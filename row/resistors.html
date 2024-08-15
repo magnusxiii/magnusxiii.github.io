@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογισμός Αντιστάσεων</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        label, input, button {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+        }
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 2px;
+        }
+        .fraction > span {
+            display: block;
+        }
+        .fraction .top {
+            border-bottom: 1px solid #000;
+            padding: 0 2px;
+        }
+        .fraction .bottom {
+            padding: 0 2px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        @media (max-width: 600px) {
+            input[type="number"], button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Υπολογισμός Αντιστάσεων</h1>
+
+        <div id="resistorsContainer">
+            <label for="resistor1">Αντίσταση 1 (Ω):</label>
+            <input type="number" id="resistor1" required>
+        </div>
+
+        <button onclick="addResistor()">Προσθήκη Αντίστασης</button>
+        <button onclick="calculate()">Υπολογισμός</button>
+
+        <h2>Αποτελέσματα</h2>
+        <p>Σειρά: <span id="seriesResult">-</span> Ω</p>
+        <p>Παράλληλα: <span id="parallelResult">-</span> Ω</p>
+
+        <h2>Επεξήγηση Πράξεων</h2>
+        <p id="seriesExplanation"></p>
+        <p id="parallelExplanation"></p>
+
+        <!-- Πρόσθεση του παραδείγματος σε μορφή πίνακα -->
+        <h2>Παράδειγμα Υπολογισμού</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Σύνδεση</th>
+                    <th>Αντιστάσεις (Ω)</th>
+                    <th>Υπολογισμός</th>
+                    <th>Συνολική Αντίσταση (Ω)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Σειρά</td>
+                    <td>10, 20, 30</td>
+                    <td>10 + 20 + 30</td>
+                    <td>60 Ω</td>
+                </tr>
+                <tr>
+                    <td>Παράλληλα</td>
+                    <td>10, 20, 30</td>
+                    <td>1/(1/10 + 1/20 + 1/30)</td>
+                    <td>5.45 Ω</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        var resistorCount = 1;
+
+        function addResistor() {
+            if (resistorCount >= 10) {
+                alert("Δεν μπορείτε να προσθέσετε περισσότερες από 10 αντιστάσεις.");
+                return;
+            }
+
+            resistorCount++;
+            var container = document.getElementById('resistorsContainer');
+            var newResistor = document.createElement('div');
+            newResistor.innerHTML = `
+                <label for="resistor${resistorCount}">Αντίσταση ${resistorCount} (Ω):</label>
+                <input type="number" id="resistor${resistorCount}" required>
+            `;
+            container.appendChild(newResistor);
+        }
+
+        function createFraction(numerator, denominator) {
+            return `
+                <span class="fraction">
+                    <span class="top">${numerator}</span>
+                    <span class="bottom">${denominator}</span>
+                </span>
+            `;
+        }
+
+        function calculate() {
+            var resistors = [];
+            for (var i = 1; i <= resistorCount; i++) {
+                var value = parseFloat(document.getElementById(`resistor${i}`).value);
+                if (isNaN(value)) {
+                    alert("Παρακαλώ εισάγετε έγκυρες θετικές τιμές για τις αντιστάσεις.");
+                    return;
+                }
+                // Προσθήκη μόνο των αντιστάσεων που δεν είναι μηδενικές
+                if (value > 0) {
+                    resistors.push(value);
+                }
+            }
+
+            if (resistors.length === 0) {
+                alert("Δεν υπάρχουν έγκυρες αντιστάσεις για υπολογισμό.");
+                return;
+            }
+
+            // Υπολογισμός της συνολικής αντίστασης σε σειρά
+            var seriesResistance = resistors.reduce((acc, curr) => acc + curr, 0);
+            var seriesExplanation = resistors.join(' + ') + ' = ' + seriesResistance.toFixed(2) + ' Ω';
+
+            // Υπολογισμός της συνολικής αντίστασης σε παράλληλη σύνδεση
+            var parallelReciprocal = resistors.reduce((acc, curr) => acc + (1 / curr), 0);
+            var parallelResistance = 1 / parallelReciprocal;
+            var fractions = resistors.map(r => createFraction('1', r));
+            var parallelExplanation = '1 / (' + fractions.join(' + ') + ') = ';
+
+            // Επεξήγηση του κλάσματος
+            var reciprocalSum = resistors.map(r => createFraction('1', r) + ` (${(1 / r).toFixed(5)})`).join(' + ');
+            var detailedParallelExplanation = `${parallelExplanation}${reciprocalSum} = ${parallelReciprocal.toFixed(5)}`;
+
+            // Τελική εξίσωση
+            detailedParallelExplanation += ` --> 1 / ${parallelReciprocal.toFixed(5)} = ${parallelResistance.toFixed(2)} Ω`;
+
+            // Εμφάνιση των αποτελεσμάτων
+            document.getElementById('seriesResult').textContent = seriesResistance.toFixed(2);
+            document.getElementById('parallelResult').textContent = parallelResistance.toFixed(2);
+
+            // Εμφάνιση των επεξηγήσεων
+            document.getElementById('seriesExplanation').innerHTML = `Σειρά: ${seriesExplanation}`;
+            document.getElementById('parallelExplanation').innerHTML = `Παράλληλα: ${detailedParallelExplanation}`;
+        }
+    </script>
+</body>
+</html>
