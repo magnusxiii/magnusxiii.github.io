@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rbs Wiki</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+        .header {
+            width: 100%;
+            background-color: #405856; /* Σκούρο μπλε */
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .navbar {
+            width: 200px;
+            background-color: #405856; /* Σκούρο μπλε */
+            height: 100vh;
+            padding-top: 60px; /* Για να αφήσουμε χώρο για την επικεφαλίδα */
+            position: fixed;
+            top: 60px;
+            left: 0;
+            overflow: auto;
+        }
+        .navbar a, .dropdown-btn {
+            display: block;
+            font-size: 18px; /* Μεγαλύτερα γράμματα */
+            color: white;
+            padding: 14px 16px;
+            text-decoration: none;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            outline: none;
+        }
+        .navbar a:hover, .dropdown-btn:hover {
+            background-color: #404856; /* Πιο ανοιχτό μπλε */
+        }
+        .dropdown-container {
+            display: none;
+            background-color: #162626;
+            padding-left: 8px;
+        }
+        .content {
+            margin-left: 220px;
+            padding: 20px;
+            padding-top: 80px; /* Για να αφήσουμε χώρο για την επικεφαλίδα */
+            flex-grow: 1;
+            display: none;
+            font-size: 18px; /* Μεγαλύτερα γράμματα */
+        }
+        .active {
+            display: block;
+        }
+        .footer {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background-color: #f1f1f1;
+            position: fixed;
+            bottom: 0;
+        }
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    Rbs Wiki
+</div>
+
+<div class="navbar">
+    <button class="dropdown-btn">Ταμειακές 
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <a href="#topic1-1" onclick="showContent('topic1-1')">Υποθέμα 1-1</a>
+        <a href="#topic1-2" onclick="showContent('topic1-2')">Υποθέμα 1-2</a>
+    </div>
+    <button class="dropdown-btn">Θέμα 2 
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <a href="#topic2-1" onclick="showContent('topic2-1')">Υποθέμα 2-1</a>
+        <a href="#topic2-2" onclick="showContent('topic2-2')">Υποθέμα 2-2</a>
+    </div>
+    <button class="dropdown-btn">Θέμα 3 
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <a href="#topic3-1" onclick="showContent('topic3-1')">Υποθέμα 3-1</a>
+        <a href="#topic3-2" onclick="showContent('topic3-2')">Υποθέμα 3-2</a>
+    </div>
+    <a href="#useful-urls" onclick="showContent('useful-urls')">Χρήσιμα URLs</a>
+    <a href="https://rbs.gr/epikoinonia/" target="_blank" onmouseover="this.innerText='Επικοινωνία';" onmouseout="this.innerText='Φόρμα Επικοινωνίας';">Φόρμα Επικοινωνίας</a>
+</div>
+
+<div class="content" id="home">
+    <h1>Rbs Wiki</h1>
+    <p>Επιλέξτε μια κατηγορία.</p>
+</div>
+
+<div class="content" id="topic1-1">
+    <h2>Υποθέμα 1-1</h2>
+    <iframe src="Jon Erickson - Hacking_ the art of exploitation-No Starch Press (2008).pdf"></iframe>
+</div>
+
+<div class="content" id="topic1-2">
+    <h2>Υποθέμα 1-2</h2>
+    <p>Περιγραφή του Υποθέματος 1-2.</p>
+</div>
+
+<div class="content" id="topic2-1">
+    <h2>Υποθέμα 2-1</h2>
+    <p>Περιγραφή του Υποθέματος 2-1.</p>
+</div>
+
+<div class="content" id="topic2-2">
+    <h2>Υποθέμα 2-2</h2>
+    <p>Περιγραφή του Υποθέματος 2-2.</p>
+</div>
+
+<div class="content" id="topic3-1">
+    <h2>Υποθέμα 3-1</h2>
+    <p>Περιγραφή του Υποθέματος 3-1.</p>
+</div>
+
+<div class="content" id="topic3-2">
+    <h2>Υποθέμα 3-2</h2>
+    <p>Περιγραφή του Υποθέματος 3-2.</p>
+</div>
+
+<div class="content" id="useful-urls">
+    <h2>Χρήσιμα URLs</h2>
+    <p>Περιγραφή των χρήσιμων URLs.</p>
+</div>
+
+<div class="footer">
+    &copy; 2024
+</div>
+
+<script>
+    function showContent(id) {
+        var contents = document.getElementsByClassName('content');
+        for (var i = 0; i < contents.length; i++) {
+            contents[i].classList.remove('active');
+        }
+        document.getElementById(id).classList.add('active');
+    }
+
+    var dropdowns = document.getElementsByClassName("dropdown-btn");
+    for (var i = 0; i < dropdowns.length; i++) {
+        dropdowns[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var dropdownContent = this.nextElementSibling;
+            if (dropdownContent.style.display === "block") {
+                dropdownContent.style.display = "none";
+            } else {
+                dropdownContent.style.display = "block";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
