@@ -1,698 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="">
-    <meta name="author" content="Inovatik">
-
-    <!-- OG Meta Tags to improve the way the post looks when you share the page on LinkedIn, Facebook, Google+ -->
-	<meta property="og:site_name" content="" /> <!-- website name -->
-	<meta property="og:site" content="" /> <!-- website link -->
-	<meta property="og:title" content=""/> <!-- title shown in the actual shared post -->
-	<meta property="og:description" content="" /> <!-- description shown in the actual shared post -->
-	<meta property="og:image" content="" /> <!-- image link, make sure it's jpg -->
-	<meta property="og:url" content="" /> <!-- where do you want your post to link to -->
-	<meta property="og:type" content="article" />
-
-    <!-- Website Title -->
-    <title>Αλέξανδρος Καραχάλιος</title>
-    
-    <!-- Styles -->
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:500,700&display=swap&subset=latin-ext" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600&display=swap&subset=latin-ext" rel="stylesheet">
-    <link href="css/bootstrap.css" rel="stylesheet">
-    <link href="css/fontawesome-all.css" rel="stylesheet">
-    <link href="css/swiper.css" rel="stylesheet">
-	<link href="css/magnific-popup.css" rel="stylesheet">
-	<link href="css/styles.css" rel="stylesheet">
-	
-	<!-- Favicon  -->
-    <link rel="icon" href="images/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rbs Wiki</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+        .header {
+            width: 100%;
+            background-color: #105856; /* Σκούρο μπλε */
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .navbar {
+            width: 200px;
+            background-color: #105856; /* Σκούρο μπλε */
+            height: 100vh;
+            padding-top: 100px; /* Για να αφήσουμε χώρο για την επικεφαλίδα */
+            position: fixed;
+            top: 60px;
+            left: 0;
+            overflow: auto;
+        }
+        .navbar a, .dropdown-btn {
+            display: block;
+            font-size: 18px; /* Μεγαλύτερα γράμματα */
+            color: white;
+            padding: 9px 16px;
+            text-decoration: none;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            outline: none;
+        }
+        .navbar a:hover, .dropdown-btn:hover {
+            background-color: #404856; /* Πιο ανοιχτό μπλε */
+        }
+        .dropdown-container {
+            display: none;
+            background-color: #162626;
+            padding-left: 8px;
+        }
+        .content {
+            margin-left: 220px;
+            padding: 20px;
+            padding-top: 80px; /* Για να αφήσουμε χώρο για την επικεφαλίδα */
+            flex-grow: 1;
+            display: none;
+            font-size: 18px; /* Μεγαλύτερα γράμματα */
+        }
+        .active {
+            display: block;
+        }
+        .footer {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background-color: #f1f1f1;
+            position: fixed;
+            bottom: 0;
+        }
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+    </style>
 </head>
-<body data-spy="scroll" data-target=".fixed-top">
-    
-    <!-- Preloader -->
-	<div class="spinner-wrapper">
-        <div class="spinner">
-            <div class="bounce1"></div>
-            <div class="bounce2"></div>
-            <div class="bounce3"></div>
-        </div>
+<body>
+
+<div class="header">
+    Rbs Wiki
+</div>
+
+<div class="navbar">
+    <button class="dropdown-btn">ecr Invoicing 
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <a href="#topic1-1" onclick="showContent('topic1-1')">παραμετροποίηση</a>
+        <a href="#topic1-2" onclick="showContent('topic1-2')">εκδοση τιμολογιου</a>
+         <a href="#topic1-3" onclick="showContent('topic1-3')">φορος διαμονησ</a>
     </div>
-    <!-- end of preloader -->
     
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-md navbar-dark navbar-custom fixed-top">
-        <!-- Text Logo - Use this if you don't have a graphic logo -->
-        <!-- <a class="navbar-brand logo-text page-scroll" href="index.html">Aria</a> -->
-
-        <!-- Image Logo -->
-        
-        
-        <!-- Mobile Menu Toggle Button -->
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-awesome fas fa-bars"></span>
-            <span class="navbar-toggler-awesome fas fa-times"></span>
-        </button>
-        <!-- end of mobile menu toggle button -->
-
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link page-scroll" href="#header">ΕΠΙΣΤΡΟΦΗ <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link page-scroll" href="#intro">ΠΕΡΙΗΓΗΣΗ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link page-scroll" href="#services">SERVICES</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link page-scroll" href="#projects">PROJECTS</a>
-                </li>
-
-                <!-- Dropdown Menu -->          
-                <li class="nav-item dropdown">
-                    <a class="nav-link page-scroll" href="#about" id="navbarDropdown" role="button" aria-haspopup="true" aria-expanded="false">ΣΧΕΤΙΚΑ ΜΕ ΕΜΑΣ</a>
-                    
-                </li>
-                <!-- end of dropdown menu -->
-
-                <li class="nav-item">
-                    
-                </li>
-            </ul>
-            <span class="nav-item social-icons">
-                <span class="fa-stack">
-                    <a href="https://www.facebook.com/magnus.alex.7">
-                        <span class="hexagon"></span>
-                        <i class="fab fa-facebook-f fa-stack-1x"></i>
-                    </a>
-                </span>
-                <span class="fa-stack">
-                    <a href="#your-link">
-                        <span class="hexagon"></span>
-                        <i class="fab fa-youtube fa-stack-1x"></i>
-                    </a>
-                </span>
-            </span>
-        </div>
-    </nav> <!-- end of navbar -->
-    <!-- end of navbar -->
-
-
-    <!-- Header -->
-    <header id="header" class="header">
-        <div class="header-content">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="text-container">
-                            <h1><span id="js-rotating">Δημιουργούμε,Επισκευάζουμε,Software & Hardware,Κατασκευή Ιστοσελίδων</span></h1>
-                            <p class="p-heading p-large"><br><br></p>
-                            <a class="btn-solid-lg page-scroll" href="#intro">ΠΕΡΙΗΓΗΣΗ</a>
-                        </div>
-                    </div> <!-- end of col -->
-                </div> <!-- end of row -->
-            </div> <!-- end of container -->
-        </div> <!-- end of header-content -->
-    </header> <!-- end of header -->
-    <!-- end of header -->
-
-
-    <!-- Intro -->
-    <div id="intro" class="basic-1">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-5">
-                    <div class="text-container"> 
-                        <div class="section-title">ΕΙΣΑΓΩΓΗ</div><br>
-                        <h2>Αναλαμβάνουμε την πλήρη διάγνωση του υπολογιστή σας, επιτραπέζιου ή φορητού και του κινητού σας δωρεάν.</h2>
-                        <p></p>
-                        <p class="testimonial-text">Ο χρόνος αναμονής επισκευής Service είναι στις δύο εργάσιμες ημέρες.</p>
-                        </div> <!-- end of text-container -->
-                </div> <!-- end of col -->
-                <div class="col-lg-7">
-                    <div class="image-container">
-                        <img class="img-fluid" src="images/intro-office.jpg" alt="alternative">
-                    </div> <!-- end of image-container -->
-                </div> <!-- end of col -->
-            </div> <!-- end of row -->
-        </div> <!-- end of container -->
-    </div> <!-- end of basic-1 -->
-    <!-- end of intro -->
-
-
-    
-
-    <!-- Services -->
-    <br><br><br>
-    <div id="services" class="cards-2">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title">SERVICES</div>
-                    <h2> </h2>
-                </div> <!-- end of col -->
-            </div> <!-- end of row -->
-            <div class="row">
-                <div class="col-lg-12">
-                    
-                    <!-- Card -->
-                    <div class="card">
-                        <div class="card-image">
-                            <img class="img-fluid" src="images/services-1.jpg" alt="alternative">
-                        </div>
-                        <div class="card-body">
-                            <h3 class="card-title">Αναβάθμιση - Επισκευή</h3>
-                            <p>Αναβαθμίζουμε τον παλιό σας υπολογιστή ή απλά συνθέτουμε τον καινούργιο. </p>
-                            <ul class="list-unstyled li-space-lg">
-                                <li class="media">
-                                    <i class="fas fa-square"></i>
-                                    <div class="media-body">Καθαρισμός κουτιού για μεγάλη απόδοση & χαμηλές θερμοκρασίες.</div>
-                                </li>
-                                <li class="media">
-                                    <i class="fas fa-square"></i>
-                                    <div class="media-body">Αναβαθμίσεις λειτουργικών συστημάτων.</div>
-                                </li>
-                            </ul>
-                            <p class="price"> <span></span></p>
-                        </div>
-                        
-                    </div>
-                    <!-- end of card -->
-
-                    <!-- Card -->
-                    <div class="card">
-                        <div class="card-image">
-                            <img class="img-fluid" src="images/services-2.jpg" alt="alternative">
-                        </div>
-                        <div class="card-body">
-                            <h3 class="card-title">Σπασμένη Οθόνη; Τέλος!</h3>
-                            <p>Αντικαθιστούμε όλες τις οθόνες των smartphone - iPhone & tablet της αγοράς.</p>
-                            <ul class="list-unstyled li-space-lg">
-                                <li class="media">
-                                    <i class="fas fa-square"></i>
-                                    <div class="media-body">Με τα καλύτερα ανταλλακτικά της αγοράς. </div>
-                                </li>
-                                <li class="media">
-                                    <i class="fas fa-square"></i>
-                                    <div class="media-body">Με κάθε αντικατάσταση σπασμένης οθόνης δώρο τοποθέτηση Tempered Glass.</div>
-                                </li>
-                            </ul>
-                            <p class="price"><span></span></p>
-                        </div>
-                    </div>
-                    <!-- end of card -->
-                    <!-- Card -->
-                    <div class="card">
-                        <div class="card-image">
-                            <img class="img-fluid" src="images/services-3.jpg" alt="alternative">
-                        </div>
-                        <div class="card-body">
-                            <h3 class="card-title">Επισκευή & Συντήρηση laptop</h3>
-                            <p>Ανεβασμένη θερμοκρασία; Επιλέξτε εμάς για τη σωστή συντήρηση συστήματος ψύξης.</p>
-                            <ul class="list-unstyled li-space-lg">
-                                <li class="media">
-                                    <i class="fas fa-square"></i>
-                                    <div class="media-body">Αναβαθμίσουμε  παλιάς <BR>τεχνολογίας δίσκους με συγχρόνους SSD.</div>
-                                </li>
-                              </ul>
-                            <p class="price"><span></span></p>
-                        </div>
-                         </div> <!-- end of button-container -->
-                    </div>
-                    <!-- end of card -->
-
-                </div> <!-- end of col -->
-            </div> <!-- end of row -->
-        </div> <!-- end of container -->
-    </div> <!-- end of cards-2 -->
-    <!-- end of services -->
-    <br><br><br><br>
-
-    <!-- Details 1 -->
-	<div id="details" class="accordion">
-		<div class="area-1">
-		</div><!-- end of area-1 on same line and no space between comments to eliminate margin white space --><div class="area-2">
-            
-            <!-- Accordion -->
-            <div class="accordion-container" id="accordionOne">
-                <h2>Refurbished & Workstation</h2>
-                <div class="item">
-                    <div id="headingOne">
-                        <span data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" role="button">
-                            <span class="circle-numbering">1</span><span class="accordion-title">Ανακατασκευασμένα Laptops & Desktop.</span>
-                        </span>
-                    </div>
-                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionOne">
-                        <div class="accordion-body">
-                        Mε κορυφαίες επιδόσεις για καλύτερη ποιότητα. Grade A, B+ σε επιτραπέζιους και φορητούς υπολογιστές.
-                        </div>
-                    </div>
-                </div> <!-- end of item -->
-            
-                <div class="item">
-                    <div id="headingTwo">
-                        <span class="collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" role="button">
-                            <span class="circle-numbering">2</span><span class="accordion-title">Workstation Μηχανήματα.</span>
-                        </span>
-                    </div>
-                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionOne">
-                        <div class="accordion-body">
-                            Για ασταμάτητη εργασία υψηής επεξεργαστικής ισχύς Workstation μηχανήματα (επεξεργασία φωτογραφίας, επεξεργασία βίντεο, βάση δεδομένων, υψηλών επιδόσεων).
-                        </div>
-                    </div>
-                </div> <!-- end of item -->
-            
-                
-            </div> <!-- end of accordion-container -->
-            <!-- end of accordion -->
-
-		</div> <!-- end of area-2 -->
-    </div> <!-- end of accordion -->
-    <!-- end of details 1 -->
-
-
-    
-
-    
-
-    <!-- Projects -->
-	<div id="projects" class="filter">
-		<div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title">PROJECTS</div>
-                    <h2></h2>
-                </div> <!-- end of col -->
-            </div> <!-- end of row -->
-            <div class="row">
-                <div class="col-lg-12">
-                    <!-- Filter -->
-                    <div class="button-group filters-button-group">
-                        <a class="button is-checked" data-filter="*"><span>Ολες Οι Υπηρεσίες</span></a>
-                        <a class="button" data-filter=".repair"><span>Υπολογιστών & Laptop</span></a>
-                        <a class="button" data-filter=".smartphones"><span>Σmartphones & Tablet</span></a>
-                        <a class="button" data-filter=".snn"><span>Servers & Networks</span></a>
-                        <a class="button" data-filter=".board"><span>Επισκευές Πλακετών</span></a>
-                        <a class="button" data-filter=".Website"><span>Κατασκευή Ιστοσελίδων</span></a>
-                    </div> <!-- end of button group -->
-                    <div class="grid">
-                        <div class="element-item board">
-                            <a class="popup-with-move-anim" href="#SMD_BGA"><div class="element-item-overlay"><span>SMD & BGA</span></div><img src="images/project-6.jpg" alt="alternative"></a>
-                        </div>
-                        <div class="element-item board">
-                            <a class="popup-with-move-anim" href="#Smartphones_Boards"><div class="element-item-overlay"><span>Eπισκευές πλακετών smartphone</span></div><img src="images/project-3.jpg" alt="alternative"></a>
-                        </div>
-                        <div class="element-item smartphones">
-                            <a class="popup-with-move-anim" href="#Connectors"><div class="element-item-overlay"><span>Αντικατάσταση βύσματος φόρτισης</span></div><img src="images/project-2.jpg" alt="alternative"></a>
-                      </div>
-                        <div class="element-item snn">
-                            <a class="popup-with-move-anim" href="#Servers"><div class="element-item-overlay"><span>Supercomputer</span></div><img src="images/project-4.jpg" alt="alternative"></a>
-                        </div>
-                        <div class="element-item snn">
-                            <a class="popup-with-move-anim" href="#Networks"><div class="element-item-overlay"><span>Δίκτυα</span></div><img src="images/project-5.jpg" alt="alternative"></a>
-                        </div>
-                        <div class="element-item repair">
-                            <a class="popup-with-move-anim" href="#Laptops"><div class="element-item-overlay"><span>Βλάβες laptop</span></div><img src="images/project-1.jpg" alt="alternative"></a>
-                         </div>
-                       <!-- <div class="element-item board">
-                            <a class="popup-with-move-anim" href="#Diagrams"><div class="element-item-overlay"><span>εντοπισμός βλάβης μέσω διαγράμματος</span></div><img src="images/project-7.jpg" alt="alternative"></a>
-                        </div>-->
-                        <div class="element-item repair">
-                            <a class="popup-with-move-anim" href="#Browsing"><div class="element-item-overlay"><span>Ασφαλή περιήγηση για όλους</span></div><img src="images/project-8.jpg" alt="alternative"></a>
-                        </div>
-                        <!--<div class="element-item repair">
-                            <a class="popup-with-move-anim" href="#Antivirus"><div class="element-item-overlay"><span>αφαίρεση κακόβουλου λογισμικού</span></div><img src="images/project-9.jpg" alt="alternative"></a>
-                        </div>-->
-                        <div class="element-item Website">
-                            <a class="popup-with-move-anim" href="#Website"><div class="element-item-overlay"><span>Ιστοσελίδες</span></div><img src="images/project-10.jpg" alt="alternative"></a>
-                        </div>
-                        <div class="element-item smartphones">
-                            <a class="popup-with-move-anim" href="#Screens"><div class="element-item-overlay"><span>Οθόνες</span></div><img src="images/project-11.jpg" alt="alternative"></a>
-                        </div>
-                    </div> <!-- end of grid -->
-                    <!-- end of filter -->
-                    
-                </div> <!-- end of col -->
-            </div> <!-- end of row -->
-		</div> <!-- end of container -->
-    </div> <!-- end of filter -->
-    <!-- end of projects -->
-
-
-    <!-- Project Lightboxes -->
-    <!-- Lightbox -->
-    <div id="Laptops" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-1.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3>Χάλασε το laptop;</h3>
-                <hr class="line-heading">
-                <h6></h6>
-                <p>Χρειάζεστε κάποιον εξειδικευμένο τεχνικό για να επισκευάσει το laptop σας;<BR>Δεν χρειάζεται να πάτε αλλού. Η ομάδα μας είναι έτοιμη να ανταπεξέλθει σε οποιαδήποτε βλάβη!</p>
-                </div> <!-- end of col -->
-        </div> <!-- end of row -->
-    </div> <!-- end of lightbox-basic -->
-    <!-- end of lightbox -->
-
-    <!-- Lightbox -->
-    <div id="Connectors" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-2.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3>Δεν φορτίζει η συσκευή μου; </h3>
-                <hr class="line-heading">
-                <h6></h6>
-                <p>Δεν κάνει επαφή το καλώδιο; Αποσυνδέεται συνέχεια;<br> Έχετε 1% μπαταρία και αναρωτιέστε γιατί;<br> Η λύση που μπορούμε να προσφέρουμε είναι να<br> αντικαταστήσουμε τον κονέκτορα φόρτισης από την πλακέτα.</p>
-                <p></p>
-                 </div> <!-- end of col -->
-        </div> <!-- end of row -->
-    </div> <!-- end of lightbox-basic -->
-    <!-- end of lightbox -->
-
-    <!-- Lightbox -->
-    <div id="Smartphones_Boards" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-3.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3>Χάλασε το Smartphone;</h3>
-                <hr class="line-heading">
-                <h6></h6>
-                <p>Διαγνωστικός έλεγχος σε οποιοδήποτε κινητό και smartphone της αγοράς.<br>Επισκευάζουμε πλακέτες σύγχρονης όσο και παλιάς τεχνολογίας.<br>Μη διστάσετε να μας ρωτήσετε. Όλα φτιάχνονται!</p>
-                
-            </div> <!-- end of col -->
-        </div> <!-- end of row -->
-    </div> <!-- end of lightbox-basic -->
-    <!-- end of lightbox -->
-
-    <!-- Lightbox -->
-    <div id="Servers" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-4.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3>Server; Γιατί όχι.</h3>
-                <hr class="line-heading">
-                <h6></h6>
-                <p>Έχετε μεγάλη βάση δεδομένων; <BR>Θέλετε έναν server να λειτουργεί 365 μέρες το χρόνο με μεγάλη <BR>επεξεργαστική ισχύ πολλαπλών επεξεργαστών και να κρατάτε  το backup της επιχείρησης σας με την τεχνολογία R.A.I.D. των server;<BR>Bρίσκεστε στο σωστό μέρος. </p>
-                <p></p>
-                
-                </div> <!-- end of col -->
-        </div> <!-- end of row -->
-    </div> <!-- end of lightbox-basic -->
-    <!-- end of lightbox -->
-
-    <!-- Lightbox -->
-    <div id="Networks" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-5.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3>Λατρεύουμε το χάος, επειδή μας αρέσει να τακτοποιούμε!</h3>
-                <hr class="line-heading">
-                <h6></h6>
-                <p>Δίνουμε τις καλύτερες λύσεις για το δίκτυο των εταιρειών σας.<BR>Αναβαθμίζουμε. Επισκευάζουμε.</p>
-                </div>
-                </div> <!-- end of col -->
-        </div> <!-- end of row -->
-    </div> <!-- end of lightbox-basic -->
-    <!-- end of lightbox -->
-
-    <!-- Lightbox -->
-    <div id="SMD_BGA" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-6.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3></h3>
-                <hr class="line-heading">
-                <h6>Εντοπισμός βλάβης</h6>
-                <p>Με την χρήση εξειδικευμένου εξοπλισμού και με τη βοήθεια διαγράμματος, μπορούμε να επισκευάσουμε κάθε είδους πλακέτας σε μικρή και σε μεγάλη κλίμακα.<br>Επίσης με τον εξοπλισμό μας μπορούμε να προβούμε σε αντικατάσταση BGA Chip (Ball grid array).</p>
-                
-            </div> <!-- end of col -->
-        </div> <!-- end of row -->
-    </div> <!-- end of lightbox-basic -->
-    <!-- end of lightbox -->
-
-    
-    <!--<div id="Diagrams" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-7.jpg" alt="alternative">
-            </div> 
-            <div class="col-lg-4">
-                <h3>Casual Wear</h3>
-                <hr class="line-heading">
-                <h6>Strategy Development</h6>
-                <p>Need a solid foundation for your business growth plans? Aria will help you manage sales and meet your current needs</p>
-                <p>By offering the best professional services and quality products in the market. Don't hesitate and get in touch with us.</p>
-                <div class="testimonial-container">
-                    <p class="testimonial-text">Need a solid foundation for your business growth plans? Aria will help you manage sales and meet your current requirements.</p>
-                    <p class="testimonial-author">General Manager</p>
-                </div>
-                <a class="btn-solid-reg" href="#your-link">DETAILS</a> <a class="btn-outline-reg mfp-close as-button" href="#projects">BACK</a> 
-            </div> 
-        </div> 
-    </div>   -->
-
-    <!-- Lightbox -->
-    <div id="Browsing" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-8.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3>Διατηρήστε ασφαλή τη συσκευή σας.</h3>
-                <hr class="line-heading">
-                <h6></h6>
-                <p>Με τον εξοπλισμό μας κάθε ιός και απειλή ανήκει στο παρελθόν.<BR>Τοποθετούμε εξειδικευμένα συστήματα ασφαλείας σε όλες τις πλατφόρμες λειτουργικών <BR> συστημάτων για να εξασφαλίσουμε οτι συσκευή σας είναι καθαρή.</p>
-                 </div> <!-- end of col -->
-        </div> <!-- end of row -->
-    </div> <!-- end of lightbox-basic -->
-    
-    <div id="Screens" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-11.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3>Δυσλειτουργία στην οθόνη;</h3>
-                <hr class="line-heading">
-                <h6></h6>
-                <p>Έσπασε η οθόνη του κινητού σου ή τρεμοπαίζει;<BR> Πρόβλημα στη φωτεινότητα;<BR> Προβαίνουμε άμεσα σε αντικατάσταση οθόνης ή και επισκευή, πάντα με ανταλλακτικά υψηλής ποιότητας.</p>
-                <p></p>
-                
-                </div> <!-- end of col -->
-        </div> <!-- end of row -->
+     <button class="dropdown-btn">Pepper 
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <a href="#topicp-1" onclick="showContent('topicp-1')">παραμετροποίηση</a>
+        <a href="#topicp-2" onclick="showContent('topicp-2')">Υποθέμα 2-2</a>
     </div>
-
-    <div id="credit" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="">
-            </div> 
-            <div class="">
-                <h3>Exressing my gratitude. 💚</h3>
-                <hr class="">
-                <h6></h6>
-                <p>I would like to express my gratitude to github for hosting my domain.<br> I would also like to thank inovatik for the free template and pexels with his group for giving me those pictures. </p>
-                <p>In addition, it must be noted that the copyrights belongs to them. I just own the contact information, the domain and of course my ideas..</p>
-              <a class="btn-solid-reg mfp-close as-button" href="#about">BACK</a> 
-            </div> 
-        </div> 
+    
+    <button class="dropdown-btn">Θέμα 2 
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <a href="#topic2-1" onclick="showContent('topic2-1')">Υποθέμα 2-1</a>
+        <a href="#topic2-2" onclick="showContent('topic2-2')">Υποθέμα 2-2</a>
     </div>
+    
+    
      
-        </div> <!-- end of row -->
-    </div>
-<div id="Website" class="lightbox-basic zoom-anim-dialog mfp-hide">
-        <div class="row">
-            <button title="Close (Esc)" type="button" class="mfp-close x-button">×</button>
-            <div class="col-lg-8">
-                <img class="img-fluid" src="images/project-10.jpg" alt="alternative">
-            </div> <!-- end of col -->
-            <div class="col-lg-4">
-                <h3>Κατασκευή ιστοσελίδων</h3>
-                <hr class="line-heading">
-                <h6></h6>
-                <p>Η κατασκευή ιστοσελίδων είναι το πάθος μας. Απλά περιγράψτε πώς το θέλετε και αφήστε τα υπόλοιπα σε εμάς.<BR>Πρέπει να σημειωθεί ότι χρησιμοποιούμε όλες τις σύγχρονες πλατφόρμες κατασκευής (wordpress, joomla) και σε κώδικα (html, css, php, js, mySql).</p>
-                <p></p>
-                
-            </div> <!-- end of col -->
-        </div> <!-- end of row -->
-    </div>
     
-    <!-- end of lightbox -->
-    <!-- end of project lightboxes -->
-
-
     
-
-
+    <button class="dropdown-btn">Θέμα 3 
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <a href="#topic3-1" onclick="showContent('topic3-1')">Υποθέμα 3-1</a>
+        <a href="#topic3-2" onclick="showContent('topic3-2')">Υποθέμα 3-2</a>
+    </div>
+    <a href="#useful-urls" onclick="showContent('useful-urls')">Χρήσιμα URLs</a>
+    <a href="https://rbs.gr/epikoinonia/" target="_blank" onmouseover="this.innerText='Επικοινωνία';" onmouseout="this.innerText='Φόρμα Επικοινωνίας';">Φόρμα Επικοινωνίας</a>
+    
+    
   
-    
+</div>
 
-    <!-- About -->
-    <div id="about" class="counter">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-5 col-xl-6">
-                    <div class="image-container">
-                        <img class="img-fluid" src="images/about.jpg" alt="alternative">
-                    </div> <!-- end of image-container -->
-                </div> <!-- end of col -->
-                <div class="col-lg-7 col-xl-6">
-                    <div class="text-container">
-                        <div class="section-title">ΣΧΕΤΙΚΑ ΜΕ ΕΜΑΣ</div>
-                        <h2>Μας γοητεύει όταν μπορούμε και βοηθάμε επισκευάζοντας τη συσκευή σας.</h2>
-                        <p></p>
-                        <ul class="list-unstyled li-space-lg">
-                            
-                            <li class="media">
-                                <i class="fas fa-square"></i>
-                                <div class="media-body">Λατρεύουμε να βλέπουμε χαρούμενους πελάτες και χαμόγελα.</div>
-                            </li>
-                        </ul>
+<div class="content" id="home">
+    <h1>Rbs Wiki</h1>
+    <p>Επιλέξτε μια κατηγορία.</p>
+</div>
+<div class="content" id="topicp-3">
+   =ΑΣΔΦΣΔΓΦΣΔΓΣ
+</div>
+<div class="content" id="topicp-1">
+   <iframe src="parametropoiisi.pdf"></iframe>
+</div>
+<div class="content" id="topicp-2">
+   =Α123123
+</div>
+<div class="content" id="topic1-1">
+    <iframe src="parametropoiisi.pdf"></iframe>
+</div>
 
-                        <!-- Counter -->
-                        <div id="counter">
-                            <div class="cell">
-                                <h2> <div class="counter-value number-count" data-count="547">1</div></h2>
-                                <div class="counter-info">Χαμόγελα<br></div>
-                            </div>
-                            <div class="cell">
-                                <h2> <div class="counter-value number-count" data-count="201">1</div></h2>
-                                <div class="counter-info">Επισκευές<br>Laptop</div>
-                            </div>
-                            <div class="cell">
-                                <h2> <div class="counter-value number-count" data-count="51">1</div></h2>
-                                <div class="counter-info">Σπασμένες <br>Oθόνες</div>
-                            </div>
-                            
-                        </div>
-                        <!-- end of counter -->
+<div class="content" id="topic1-2">
+    <iframe src="ekdosi timologiou.pdf"></iframe>
+</div>
 
-                    </div> <!-- end of text-container -->      
-                </div> <!-- end of col -->
-            </div> <!-- end of row -->
-        </div> <!-- end of container -->
-    </div> <!-- end of counter -->
-    <!-- end of about -->
 
-    <!-- Footer -->
-    <div class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="text-container about">
-                        <h4> Στοιχεία Επικοινωνίας </h4>
-                        <li><i class="fas fa-name"></i><a href="" class="text-white"> Αλέξανδρος Καραχάλιος</a></li>
-                        <li><i class="fas fa-phone"></i><a href="tel:00306987868377" class="text-white"> +30 698 78 68 377</a></li>
-                        <li><i class="fas fa-envelope">
-                        </i><a href="mailto:alexmagnkarachalios@gmail.com" class="text-white">  alexmagnkarachalios@gmail.com</a></li>
-                       
-                         </div> <!-- end of text-container -->
-                </div> <!-- end of col -->
-                <div class="col-md-2">
-                    <div class="text-container">
-                        <h4>Code & Design</h4>
-                        <ul class="list-unstyled li-space-lg white">
-                            <li>
-                                <a class="white" href="https://code.visualstudio.com/">Visual Studio Code</a>
-                            </li>
-                            <li>
-                                <a class="white" href="https://getbootstrap.com/">Bootstrap</a>
-                            </li>
-                        </ul>
-                    </div> <!-- end of text-container -->
-                </div> <!-- end of col -->
-                <div class="col-md-2">
-                    <div class="text-container">
-                        <h4>Credits</h4>
-                        <ul class="list-unstyled li-space-lg">
-                           
-                            <li>
-                                <a class="white" href="https://github.com/">Github.com</a>
-                            </li>
-                            <li class="media">
-                                <a class="white" href="https://inovatik.com/">Iinovatik.com</a>
-                            </li>
-                            <li>
-                                <a class="white" href="https://www.pexels.com/">Pexels.com</a>
-                             </li>
-                             <li>
-                                <a class="white popup-with-move-anim" href="#credit">See also</a>
-                             </li>
-                        </ul>
-                    </div> <!-- end of text-container -->
-                </div> <!-- end of col -->
-                <div class="col-md-2">
-                    <div class="text-container">
-                        <h4>Συνεργάτες</h4>
-                        <ul class="list-unstyled li-space-lg">
-                            
-                            <li>
-                                <a class="white" href="https://agkaravelis.com/">AGkaravelis.com</a><i class="text-white"></i>
-                            </li>
-                            
-                            <li>
-                                <a class="white" href="http://clickservice.gr/">Clickservice</a><i class="text-white">.  (Πατήσια)</i>
-                            </li>
-                            </ul>
-                    </div> <!-- end of text-container -->
-                </div> <!-- end of col -->
-            </div> <!-- end of row -->
-        </div> <!-- end of container -->
-    </div> <!-- end of footer -->  
-    <!-- end of footer -->
+<div class="content" id="topic2-1">
+    <h2>Υποθέμα 2-1</h2>
+    <p>Περιγραφή του Υποθέματος 2-1.</p>
+</div>
 
-    <!-- Copyright -->
-    <div class="copyright">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <p class="p-small">Copyright © 2020 - 2023 by Alexandros Karachalios</a></p>
-                </div> <!-- end of col -->
-            </div> <!-- enf of row -->
-        </div> <!-- end of container -->
-    </div> <!-- end of copyright --> 
-    <!-- end of copyright -->
-    
-    	
-    <!-- Scripts -->
-    <script src="js/jquery.min.js"></script> <!-- jQuery for Bootstrap's JavaScript plugins -->
-    <script src="js/popper.min.js"></script> <!-- Popper tooltip library for Bootstrap -->
-    <script src="js/bootstrap.min.js"></script> <!-- Bootstrap framework -->
-    <script src="js/jquery.easing.min.js"></script> <!-- jQuery Easing for smooth scrolling between anchors -->
-    <script src="js/swiper.min.js"></script> <!-- Swiper for image and text sliders -->
-    <script src="js/jquery.magnific-popup.js"></script> <!-- Magnific Popup for lightboxes -->
-    <script src="js/morphext.min.js"></script> <!-- Morphtext rotating text in the header -->
-    <script src="js/isotope.pkgd.min.js"></script> <!-- Isotope for filter -->
-    <script src="js/validator.min.js"></script> <!-- Validator.js - Bootstrap plugin that validates forms -->
-    <script src="js/scripts.js"></script> <!-- Custom scripts -->
+<div class="content" id="topic2-2">
+    <h2>Υποθέμα 2-2</h2>
+    <p>Περιγραφή του Υποθέματος 2-2.</p>
+</div>
+
+<div class="content" id="topic3-1">
+    <h2>Υποθέμα 3-1</h2>
+    <p>Περιγραφή του Υποθέματος 3-1.</p>
+</div>
+
+<div class="content" id="topic3-2">
+    <h2>Υποθέμα 3-2</h2>
+    <p>Περιγραφή του Υποθέματος 3-2.</p>
+</div>
+
+<div class="content" id="useful-urls">
+    <h2>Χρήσιμα URLs</h2>
+    <p>Περιγραφή των χρήσιμων URLs.</p>
+</div>
+
+<div class="footer">
+    &copy; 2024
+</div>
+
+<script>
+    function showContent(id) {
+        var contents = document.getElementsByClassName('content');
+        for (var i = 0; i < contents.length; i++) {
+            contents[i].classList.remove('active');
+        }
+        document.getElementById(id).classList.add('active');
+    }
+
+    var dropdowns = document.getElementsByClassName("dropdown-btn");
+    for (var i = 0; i < dropdowns.length; i++) {
+        dropdowns[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var dropdownContent = this.nextElementSibling;
+            if (dropdownContent.style.display === "block") {
+                dropdownContent.style.display = "none";
+            } else {
+                dropdownContent.style.display = "block";
+            }
+        });
+    }
+</script>
+
 </body>
 </html>
