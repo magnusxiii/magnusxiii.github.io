@@ -13,20 +13,20 @@
         }
         .header {
             width: 100%;
-            background-color: #405856; /* Σκούρο μπλε */
+            background-color: #105856; /* Σκούρο μπλε */
             color: white;
-            padding: 10px;
+            padding: 15px;
             text-align: center;
-            font-size: 24px;
+            font-size: 20px;
             position: fixed;
             top: 0;
             left: 0;
         }
         .navbar {
             width: 200px;
-            background-color: #405856; /* Σκούρο μπλε */
+            background-color: #105856; /* Σκούρο μπλε */
             height: 100vh;
-            padding-top: 60px; /* Για να αφήσουμε χώρο για την επικεφαλίδα */
+            padding-top: 100px; /* Για να αφήσουμε χώρο για την επικεφαλίδα */
             position: fixed;
             top: 60px;
             left: 0;
@@ -36,7 +36,7 @@
             display: block;
             font-size: 18px; /* Μεγαλύτερα γράμματα */
             color: white;
-            padding: 14px 16px;
+            padding: 9px 16px;
             text-decoration: none;
             background: none;
             border: none;
@@ -86,13 +86,23 @@
 </div>
 
 <div class="navbar">
-    <button class="dropdown-btn">ecr invoicing 
+    <button class="dropdown-btn">ecr Invoicing 
         <i class="fa fa-caret-down"></i>
     </button>
     <div class="dropdown-container">
         <a href="#topic1-1" onclick="showContent('topic1-1')">παραμετροποίηση</a>
-        <a href="#topic1-2" onclick="showContent('topic1-2')">Υποθέμα 1-2</a>
+        <a href="#topic1-2" onclick="showContent('topic1-2')">εκδοση τιμολογιου</a>
+         <a href="#topic1-3" onclick="showContent('topic1-3')">φορος διαμονησ</a>
     </div>
+    
+     <button class="dropdown-btn">Pepper 
+        <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+        <a href="#topicp-1" onclick="showContent('topicp-1')">Παραμετροποίηση</a>
+        <a href="#topicp-2" onclick="showContent('topicp-2')">Softpos</a>
+    </div>
+    
     <button class="dropdown-btn">Θέμα 2 
         <i class="fa fa-caret-down"></i>
     </button>
@@ -100,6 +110,11 @@
         <a href="#topic2-1" onclick="showContent('topic2-1')">Υποθέμα 2-1</a>
         <a href="#topic2-2" onclick="showContent('topic2-2')">Υποθέμα 2-2</a>
     </div>
+    
+    
+     
+    
+    
     <button class="dropdown-btn">Θέμα 3 
         <i class="fa fa-caret-down"></i>
     </button>
@@ -109,22 +124,32 @@
     </div>
     <a href="#useful-urls" onclick="showContent('useful-urls')">Χρήσιμα URLs</a>
     <a href="https://rbs.gr/epikoinonia/" target="_blank" onmouseover="this.innerText='Επικοινωνία';" onmouseout="this.innerText='Φόρμα Επικοινωνίας';">Φόρμα Επικοινωνίας</a>
+    
+    
+  
 </div>
 
 <div class="content" id="home">
     <h1>Rbs Wiki</h1>
     <p>Επιλέξτε μια κατηγορία.</p>
 </div>
-
+<div class="content" id="topicp-3">
+   =ΑΣΔΦΣΔΓΦΣΔΓΣ
+</div>
+<div class="content" id="topicp-1">
+   <iframe src="parametropoiisi.pdf"></iframe>
+</div>
+<div class="content" id="topicp-2">
+      <iframe src="pepersoftpos.pdf"></iframe>
+</div>
 <div class="content" id="topic1-1">
-    <h2>Υποθέμα 1-1</h2>
     <iframe src="parametropoiisi.pdf"></iframe>
 </div>
 
 <div class="content" id="topic1-2">
-    <h2>Υποθέμα 1-2</h2>
-    <p>Περιγραφή του Υποθέματος 1-2.</p>
+    <iframe src="ekdosi timologiou.pdf"></iframe>
 </div>
+
 
 <div class="content" id="topic2-1">
     <h2>Υποθέμα 2-1</h2>
