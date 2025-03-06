@@ -1,0 +1,522 @@
+klaoude
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογισμός Πτώσης Τάσης</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #e8f4fc;
+            color: #2c3e50;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.15);
+        }
+        
+        h1 {
+            color: #1a5276;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2874a6;
+            transition: color 0.3s;
+        }
+        
+        .form-group:hover label {
+            color: #1a5276;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #f8fafc;
+            color: #34495e;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+            background-color: #fff;
+        }
+        
+        input:hover, select:hover {
+            border-color: #3498db;
+        }
+        
+        button {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            background-color: #1a5276;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(41, 128, 185, 0.2);
+        }
+        
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        button:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(100, 100);
+                opacity: 0;
+            }
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result h2 {
+            margin-top: 0;
+            color: #1a5276;
+            font-size: 22px;
+            border-bottom: 2px solid #d6eaf8;
+            padding-bottom: 10px;
+        }
+        
+        .result p {
+            margin: 12px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .result .highlight {
+            font-weight: bold;
+            color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .calculations {
+            margin-top: 25px;
+            background-color: #eaf2f8;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 5px solid #2874a6;
+        }
+        
+        .calculations h3 {
+            color: #2874a6;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        
+        .calculation-step {
+            margin: 12px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .calculation-step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            background-color: #f5f5f5;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+            overflow-x: auto;
+        }
+        
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 3px;
+        }
+        
+        .fraction .numerator {
+            border-bottom: 1px solid #333;
+            padding: 0 3px;
+        }
+        
+        .fraction .denominator {
+            padding: 0 3px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            input, select, button {
+                font-size: 14px;
+            }
+            
+            .result p, .calculation-step {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Υπολογισμός Πτώσης Τάσης σε Καλώδια</h1>
+        
+        <div class="form-group">
+            <label for="voltage">Τάση (V):</label>
+            <input type="number" id="voltage" placeholder="π.χ. 12" value="12">
+        </div>
+        
+        <div class="form-group">
+            <label for="current">Ρεύμα (A):</label>
+            <input type="number" id="current" placeholder="π.χ. 1" step="0.1" value="1">
+        </div>
+        
+        <div class="form-group">
+            <label for="length">Μήκος Καλωδίου (m):</label>
+            <input type="number" id="length" placeholder="π.χ. 10" value="10">
+        </div>
+        
+        <div class="form-group">
+            <label for="cross-section">Διατομή Καλωδίου (mm²):</label>
+            <input type="number" id="cross-section" placeholder="π.χ. 1.5" step="0.1" value="1">
+        </div>
+        
+        <div class="form-group">
+            <label for="temperature">Θερμοκρασία Περιβάλλοντος (°C):</label>
+            <input type="number" id="temperature" placeholder="π.χ. 20" value="20">
+        </div>
+        
+        <div class="form-group">
+            <label for="material">Υλικό Καλωδίου:</label>
+            <select id="material">
+                <option value="copper">Χαλκός (Cu)</option>
+                <option value="aluminum">Αλουμίνιο (Al)</option>
+                <option value="iron">Σίδηρος (Fe)</option>
+                <option value="nickel">Νικέλιο (Ni)</option>
+                <option value="silver">Ασήμι (Ag)</option>
+                <option value="gold">Χρυσός (Au)</option>
+                <option value="custom">Προσαρμοσμένο</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="custom-resistivity-group" style="display: none;">
+            <label for="custom-resistivity">Ειδική Αντίσταση (Ω·mm²/m):</label>
+            <input type="number" id="custom-resistivity" placeholder="π.χ. 0.0175" step="0.0001">
+        </div>
+        
+        <button id="calculate-btn">Υπολογισμός</button>
+        
+        <div class="result" id="result" style="display: none;">
+            <h2>Αποτελέσματα</h2>
+            <p>Ειδική Αντίσταση Υλικού: <span id="result-resistivity"></span> Ω·mm²/m</p>
+            <p>Αντίσταση Καλωδίου: <span id="result-resistance"></span> Ω</p>
+            <p>Πτώση Τάσης: <span id="result-voltage-drop" class="highlight"></span> V</p>
+            <p>Ποσοστό Πτώσης Τάσης: <span id="result-percentage" class="highlight"></span>%</p>
+            <p>Τάση στο Φορτίο: <span id="result-load-voltage"></span> V</p>
+            
+            <div class="calculations" id="calculations">
+                <h3>Αναλυτικοί Υπολογισμοί</h3>
+                <div id="calculation-steps"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Υλικά και οι ειδικές αντιστάσεις τους σε Ω·mm²/m στους 20°C
+            const materials = {
+                copper: { name: 'Χαλκός', resistivity: 0.0175, tempCoef: 0.00393 },
+                aluminum: { name: 'Αλουμίνιο', resistivity: 0.028, tempCoef: 0.00403 },
+                iron: { name: 'Σίδηρος', resistivity: 0.10, tempCoef: 0.00651 },
+                nickel: { name: 'Νικέλιο', resistivity: 0.078, tempCoef: 0.006 },
+                silver: { name: 'Ασήμι', resistivity: 0.016, tempCoef: 0.0038 },
+                gold: { name: 'Χρυσός', resistivity: 0.022, tempCoef: 0.0034 },
+                custom: { name: 'Προσαρμοσμένο', resistivity: 0, tempCoef: 0.004 }
+            };
+            
+            const materialSelect = document.getElementById('material');
+            const customResistivityGroup = document.getElementById('custom-resistivity-group');
+            const customResistivity = document.getElementById('custom-resistivity');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resultDiv = document.getElementById('result');
+            const calculationSteps = document.getElementById('calculation-steps');
+            
+            // Εμφάνιση/απόκρυψη πεδίου προσαρμοσμένης ειδικής αντίστασης
+            materialSelect.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customResistivityGroup.style.display = 'block';
+                } else {
+                    customResistivityGroup.style.display = 'none';
+                }
+            });
+            
+            // Συνάρτηση για δημιουργία κλάσματος HTML
+            function createFraction(numerator, denominator) {
+                return `<span class="fraction"><span class="numerator">${numerator}</span><span class="denominator">${denominator}</span></span>`;
+            }
+            
+            // Υπολογισμός πτώσης τάσης
+            calculateBtn.addEventListener('click', function() {
+                const voltage = parseFloat(document.getElementById('voltage').value);
+                const current = parseFloat(document.getElementById('current').value);
+                const length = parseFloat(document.getElementById('length').value);
+                const crossSection = parseFloat(document.getElementById('cross-section').value);
+                const temperature = parseFloat(document.getElementById('temperature').value);
+                const materialType = materialSelect.value;
+                
+                // Έλεγχος εγκυρότητας δεδομένων
+                if (isNaN(voltage) || isNaN(current) || isNaN(length) || isNaN(crossSection) || isNaN(temperature)) {
+                    alert('Παρακαλώ συμπληρώστε όλα τα πεδία με έγκυρες αριθμητικές τιμές.');
+                    return;
+                }
+                
+                if (voltage <= 0 || current <= 0 || length <= 0 || crossSection <= 0) {
+                    alert('Οι τιμές πρέπει να είναι θετικοί αριθμοί.');
+                    return;
+                }
+                
+                let resistivity;
+                let materialName;
+                let originalResistivity;
+                let tempCoef;
+                
+                if (materialType === 'custom') {
+                    resistivity = parseFloat(customResistivity.value);
+                    originalResistivity = resistivity;
+                    materialName = 'Προσαρμοσμένο';
+                    tempCoef = 0.004; // Προεπιλεγμένη τιμή για προσαρμοσμένο υλικό
+                    
+                    if (isNaN(resistivity) || resistivity <= 0) {
+                        alert('Παρακαλώ εισάγετε έγκυρη τιμή για την ειδική αντίσταση.');
+                        return;
+                    }
+                } else {
+                    const material = materials[materialType];
+                    materialName = material.name;
+                    originalResistivity = material.resistivity;
+                    tempCoef = material.tempCoef;
+                    
+                    // Διόρθωση ειδικής αντίστασης για θερμοκρασία
+                    const tempDiff = temperature - 20; // Διαφορά από τους 20°C
+                    resistivity = material.resistivity * (1 + material.tempCoef * tempDiff);
+                }
+                
+                // Υπολογισμός αντίστασης καλωδίου (για ένα αγωγό)
+                const resistance = resistivity * length / crossSection;
+                
+                // Υπολογισμός πτώσης τάσης (για δύο αγωγούς - πήγαινε-έλα)
+                const voltageDrop = 2 * resistance * current;
+                
+                // Υπολογισμός ποσοστού πτώσης τάσης
+                const percentage = (voltageDrop / voltage) * 100;
+                
+                // Υπολογισμός τάσης στο φορτίο
+                const loadVoltage = voltage - voltageDrop;
+                
+                // Εμφάνιση αποτελεσμάτων
+                document.getElementById('result-resistivity').textContent = resistivity.toFixed(6);
+                document.getElementById('result-resistance').textContent = resistance.toFixed(4);
+                document.getElementById('result-voltage-drop').textContent = voltageDrop.toFixed(3);
+                document.getElementById('result-percentage').textContent = percentage.toFixed(2);
+                document.getElementById('result-load-voltage').textContent = loadVoltage.toFixed(2);
+                
+                // Δημιουργία αναλυτικών βημάτων υπολογισμού
+                calculationSteps.innerHTML = '';
+                
+                // Βήμα 1: Υπολογισμός ειδικής αντίστασης με διόρθωση θερμοκρασίας
+                let step1 = document.createElement('div');
+                step1.className = 'calculation-step';
+                
+                if (temperature !== 20) {
+                    step1.innerHTML = `
+                        <p><strong>Βήμα 1:</strong> Υπολογισμός ειδικής αντίστασης με διόρθωση θερμοκρασίας</p>
+                        <p class="formula">ρ = ρ₂₀ × (1 + α × (θ - 20))</p>
+                        <p>Όπου:</p>
+                        <ul>
+                            <li>ρ₂₀ = ${originalResistivity.toFixed(6)} Ω·mm²/m (ειδική
+                        <p><strong>Βήμα 1:</strong> Υπολογισμός ειδικής αντίστασης με διόρθωση θερμοκρασίας</p>
+                        <p class="formula">ρ = ρ₂₀ × (1 + α × (θ - 20))</p>
+                        <p>Όπου:</p>
+                        <ul>
+                            <li>ρ₂₀ = ${originalResistivity.toFixed(6)} Ω·mm²/m (ειδική αντίσταση στους 20°C)</li>
+                            <li>α = ${tempCoef.toFixed(6)} /°C (θερμικός συντελεστής αντίστασης)</li>
+                            <li>θ = ${temperature} °C (θερμοκρασία λειτουργίας)</li>
+                        </ul>
+                        <p>Υπολογισμός:</p>
+                        <p class="formula">ρ = ${originalResistivity.toFixed(6)} × (1 + ${tempCoef.toFixed(6)} × (${temperature} - 20)) = ${resistivity.toFixed(6)} Ω·mm²/m</p>
+                    `;
+                } else {
+                    step1.innerHTML = `
+                        <p><strong>Βήμα 1:</strong> Ειδική αντίσταση υλικού στους 20°C</p>
+                        <p class="formula">ρ = ${resistivity.toFixed(6)} Ω·mm²/m</p>
+                    `;
+                }
+                calculationSteps.appendChild(step1);
+                
+                // Βήμα 2: Υπολογισμός αντίστασης καλωδίου
+                let step2 = document.createElement('div');
+                step2.className = 'calculation-step';
+                step2.innerHTML = `
+                    <p><strong>Βήμα 2:</strong> Υπολογισμός αντίστασης καλωδίου</p>
+                    <p class="formula">R = ρ × L / S</p>
+                    <p>Όπου:</p>
+                    <ul>
+                        <li>ρ = ${resistivity.toFixed(6)} Ω·mm²/m (ειδική αντίσταση)</li>
+                        <li>L = ${length} m (μήκος καλωδίου)</li>
+                        <li>S = ${crossSection} mm² (διατομή καλωδίου)</li>
+                    </ul>
+                    <p>Υπολογισμός:</p>
+                    <p class="formula">R = ${resistivity.toFixed(6)} × ${length} / ${crossSection} = ${resistance.toFixed(4)} Ω</p>
+                `;
+                calculationSteps.appendChild(step2);
+                
+                // Βήμα 3: Υπολογισμός πτώσης τάσης
+                let step3 = document.createElement('div');
+                step3.className = 'calculation-step';
+                step3.innerHTML = `
+                    <p><strong>Βήμα 3:</strong> Υπολογισμός πτώσης τάσης</p>
+                    <p class="formula">Ud = 2 × R × I</p>
+                    <p>Όπου:</p>
+                    <ul>
+                        <li>2 = συντελεστής για δύο αγωγούς (πήγαινε-έλα)</li>
+                        <li>R = ${resistance.toFixed(4)} Ω (αντίσταση ενός αγωγού)</li>
+                        <li>I = ${current} A (ρεύμα)</li>
+                    </ul>
+                    <p>Υπολογισμός:</p>
+                    <p class="formula">Ud = 2 × ${resistance.toFixed(4)} × ${current} = ${voltageDrop.toFixed(3)} V</p>
+                `;
+                calculationSteps.appendChild(step3);
+                
+                // Βήμα 4: Υπολογισμός ποσοστού πτώσης τάσης
+                let step4 = document.createElement('div');
+                step4.className = 'calculation-step';
+                step4.innerHTML = `
+                    <p><strong>Βήμα 4:</strong> Υπολογισμός ποσοστού πτώσης τάσης</p>
+                    <p class="formula">Ud% = (Ud / U) × 100%</p>
+                    <p>Όπου:</p>
+                    <ul>
+                        <li>Ud = ${voltageDrop.toFixed(3)} V (πτώση τάσης)</li>
+                        <li>U = ${voltage} V (τάση τροφοδοσίας)</li>
+                    </ul>
+                    <p>Υπολογισμός:</p>
+                    <p class="formula">Ud% = (${voltageDrop.toFixed(3)} / ${voltage}) × 100% = ${percentage.toFixed(2)}%</p>
+                `;
+                calculationSteps.appendChild(step4);
+                
+                // Βήμα 5: Υπολογισμός τάσης στο φορτίο
+                let step5 = document.createElement('div');
+                step5.className = 'calculation-step';
+                step5.innerHTML = `
+                    <p><strong>Βήμα 5:</strong> Υπολογισμός τάσης στο φορτίο</p>
+                    <p class="formula">Uφορτίου = U - Ud</p>
+                    <p>Όπου:</p>
+                    <ul>
+                        <li>U = ${voltage} V (τάση τροφοδοσίας)</li>
+                        <li>Ud = ${voltageDrop.toFixed(3)} V (πτώση τάσης)</li>
+                    </ul>
+                    <p>Υπολογισμός:</p>
+                    <p class="formula">Uφορτίου = ${voltage} - ${voltageDrop.toFixed(3)} = ${loadVoltage.toFixed(2)} V</p>
+                `;
+                calculationSteps.appendChild(step5);
+                
+                // Προσθήκη συμπεράσματος
+                let conclusion = document.createElement('div');
+                conclusion.className = 'calculation-step';
+                
+                // Έλεγχος αν η πτώση τάσης είναι αποδεκτή (συνήθως <5%)
+                let isAcceptable = percentage <= 5;
+                let acceptabilityClass = isAcceptable ? 'acceptable' : 'not-acceptable';
+                let acceptabilityText = isAcceptable ? 
+                    'Η πτώση τάσης είναι αποδεκτή (κάτω από 5%).' : 
+                    'Η πτώση τάσης είναι πολύ υψηλή (πάνω από 5%). Συνιστάται η χρήση καλωδίου μεγαλύτερης διατομής.';
+                
+                conclusion.innerHTML = `
+                    <p><strong>Συμπέρασμα:</strong></p>
+                    <p class="${acceptabilityClass}">${acceptabilityText}</p>
+                    <p>Σύμφωνα με τα πρότυπα, η πτώση τάσης δεν πρέπει να υπερβαίνει το 5% για τις περισσότερες εφαρμογές.</p>
+                `;
+                calculationSteps.appendChild(conclusion);
+                
+                resultDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
