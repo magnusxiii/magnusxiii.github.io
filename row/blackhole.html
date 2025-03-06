@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Σύγκριση Μάζας Ουράνιων Σωμάτων</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.2rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .visualization {
+      width: 100%;
+      height: 600px;
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    
+    .info-panel {
+      margin-top: 30px;
+      background-color: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .info-card {
+      background-color: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 8px;
+      transition: transform 0.3s;
+    }
+    
+    .info-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .info-card h3 {
+      margin-top: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 10px;
+    }
+    
+    @media (max-width: 768px) {
+      .visualization {
+        height: 400px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>3D Σύγκριση Μάζας: Γη, Ήλιος και Μαύρη Τρύπα</h1>
+    
+    <div id="visualization" class="visualization"></div>
+    
+    <div class="info-panel">
+      <h2>Συγκριτικά Στοιχεία</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>Γη</h3>
+          <p>Μάζα: 5,97 × 10<sup>24</sup> kg</p>
+          <p>Διάμετρος: 12.742 km</p>
+          <p>Μονάδα αναφοράς για τη σύγκριση</p>
+        </div>
+        
+        <div class="info-card">
+          <h3>Ήλιος</h3>
+          <p>Μάζα: 1,989 × 10<sup>30</sup> kg</p>
+          <p>Διάμετρος: 1.392.700 km</p>
+          <p>~333.000 φορές βαρύτερος από τη Γη</p>
+        </div>
+        
+        <div class="info-card">
+          <h3>Μαύρη Τρύπα (TON 618)</h3>
+          <p>Μάζα: ~66 δισεκατομμύρια ηλιακές μάζες</p>
+          <p>Ορίζοντας γεγονότων: ~390 δισεκατομμύρια km</p>
+          <p>Μία από τις μεγαλύτερες γνωστές μαύρες τρύπες</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Δεδομένα μάζας (σε σχέση με τη Γη)
+  const massEarth = 1;
+  const massSun = 333000;
+  const massBlackHole = 66000000000 * massSun; // TON 618 supermassive black hole
+  
+  // Λογαριθμική κλίμακα για καλύτερη οπτικοποίηση
+  const logScale = (mass) => Math.log10(mass) / 2;
+  
+  // Χρώματα και μεγέθη
+  const earthSize = 1;
+  const sunSize = logScale(massSun) * 2;
+  const blackHoleSize = logScale(massBlackHole) * 3;
+  
+  // Δημιουργία 3D γραφήματος
+  const data = [{
+    type: 'scatter3d',
+    mode: 'markers',
+    x: [-10, 0, 15],
+    y: [0, 0, 0],
+    z: [0, 0, 0],
+    text: ['Γη', 'Ήλιος', 'Μαύρη Τρύπα (TON 618)'],
+    hoverinfo: 'text',
+    marker: {
+      size: [earthSize * 5, sunSize * 3, blackHoleSize * 2],
+      color: ['#1E88E5', '#FFA000', '#000000'],
+      opacity: [0.8, 0.8, 0.95],
+      symbol: 'circle',
+      line: {
+        color: ['#FFFFFF', '#FF5722', '#7B1FA2'],
+        width: 1
+      }
+    }
+  }];
+  
+  // Προσθήκη ακτινών γύρω από τη μαύρη τρύπα
+  const phi = Array.from({length: 20}, (_, i) => i * Math.PI / 10);
+  const theta = Array.from({length: 20}, (_, i) => i * Math.PI / 10);
+  
+  phi.forEach(p => {
+    theta.forEach(t => {
+      const r = 2;
+      const x = 15 + r * Math.sin(p) * Math.cos(t);
+      const y = 0 + r * Math.sin(p) * Math.sin(t);
+      const z = 0 + r * Math.cos(p);
+      
+      data.push({
+        type: 'scatter3d',
+        mode: 'lines',
+        x: [15, x],
+        y: [0, y],
+        z: [0, z],
+        line: {
+          color: '#7B1FA2',
+          width: 1
+        },
+        hoverinfo: 'none',
+        showlegend: false
+      });
+    });
+  });
+  
+  const layout = {
+    title: {
+      text: 'Σύγκριση Μάζας (Λογαριθμική Κλίμακα)',
+      font: {
+        family: 'Arial, sans-serif',
+        size: 18,
+        color: '#FFFFFF'
+      }
+    },
+    scene: {
+      xaxis: {
+        title: '',
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false
+      },
+      yaxis: {
+        title: '',
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false
+      },
+      zaxis: {
+        title: '',
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false
+      },
+      aspectratio: {x: 1.5, y: 1, z: 1},
+      camera: {
+        eye: {x: 1.5, y: 1.5, z: 1}
+      },
+      annotations: [
+        {
+          showarrow: false,
+          x: -10,
+          y: 0,
+          z: 0,
+          text: 'Γη',
+          font: {
+            color: 'white',
+            size: 12
+          },
+          xanchor: 'left',
+          yanchor: 'bottom'
+        },
+        {
+          showarrow: false,
+          x: 0,
+          y: 0,
+          z: 0,
+          text: 'Ήλιος',
+          font: {
+            color: 'white',
+            size: 12
+          },
+          xanchor: 'left',
+          yanchor: 'bottom'
+        },
+        {
+          showarrow: false,
+          x: 15,
+          y: 0,
+          z: 0,
+          text: 'Μαύρη Τρύπα',
+          font: {
+            color: 'white',
+            size: 12
+          },
+          xanchor: 'left',
+          yanchor: 'bottom'
+        }
+      ]
+    },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: {l: 0, r: 0, t: 30, b: 0},
+    showlegend: false,
+    autosize: true
+  };
+  
+  const config = {
+    responsive: true,
+    displayModeBar: false
+  };
+  
+  Plotly.newPlot('visualization', data, layout, config);
+  
+  // Προσθήκη animation
+  function rotateCamera() {
+    const t = Date.now() / 1000<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Σύγκριση Μάζας Ουράνιων Σωμάτων</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.2rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .visualization {
+      width: 100%;
+      height: 600px;
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    
+    .info-panel {
+      margin-top: 30px;
+      background-color: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .info-card {
+      background-color: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 8px;
+      transition: transform 0.3s;
+    }
+    
+    .info-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .info-card h3 {
+      margin-top: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 10px;
+    }
+    
+    @media (max-width: 768px) {
+      .visualization {
+        height: 400px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>3D Σύγκριση Μάζας: Γη, Ήλιος και Μαύρη Τρύπα</h1>
+    
+    <div id="visualization" class="visualization"></div>
+    
+    <div class="info-panel">
+      <h2>Συγκριτικά Στοιχεία</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>Γη</h3>
+          <p>Μάζα: 5,97 × 10<sup>24</sup> kg</p>
+          <p>Διάμετρος: 12.742 km</p>
+          <p>Μονάδα αναφοράς για τη σύγκριση</p>
+        </div>
+        
+        <div class="info-card">
+          <h3>Ήλιος</h3>
+          <p>Μάζα: 1,989 × 10<sup>30</sup> kg</p>
+          <p>Διάμετρος: 1.392.700 km</p>
+          <p>~333.000 φορές βαρύτερος από τη Γη</p>
+        </div>
+        
+        <div class="info-card">
+          <h3>Μαύρη Τρύπα (TON 618)</h3>
+          <p>Μάζα: ~66 δισεκατομμύρια ηλιακές μάζες</p>
+          <p>Ορίζοντας γεγονότων: ~390 δισεκατομμύρια km</p>
+          <p>Μία από τις μεγαλύτερες γνωστές μαύρες τρύπες</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Δεδομένα μάζας (σε σχέση με τη Γη)
+  const massEarth = 1;
+  const massSun = 333000;
+  const massBlackHole = 66000000000 * massSun; // TON 618 supermassive black hole
+  
+  // Λογαριθμική κλίμακα για καλύτερη οπτικοποίηση
+  const logScale = (mass) => Math.log10(mass) / 2;
+  
+  // Χρώματα και μεγέθη
+  const earthSize = 1;
+  const sunSize = logScale(massSun) * 2;
+  const blackHoleSize = logScale(massBlackHole) * 3;
+  
+  // Δημιουργία 3D γραφήματος
+  const data = [{
+    type: 'scatter3d',
+    mode: 'markers',
+    x: [-10, 0, 15],
+    y: [0, 0, 0],
+    z: [0, 0, 0],
+    text: ['Γη', 'Ήλιος', 'Μαύρη Τρύπα (TON 618)'],
+    hoverinfo: 'text',
+    marker: {
+      size: [earthSize * 5, sunSize * 3, blackHoleSize * 2],
+      color: ['#1E88E5', '#FFA000', '#000000'],
+      opacity: [0.8, 0.8, 0.95],
+      symbol: 'circle',
+      line: {
+        color: ['#FFFFFF', '#FF5722', '#7B1FA2'],
+        width: 1
+      }
+    }
+  }];
+  
+  // Προσθήκη ακτινών γύρω από τη μαύρη τρύπα
+  const phi = Array.from({length: 20}, (_, i) => i * Math.PI / 10);
+  const theta = Array.from({length: 20}, (_, i) => i * Math.PI / 10);
+  
+  phi.forEach(p => {
+    theta.forEach(t => {
+      const r = 2;
+      const x = 15 + r * Math.sin(p) * Math.cos(t);
+      const y = 0 + r * Math.sin(p) * Math.sin(t);
+      const z = 0 + r * Math.cos(p);
+      
+      data.push({
+        type: 'scatter3d',
+        mode: 'lines',
+        x: [15, x],
+        y: [0, y],
+        z: [0, z],
+        line: {
+          color: '#7B1FA2',
+          width: 1
+        },
+        hoverinfo: 'none',
+        showlegend: false
+      });
+    });
+  });
+  
+  const layout = {
+    title: {
+      text: 'Σύγκριση Μάζας (Λογαριθμική Κλίμακα)',
+      font: {
+        family: 'Arial, sans-serif',
+        size: 18,
+        color: '#FFFFFF'
+      }
+    },
+    scene: {
+      xaxis: {
+        title: '',
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false
+      },
+      yaxis: {
+        title: '',
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false
+      },
+      zaxis: {
+        title: '',
+        showgrid: false,
+        zeroline: false,
+        showticklabels: false
+      },
+      aspectratio: {x: 1.5, y: 1, z: 1},
+      camera: {
+        eye: {x: 1.5, y: 1.5, z: 1}
+      },
+      annotations: [
+        {
+          showarrow: false,
+          x: -10,
+          y: 0,
+          z: 0,
+          text: 'Γη',
+          font: {
+            color: 'white',
+            size: 12
+          },
+          xanchor: 'left',
+          yanchor: 'bottom'
+        },
+        {
+          showarrow: false,
+          x: 0,
+          y: 0,
+          z: 0,
+          text: 'Ήλιος',
+          font: {
+            color: 'white',
+            size: 12
+          },
+          xanchor: 'left',
+          yanchor: 'bottom'
+        },
+        {
+          showarrow: false,
+          x: 15,
+          y: 0,
+          z: 0,
+          text: 'Μαύρη Τρύπα',
+          font: {
+            color: 'white',
+            size: 12
+          },
+          xanchor: 'left',
+          yanchor: 'bottom'
+        }
+      ]
+    },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: {l: 0, r: 0, t: 30, b: 0},
+    showlegend: false,
+    autosize: true
+  };
+  
+  const config = {
+    responsive: true,
+    displayModeBar: false
+  };
+  
+  Plotly.newPlot('visualization', data, layout, config);
+  
+  // Προσθήκη animation
+  function rotateCamera() {
+    const t = Date.now() / 10000;
+    const eyeX = 1.5 * Math.cos(t);
+    const eyeY = 1.5 * Math.sin(t);
+    
+    Plotly.relayout('visualization', {
+      'scene.camera.eye.x': eyeX,
+      'scene.camera.eye.y': eyeY,
+      'scene.camera.eye.z': 1.2
+    });
+    
+    requestAnimationFrame(rotateCamera);
+  }
+  
+  rotateCamera();
+  
+  // Προσαρμογή στο μέγεθος παραθύρου
+  window.addEventListener('resize', function() {
+    Plotly.Plots.resize(document.getElementById('visualization'));
+  });
+});
+</script>
+
+</body>
+</html>
+0;
+    const eyeX = 1.5 * Math.cos(t);
+    const eyeY = 1.5 * Math.sin(t);
+    
+    Plotly.relayout('visualization', {
+      'scene.camera.eye.x': eyeX,
+      'scene.camera.eye.y': eyeY,
+      'scene.camera.eye.z': 1.2
+    });
+    
+    requestAnimationFrame(rotateCamera);
+  }
+  
+  rotateCamera();
+  
+  // Προσαρμογή στο μέγεθος παραθύρου
+  window.addEventListener('resize', function() {
+    Plotly.Plots.resize(document.getElementById('visualization'));
+  });
+});
+</script>
+
+</body>
+</html>
