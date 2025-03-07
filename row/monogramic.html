@@ -51,19 +51,27 @@
         .panel-row:last-child {
             border-bottom: none;
         }
-        .panel-cell {
-            width: 60px;
-            min-width: 60px;
-            height: 80px;
-            border-right: 1px solid #ccc;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            background-color: #fff;
-            transition: background-color 0.2s;
-        }
+ .panel-cell {
+    width: 90px;
+    min-width: 90px;
+    height: 120px;
+    border-right: 1px solid #ccc;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #fff;
+    transition: background-color 0.2s;
+}
+.panel-cell.half-width {
+    width: 30px;
+    min-width: 30px;
+}
+.panel-cell.quarter-width {
+    width: 15px;
+    min-width: 15px;
+}
         .panel-cell:last-child {
             border-right: none;
         }
@@ -71,6 +79,7 @@
             background-color: #e6f7ff;
             cursor: pointer;
         }
+        /////////////////////////////////////////////////////
         .component {
             width: 100%;
             height: 100%;
@@ -82,14 +91,26 @@
         .component-icon {
             font-size: 20px;
             margin-bottom: 5px;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .component-label {
-            font-size: 10px;
-            text-align: center;
-            word-break: break-word;
-            overflow: hidden;
-            max-height: 40px;
-        }
+.component-icon img {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+  .component-label {
+    font-size: 12px;
+    text-align: center;
+    word-break: break-word;
+    overflow: hidden;
+    max-height: 60px;
+}
         .component-list {
             display: flex;
             flex-wrap: wrap;
@@ -260,6 +281,7 @@
         #file-import {
             display: none;
         }
+    
     </style>
 </head>
 <body>
@@ -313,7 +335,14 @@
             </div>
             <div class="form-group">
                 <label for="component-size">Μέγεθος (θέσεις):</label>
-                <input type="number" id="component-size" min="1" max="4" value="1">
+                <select id="component-size">
+                    <option value="0.25">1/4 (1/4 θέσης)</option>
+                    <option value="0.5">1/2 (1/2 θέσης)</option>
+                    <option value="1">1 (Πλήρης θέση)</option>
+                    <option value="2">2 (Διπλή θέση)</option>
+                    <option value="3">3 (Τριπλή θέση)</option>
+                    <option value="4">4 (Τετραπλή θέση)</option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="component-type">Τύπος:</label>
@@ -325,6 +354,10 @@
                     <option value="rcd">Ρελέ Διαφυγής</option>
                     <option value="main">Γενικός Διακόπτης</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label for="component-icon-url">URL Εικονιδίου (προαιρετικό):</label>
+                <input type="text" id="component-icon-url" placeholder="https://example.com/icon.png">
             </div>
             <div class="form-group">
                 <label for="component-ampere">Αμπέρ:</label>
@@ -393,7 +426,7 @@
                 btn.addEventListener('click', function() {
                     const type = this.dataset.type;
                     const icon = this.dataset.icon;
-                    const size = parseInt(this.dataset.size);
+                    const size = parseFloat(this.dataset.size);
                     
                     selectedComponent = {
                         type: type,
@@ -407,7 +440,6 @@
                     this.style.opacity = '1';
                 });
             });
-            
             // Κλείσιμο modal
             closeModal.addEventListener('click', function() {
                 modal.style.display = "none";
@@ -425,8 +457,9 @@
                 if (!editingCell) return;
                 
                 const name = document.getElementById('component-name').value;
-                const size = parseInt(document.getElementById('component-size').value);
+                const size = parseFloat(document.getElementById('component-size').value);
                 const type = document.getElementById('component-type').value;
+                const iconUrl = document.getElementById('component-icon-url').value;
                 const ampere = parseInt(document.getElementById('component-ampere').value);
                 const description = document.getElementById('component-description').value;
                 
@@ -442,11 +475,17 @@
                 const colIndex = parseInt(editingCell.dataset.col);
                 
                 // Έλεγχος αν υπάρχει χώρος
-                if (size > 1) {
+                if (size > 0.25) {
                     const row = panelData[rowIndex];
                     let canPlace = true;
                     
-                    for (let i = colIndex; i < colIndex + size; i++) {
+                    // Υπολογισμός πόσα κελιά χρειάζονται
+                    let cellsNeeded = 1;
+                    if (size === 0.25) cellsNeeded = 0.25;
+                    else if (size === 0.5) cellsNeeded = 0.5;
+                    else cellsNeeded = Math.ceil(size);
+                    
+                    for (let i = colIndex; i < colIndex + cellsNeeded; i++) {
                         if (i >= row.cells.length || (row.cells[i] && row.cells[i].id !== editingCell.dataset.id)) {
                             canPlace = false;
                             break;
@@ -465,6 +504,8 @@
                     cells.forEach(cell => {
                         cell.innerHTML = '';
                         cell.classList.remove('occupied');
+                        cell.classList.remove('half-width');
+                        cell.classList.remove('quarter-width');
                         cell.removeAttribute('data-id');
                         
                         const cellRow = parseInt(cell.dataset.row);
@@ -475,18 +516,35 @@
                 
                 // Δημιουργία μοναδικού ID
                 const componentId = 'comp_' + Date.now();
-                               // Ενημέρωση του πίνακα δεδομένων
-                for (let i = 0; i < size; i++) {
-                    if (colIndex + i < panelData[rowIndex].cells.length) {
-                        panelData[rowIndex].cells[colIndex + i] = {
-                            id: componentId,
-                            type: type,
-                            icon: icon,
-                            name: name,
-                            size: size,
-                            ampere: ampere,
-                            description: description
-                        };
+                
+                // Ενημέρωση του πίνακα δεδομένων
+                if (size === 0.25 || size === 0.5) {
+                    // Για κλασματικά μεγέθη, χρησιμοποιούμε μόνο ένα κελί
+                    panelData[rowIndex].cells[colIndex] = {
+                        id: componentId,
+                        type: type,
+                        icon: icon,
+                        iconUrl: iconUrl,
+                        name: name,
+                        size: size,
+                        ampere: ampere,
+                        description: description
+                    };
+                } else {
+                    // Για κανονικά μεγέθη, χρησιμοποιούμε πολλαπλά κελιά
+                    for (let i = 0; i < size; i++) {
+                        if (colIndex + i < panelData[rowIndex].cells.length) {
+                            panelData[rowIndex].cells[colIndex + i] = {
+                                id: componentId,
+                                type: type,
+                                icon: icon,
+                                iconUrl: iconUrl,
+                                name: name,
+                                size: size,
+                                ampere: ampere,
+                                description: description
+                            };
+                        }
                     }
                 }
                 
@@ -506,6 +564,8 @@
                 cells.forEach(cell => {
                     cell.innerHTML = '';
                     cell.classList.remove('occupied');
+                    cell.classList.remove('half-width');
+                    cell.classList.remove('quarter-width');
                     cell.removeAttribute('data-id');
                     
                     const rowIndex = parseInt(cell.dataset.row);
@@ -565,14 +625,30 @@
                             cellElement.classList.add('occupied');
                             cellElement.dataset.id = cell.id;
                             
-                            // Αν είναι η πρώτη θέση του στοιχείου
-                            if (colIndex === 0 || row.cells[colIndex - 1]?.id !== cell.id) {
+                            // Προσθήκη κλάσεων για κλασματικά μεγέθη
+                            if (cell.size === 0.5) {
+                                cellElement.classList.add('half-width');
+                            } else if (cell.size === 0.25) {
+                                cellElement.classList.add('quarter-width');
+                            }
+                            
+                            // Αν είναι η πρώτη θέση του στοιχείου ή αν είναι κλασματικό μέγεθος
+                            if (colIndex === 0 || row.cells[colIndex - 1]?.id !== cell.id || cell.size < 1) {
                                 const componentElement = document.createElement('div');
                                 componentElement.className = 'component';
                                 
                                 const iconElement = document.createElement('div');
                                 iconElement.className = 'component-icon';
-                                iconElement.textContent = cell.icon;
+                                
+                                // Χρήση URL εικόνας αν υπάρχει, αλλιώς χρήση emoji
+                                if (cell.iconUrl) {
+                                    const imgElement = document.createElement('img');
+                                    imgElement.src = cell.iconUrl;
+                                    imgElement.alt = cell.name;
+                                    iconElement.appendChild(imgElement);
+                                } else {
+                                    iconElement.textContent = cell.icon;
+                                }
                                 
                                 const labelElement = document.createElement('div');
                                 labelElement.className = 'component-label';
@@ -626,11 +702,17 @@
                 const colIndex = parseInt(cell.dataset.col);
                 
                 // Έλεγχος αν υπάρχει χώρος για το στοιχείο
-                if (selectedComponent.size > 1) {
+                if (selectedComponent.size > 0.25) {
                     const row = panelData[rowIndex];
                     let canPlace = true;
                     
-                    for (let i = colIndex; i < colIndex + selectedComponent.size; i++) {
+                    // Υπολογισμός πόσα κελιά χρειάζονται
+                    let cellsNeeded = 1;
+                    if (selectedComponent.size === 0.25) cellsNeeded = 0.25;
+                    else if (selectedComponent.size === 0.5) cellsNeeded = 0.5;
+                    else cellsNeeded = Math.ceil(selectedComponent.size);
+                    
+                    for (let i = colIndex; i < colIndex + cellsNeeded; i++) {
                         if (i >= row.cells.length || row.cells[i] !== null) {
                             canPlace = false;
                             break;
@@ -648,6 +730,7 @@
                 document.getElementById('component-name').value = selectedComponent.name;
                 document.getElementById('component-size').value = selectedComponent.size;
                 document.getElementById('component-type').value = selectedComponent.type;
+                document.getElementById('component-icon-url').value = '';
                 document.getElementById('component-ampere').value = 16;
                 document.getElementById('component-description').value = '';
                 
@@ -675,6 +758,7 @@
                 document.getElementById('component-name').value = component.name || '';
                 document.getElementById('component-size').value = component.size || 1;
                 document.getElementById('component-type').value = component.type || 'breaker';
+                document.getElementById('component-icon-url').value = component.iconUrl || '';
                 document.getElementById('component-ampere').value = component.ampere || 16;
                 document.getElementById('component-description').value = component.description || '';
                 
@@ -741,7 +825,7 @@
                     const uniqueComponents = [];
                     const processedIds = new Set();
                     
-                    row.cells.forEach(cell => {
+                    row.cells.forEach((cell, index) => {
                         if (cell && !processedIds.has(cell.id)) {
                             // Δημιουργία αντιγράφου του στοιχείου χωρίς το id
                             const { id, ...componentWithoutId } = cell;
@@ -777,7 +861,7 @@
                         throw new Error("Μη έγκυρη μορφή JSON");
                     }
                     
-                    // Επαναφορά μετρητή σειρών
+                                     // Επαναφορά μετρητή σειρών
                     rowCounter = 1;
                     
                     // Δημιουργία νέων δεδομένων πίνακα
@@ -792,12 +876,23 @@
                             const position = component.position || 0;
                             
                             // Προσθήκη στοιχείου στα κελιά
-                            for (let i = 0; i < component.size; i++) {
-                                if (position + i < columns) {
-                                    cells[position + i] = {
+                            if (component.size < 1) {
+                                // Για κλασματικά μεγέθη
+                                if (position < columns) {
+                                    cells[position] = {
                                         ...component,
                                         id: componentId
                                     };
+                                }
+                            } else {
+                                // Για κανονικά μεγέθη
+                                for (let i = 0; i < component.size; i++) {
+                                    if (position + i < columns) {
+                                        cells[position + i] = {
+                                            ...component,
+                                            id: componentId
+                                        };
+                                    }
                                 }
                             }
                         });
