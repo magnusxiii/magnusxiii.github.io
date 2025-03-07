@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Σχεδιασμός Ηλεκτρολογικού Πίνακα</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .panel {
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #333;
+            border-radius: 5px;
+            overflow: auto;
+            margin-bottom: 20px;
+        }
+        .panel-row {
+            display: flex;
+            min-height: 80px;
+            border-bottom: 1px solid #999;
+        }
+        .panel-row:last-child {
+            border-bottom: none;
+        }
+        .panel-cell {
+            width: 60px;
+            min-width: 60px;
+            height: 80px;
+            border-right: 1px solid #ccc;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-color: #fff;
+            transition: background-color 0.2s;
+        }
+        .panel-cell:last-child {
+            border-right: none;
+        }
+        .panel-cell.occupied {
+            background-color: #e6f7ff;
+            cursor: pointer;
+        }
+        .component {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .component-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .component-label {
+            font-size: 10px;
+            text-align: center;
+            word-break: break-word;
+            overflow: hidden;
+            max-height: 40px;
+        }
+        .component-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .component-btn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .component-btn:hover {
+            background-color: #45a049;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        .save-btn {
+            background-color: #28a745;
+        }
+        .save-btn:hover {
+            background-color: #218838;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .row-label {
+            min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            font-weight: bold;
+            border-right: 2px solid #333;
+        }
+        #export-area {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        .export-container {
+            margin-top: 20px;
+        }
+        .add-row-btn {
+            margin-top: 10px;
+            background-color: #6c757d;
+        }
+        .add-row-btn:hover {
+            background-color: #5a6268;
+        }
+        .row-controls {
+            display: flex;
+            align-items: center;
+        }
+        .row-name {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .remove-row {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 5px;
+        }
+        .remove-row:hover {
+            background-color: #c82333;
+        }
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .import-export-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+        }
+        #import-btn {
+            background-color: #6610f2;
+        }
+        #import-btn:hover {
+            background-color: #520dc2;
+        }
+        #file-import {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Σχεδιασμός Ηλεκτρολογικού Πίνακα</h1>
+        
+        <div class="controls">
+            <div class="form-group">
+                <label for="columns">Αριθμός Στηλών ανά Σειρά:</label>
+                <input type="number" id="columns" min="1" max="24" value="12">
+            </div>
+            <button id="add-row">Προσθήκη Σειράς</button>
+            <button id="export-text-btn">Εξαγωγή Μονογραμμικού</button>
+            <button id="export-json-btn">Εξαγωγή JSON</button>
+            <button id="import-btn">Εισαγωγή JSON</button>
+            <input type="file" id="file-import" accept=".json">
+        </div>
+        
+        <h2>Διαθέσιμα Στοιχεία</h2>
+        <div class="component-list">
+            <button class="component-btn" data-type="breaker" data-icon="⚡" data-size="1">Ασφάλεια</button>
+            <button class="component-btn" data-type="light" data-icon="💡" data-size="1">Λυχνία</button>
+            <button class="component-btn" data-type="switch" data-icon="🔌" data-size="1">Διακόπτης</button>
+            <button class="component-btn" data-type="relay" data-icon="🔄" data-size="2">Ρελέ</button>
+            <button class="component-btn" data-type="rcd" data-icon="🛡️" data-size="2">Ρελέ Διαφυγής</button>
+            <button class="component-btn" data-type="main" data-icon="⚙️" data-size="3">Γενικός Διακόπτης</button>
+        </div>
+        
+        <h2>Ο Πίνακάς μου</h2>
+        <div id="panel-container"></div>
+        
+        <button id="add-row-bottom" class="add-row-btn">+ Προσθήκη Σειράς</button>
+        
+        <div class="export-container">
+            <h2>Εξαγωγή / Εισαγωγή</h2>
+            <textarea id="export-area" placeholder="Εδώ θα εμφανιστεί το μονογραμμικό διάγραμμα ή το JSON του πίνακα..."></textarea>
+            <div class="export-options">
+                <button id="copy-btn">Αντιγραφή</button>
+                <button id="download-btn">Λήψη Αρχείου</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="componentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Επεξεργασία Στοιχείου</h2>
+            <div class="form-group">
+                <label for="component-name">Όνομα:</label>
+                <input type="text" id="component-name">
+            </div>
+            <div class="form-group">
+                <label for="component-size">Μέγεθος (θέσεις):</label>
+                <input type="number" id="component-size" min="1" max="4" value="1">
+            </div>
+            <div class="form-group">
+                <label for="component-type">Τύπος:</label>
+                <select id="component-type">
+                    <option value="breaker">Ασφάλεια</option>
+                    <option value="light">Λυχνία</option>
+                    <option value="switch">Διακόπτης</option>
+                    <option value="relay">Ρελέ</option>
+                    <option value="rcd">Ρελέ Διαφυγής</option>
+                    <option value="main">Γενικός Διακόπτης</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="component-ampere">Αμπέρ:</label>
+                <input type="number" id="component-ampere" min="1" max="100" value="16">
+            </div>
+            <div class="form-group">
+                <label for="component-description">Περιγραφή:</label>
+                <input type="text" id="component-description" placeholder="π.χ. Φωτισμός Σαλονιού">
+            </div>
+            <div class="actions">
+                <button id="delete-component" class="delete-btn">Διαγραφή</button>
+                <button id="save-component" class="save-btn">Αποθήκευση</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const panelContainer = document.getElementById('panel-container');
+            const addRowBtn = document.getElementById('add-row');
+            const addRowBottomBtn = document.getElementById('add-row-bottom');
+            const columnsInput = document.getElementById('columns');
+            const componentBtns = document.querySelectorAll('.component-btn');
+            const modal = document.getElementById('componentModal');
+            const closeModal = document.querySelector('.close');
+            const saveComponentBtn = document.getElementById('save-component');
+            const deleteComponentBtn = document.getElementById('delete-component');
+            const exportTextBtn = document.getElementById('export-text-btn');
+            const exportJsonBtn = document.getElementById('export-json-btn');
+            const exportArea = document.getElementById('export-area');
+            const copyBtn = document.getElementById('copy-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const importBtn = document.getElementById('import-btn');
+            const fileImport = document.getElementById('file-import');
+            
+            let selectedComponent = null;
+            let editingCell = null;
+            let panelData = [];
+            let rowCounter = 1;
+            
+            // Προσθήκη σειράς
+            function addRow() {
+                const columns = parseInt(columnsInput.value);
+                const rowId = 'row_' + Date.now();
+                const rowName = 'Σειρά ' + rowCounter;
+                
+                // Δημιουργία δεδομένων σειράς
+                const rowData = {
+                    id: rowId,
+                    name: rowName,
+                    cells: Array(columns).fill(null)
+                };
+                
+                panelData.push(rowData);
+                rowCounter++;
+                
+                renderPanel();
+            }
+            
+            // Event listeners για προσθήκη σειράς
+            addRowBtn.addEventListener('click', addRow);
+            addRowBottomBtn.addEventListener('click', addRow);
+            
+            // Επιλογή στοιχείου
+            componentBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const icon = this.dataset.icon;
+                    const size = parseInt(this.dataset.size);
+                    
+                    selectedComponent = {
+                        type: type,
+                        icon: icon,
+                        size: size,
+                        name: this.textContent
+                    };
+                    
+                    // Αφαίρεση επιλογής από άλλα κουμπιά
+                    componentBtns.forEach(b => b.style.opacity = '0.7');
+                    this.style.opacity = '1';
+                });
+            });
+            
+            // Κλείσιμο modal
+            closeModal.addEventListener('click', function() {
+                modal.style.display = "none";
+            });
+            
+            // Κλείσιμο modal όταν κάνουμε κλικ έξω από αυτό
+            window.addEventListener('click', function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            });
+            
+            // Αποθήκευση στοιχείου
+            saveComponentBtn.addEventListener('click', function() {
+                if (!editingCell) return;
+                
+                const name = document.getElementById('component-name').value;
+                const size = parseInt(document.getElementById('component-size').value);
+                const type = document.getElementById('component-type').value;
+                const ampere = parseInt(document.getElementById('component-ampere').value);
+                const description = document.getElementById('component-description').value;
+                
+                let icon = "⚡";
+                if (type === "light") icon = "💡";
+                if (type === "switch") icon = "🔌";
+                if (type === "relay") icon = "🔄";
+                if (type === "rcd") icon = "🛡️";
+                if (type === "main") icon = "⚙️";
+                
+                // Ενημέρωση του στοιχείου
+                const rowIndex = parseInt(editingCell.dataset.row);
+                const colIndex = parseInt(editingCell.dataset.col);
+                
+                // Έλεγχος αν υπάρχει χώρος
+                if (size > 1) {
+                    const row = panelData[rowIndex];
+                    let canPlace = true;
+                    
+                    for (let i = colIndex; i < colIndex + size; i++) {
+                        if (i >= row.cells.length || (row.cells[i] && row.cells[i].id !== editingCell.dataset.id)) {
+                            canPlace = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!canPlace) {
+                        alert("Δεν υπάρχει αρκετός χώρος για αυτό το στοιχείο!");
+                        return;
+                    }
+                }
+                
+                // Καθαρισμός προηγούμενων θέσεων
+                if (editingCell.dataset.id) {
+                    const cells = document.querySelectorAll(`[data-id="${editingCell.dataset.id}"]`);
+                    cells.forEach(cell => {
+                        cell.innerHTML = '';
+                        cell.classList.remove('occupied');
+                        cell.removeAttribute('data-id');
+                        
+                        const cellRow = parseInt(cell.dataset.row);
+                        const cellCol = parseInt(cell.dataset.col);
+                        panelData[cellRow].cells[cellCol] = null;
+                    });
+                }
+                
+                // Δημιουργία μοναδικού ID
+                const componentId = 'comp_' + Date.now();
+                               // Ενημέρωση του πίνακα δεδομένων
+                for (let i = 0; i < size; i++) {
+                    if (colIndex + i < panelData[rowIndex].cells.length) {
+                        panelData[rowIndex].cells[colIndex + i] = {
+                            id: componentId,
+                            type: type,
+                            icon: icon,
+                            name: name,
+                            size: size,
+                            ampere: ampere,
+                            description: description
+                        };
+                    }
+                }
+                
+                // Ενημέρωση του UI
+                renderPanel();
+                
+                modal.style.display = "none";
+            });
+            
+            // Διαγραφή στοιχείου
+            deleteComponentBtn.addEventListener('click', function() {
+                if (!editingCell || !editingCell.dataset.id) return;
+                
+                const componentId = editingCell.dataset.id;
+                const cells = document.querySelectorAll(`[data-id="${componentId}"]`);
+                
+                cells.forEach(cell => {
+                    cell.innerHTML = '';
+                    cell.classList.remove('occupied');
+                    cell.removeAttribute('data-id');
+                    
+                    const rowIndex = parseInt(cell.dataset.row);
+                    const colIndex = parseInt(cell.dataset.col);
+                    panelData[rowIndex].cells[colIndex] = null;
+                });
+                
+                renderPanel();
+                modal.style.display = "none";
+            });
+            
+            // Απεικόνιση πίνακα
+            function renderPanel() {
+                panelContainer.innerHTML = '';
+                
+                panelData.forEach((row, rowIndex) => {
+                    const panelElement = document.createElement('div');
+                    panelElement.className = 'panel';
+                    panelElement.dataset.rowId = row.id;
+                    
+                    const rowElement = document.createElement('div');
+                    rowElement.className = 'panel-row';
+                    
+                    // Προσθήκη ετικέτας σειράς
+                    const rowLabelElement = document.createElement('div');
+                    rowLabelElement.className = 'row-label';
+                    
+                    const rowControlsElement = document.createElement('div');
+                    rowControlsElement.className = 'row-controls';
+                    
+                    const rowNameElement = document.createElement('div');
+                    rowNameElement.className = 'row-name';
+                    rowNameElement.textContent = row.name;
+                    
+                    const removeRowBtn = document.createElement('button');
+                    removeRowBtn.className = 'remove-row';
+                    removeRowBtn.textContent = '×';
+                    removeRowBtn.title = 'Αφαίρεση σειράς';
+                    removeRowBtn.addEventListener('click', function() {
+                        removeRow(rowIndex);
+                    });
+                    
+                    rowControlsElement.appendChild(rowNameElement);
+                    rowControlsElement.appendChild(removeRowBtn);
+                    rowLabelElement.appendChild(rowControlsElement);
+                    rowElement.appendChild(rowLabelElement);
+                    
+                    // Προσθήκη κελιών
+                    row.cells.forEach((cell, colIndex) => {
+                        const cellElement = document.createElement('div');
+                        cellElement.className = 'panel-cell';
+                        cellElement.dataset.row = rowIndex;
+                        cellElement.dataset.col = colIndex;
+                        
+                        // Αν υπάρχει στοιχείο σε αυτή τη θέση
+                        if (cell) {
+                            cellElement.classList.add('occupied');
+                            cellElement.dataset.id = cell.id;
+                            
+                            // Αν είναι η πρώτη θέση του στοιχείου
+                            if (colIndex === 0 || row.cells[colIndex - 1]?.id !== cell.id) {
+                                const componentElement = document.createElement('div');
+                                componentElement.className = 'component';
+                                
+                                const iconElement = document.createElement('div');
+                                iconElement.className = 'component-icon';
+                                iconElement.textContent = cell.icon;
+                                
+                                const labelElement = document.createElement('div');
+                                labelElement.className = 'component-label';
+                                labelElement.textContent = cell.name;
+                                
+                                componentElement.appendChild(iconElement);
+                                componentElement.appendChild(labelElement);
+                                cellElement.appendChild(componentElement);
+                                
+                                // Ορισμός πλάτους για στοιχεία που καταλαμβάνουν πολλές θέσεις
+                                if (cell.size > 1) {
+                                    componentElement.style.width = (cell.size * 100) + '%';
+                                }
+                            }
+                            
+                            // Προσθήκη event listener για επεξεργασία
+                            cellElement.addEventListener('click', function() {
+                                editComponent(this);
+                            });
+                        } else {
+                            // Προσθήκη event listener για προσθήκη νέου στοιχείου
+                            cellElement.addEventListener('click', function() {
+                                addComponent(this);
+                            });
+                        }
+                        
+                        rowElement.appendChild(cellElement);
+                    });
+                    
+                    panelElement.appendChild(rowElement);
+                    panelContainer.appendChild(panelElement);
+                });
+            }
+            
+            // Αφαίρεση σειράς
+            function removeRow(rowIndex) {
+                if (confirm('Είστε βέβαιοι ότι θέλετε να αφαιρέσετε αυτή τη σειρά;')) {
+                    panelData.splice(rowIndex, 1);
+                    renderPanel();
+                }
+            }
+            
+            // Προσθήκη νέου στοιχείου
+            function addComponent(cell) {
+                if (!selectedComponent) {
+                    alert("Παρακαλώ επιλέξτε πρώτα ένα στοιχείο!");
+                    return;
+                }
+                
+                const rowIndex = parseInt(cell.dataset.row);
+                const colIndex = parseInt(cell.dataset.col);
+                
+                // Έλεγχος αν υπάρχει χώρος για το στοιχείο
+                if (selectedComponent.size > 1) {
+                    const row = panelData[rowIndex];
+                    let canPlace = true;
+                    
+                    for (let i = colIndex; i < colIndex + selectedComponent.size; i++) {
+                        if (i >= row.cells.length || row.cells[i] !== null) {
+                            canPlace = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!canPlace) {
+                        alert("Δεν υπάρχει αρκετός χώρος για αυτό το στοιχείο!");
+                        return;
+                    }
+                }
+                
+                // Άνοιγμα του modal για συμπλήρωση στοιχείων
+                editingCell = cell;
+                document.getElementById('component-name').value = selectedComponent.name;
+                document.getElementById('component-size').value = selectedComponent.size;
+                document.getElementById('component-type').value = selectedComponent.type;
+                document.getElementById('component-ampere').value = 16;
+                document.getElementById('component-description').value = '';
+                
+                modal.style.display = "block";
+            }
+            
+            // Επεξεργασία υπάρχοντος στοιχείου
+            function editComponent(cell) {
+                if (!cell.classList.contains('occupied')) return;
+                
+                editingCell = cell;
+                const componentId = cell.dataset.id;
+                const rowIndex = parseInt(cell.dataset.row);
+                const colIndex = parseInt(cell.dataset.col);
+                
+                // Βρίσκουμε την πρώτη θέση του στοιχείου
+                let startCol = colIndex;
+                while (startCol > 0 && panelData[rowIndex].cells[startCol - 1] && panelData[rowIndex].cells[startCol - 1].id === componentId) {
+                    startCol--;
+                }
+                
+                const component = panelData[rowIndex].cells[startCol];
+                
+                // Συμπλήρωση της φόρμας
+                document.getElementById('component-name').value = component.name || '';
+                document.getElementById('component-size').value = component.size || 1;
+                document.getElementById('component-type').value = component.type || 'breaker';
+                document.getElementById('component-ampere').value = component.ampere || 16;
+                document.getElementById('component-description').value = component.description || '';
+                
+                // Εμφάνιση του modal
+                modal.style.display = "block";
+            }
+            
+            // Εξαγωγή μονογραμμικού διαγράμματος
+            function updateMonogrammic() {
+                let monogrammic = "ΜΟΝΟΓΡΑΜΜΙΚΟ ΔΙΑΓΡΑΜΜΑ ΗΛΕΚΤΡΟΛΟΓΙΚΟΥ ΠΙΝΑΚΑ\n";
+                monogrammic += "=============================================\n\n";
+                
+                panelData.forEach((row, rowIndex) => {
+                    monogrammic += `${row.name}:\n`;
+                    monogrammic += "-------------------------\n";
+                    
+                    // Συλλογή μοναδικών στοιχείων στη σειρά
+                    const uniqueComponents = [];
+                    const processedIds = new Set();
+                    
+                    row.cells.forEach(cell => {
+                        if (cell && !processedIds.has(cell.id)) {
+                            uniqueComponents.push(cell);
+                            processedIds.add(cell.id);
+                        }
+                    });
+                    
+                    // Προσθήκη στοιχείων στο μονογραμμικό
+                    uniqueComponents.forEach(component => {
+                        let typeText = "Άγνωστο";
+                        switch(component.type) {
+                            case 'breaker': typeText = "Ασφάλεια"; break;
+                            case 'light': typeText = "Λυχνία"; break;
+                            case 'switch': typeText = "Διακόπτης"; break;
+                            case 'relay': typeText = "Ρελέ"; break;
+                            case 'rcd': typeText = "Ρελέ Διαφυγής"; break;
+                            case 'main': typeText = "Γενικός Διακόπτης"; break;
+                        }
+                        
+                        monogrammic += `- ${typeText} "${component.name}"`;
+                        
+                        if (component.ampere) {
+                            monogrammic += ` ${component.ampere}A`;
+                        }
+                        
+                        if (component.description) {
+                            monogrammic += ` (${component.description})`;
+                        }
+                        
+                        monogrammic += `\n`;
+                    });
+                    
+                    monogrammic += "\n";
+                });
+                
+                return monogrammic;
+            }
+            
+            // Εξαγωγή σε JSON
+            function exportToJson() {
+                // Καθαρισμός δεδομένων για εξαγωγή (αφαίρεση περιττών πληροφοριών)
+                const exportData = panelData.map(row => {
+                    // Συλλογή μοναδικών στοιχείων στη σειρά
+                    const uniqueComponents = [];
+                    const processedIds = new Set();
+                    
+                    row.cells.forEach(cell => {
+                        if (cell && !processedIds.has(cell.id)) {
+                            // Δημιουργία αντιγράφου του στοιχείου χωρίς το id
+                            const { id, ...componentWithoutId } = cell;
+                            // Προσθήκη της θέσης του στοιχείου
+                            const position = row.cells.findIndex(c => c && c.id === id);
+                            uniqueComponents.push({
+                                ...componentWithoutId,
+                                position: position
+                            });
+                            processedIds.add(id);
+                        }
+                    });
+                    
+                    return {
+                        name: row.name,
+                        components: uniqueComponents
+                    };
+                });
+                
+                return JSON.stringify({
+                    panelName: "Ηλεκτρολογικός Πίνακας",
+                    createdAt: new Date().toISOString(),
+                    rows: exportData
+                }, null, 2);
+            }
+            
+            // Εισαγωγή από JSON
+            function importFromJson(jsonData) {
+                try {
+                    const data = JSON.parse(jsonData);
+                    
+                    if (!data.rows || !Array.isArray(data.rows)) {
+                        throw new Error("Μη έγκυρη μορφή JSON");
+                    }
+                    
+                    // Επαναφορά μετρητή σειρών
+                    rowCounter = 1;
+                    
+                    // Δημιουργία νέων δεδομένων πίνακα
+                    panelData = data.rows.map(row => {
+                        const columns = parseInt(columnsInput.value);
+                        const rowId = 'row_' + Date.now() + Math.random().toString(36).substr(2, 9);
+                        const cells = Array(columns).fill(null);
+                        
+                        // Προσθήκη στοιχείων
+                        row.components.forEach(component => {
+                            const componentId = 'comp_' + Date.now() + Math.random().toString(36).substr(2, 9);
+                            const position = component.position || 0;
+                            
+                            // Προσθήκη στοιχείου στα κελιά
+                            for (let i = 0; i < component.size; i++) {
+                                if (position + i < columns) {
+                                    cells[position + i] = {
+                                        ...component,
+                                        id: componentId
+                                    };
+                                }
+                            }
+                        });
+                        
+                        rowCounter++;
+                        
+                        return {
+                            id: rowId,
+                            name: row.name || `Σειρά ${rowCounter - 1}`,
+                            cells: cells
+                        };
+                    });
+                    
+                    renderPanel();
+                    alert("Επιτυχής εισαγωγή δεδομένων!");
+                } catch (error) {
+                    alert("Σφάλμα κατά την εισαγωγή: " + error.message);
+                }
+            }
+            
+            // Event listeners για εξαγωγή
+            exportTextBtn.addEventListener('click', function() {
+                exportArea.value = updateMonogrammic();
+            });
+            
+            exportJsonBtn.addEventListener('click', function() {
+                exportArea.value = exportToJson();
+            });
+            
+            // Αντιγραφή στο πρόχειρο
+            copyBtn.addEventListener('click', function() {
+                exportArea.select();
+                document.execCommand('copy');
+                alert("Το περιεχόμενο αντιγράφηκε στο πρόχειρο!");
+            });
+            
+            // Λήψη αρχείου
+            downloadBtn.addEventListener('click', function() {
+                const content = exportArea.value;
+                if (!content) {
+                    alert("Δεν υπάρχει περιεχόμενο για λήψη!");
+                    return;
+                }
+                
+                const isJson = content.trim().startsWith('{');
+                const filename = isJson ? 'panel_data.json' : 'monogrammic.txt';
+                const type = isJson ? 'application/json' : 'text/plain';
+                
+                const blob = new Blob([content], { type: type });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            // Εισαγωγή από αρχείο
+            importBtn.addEventListener('click', function() {
+                fileImport.click();
+            });
+            
+            fileImport.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    importFromJson(e.target.result);
+                };
+                reader.readAsText(file);
+                
+                // Καθαρισμός για να επιτρέπει την επιλογή του ίδιου αρχείου ξανά
+                fileImport.value = '';
+            });
+            
+            // Αρχική δημιουργία πίνακα με μία σειρά
+            addRow();
+        });
+    </script>
+</body>
+</html>
