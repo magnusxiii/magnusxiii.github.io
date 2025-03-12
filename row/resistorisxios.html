@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογισμός Αντίστασης Ρελέ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to right, #1e1e1e, #2c3e50);
+            color: white;
+        }
+        input {
+            margin: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            text-align: center;
+        }
+        button {
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #result, #fuseResult {
+            margin-top: 20px;
+            font-weight: bold;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            display: inline-block;
+        }
+        h2 {
+            text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <h2>Υπολογισμός Αντίστασης για Ρελέ Ισχύος</h2>
+    <label>Τάση λειτουργίας πηνίου (V AC):</label>
+    <input type="number" id="coilVoltage" placeholder="π.χ. 24" step="0.1"><br>
+    <label>Τάση εξόδου προς πηνίο ρελέ ισχύος (V AC):</label>
+    <input type="number" id="supplyVoltage" placeholder="π.χ. 30" step="0.1"><br>
+    <button onclick="calculateResistance()">Υπολόγισε</button>
+    <div id="result"></div>
+
+    <h2>Υπολογισμός Ασφάλειας Μετασχηματιστή</h2>
+    <label>Ισχύς Μετασχηματιστή (VA):</label>
+    <input type="number" id="transformerPower" placeholder="π.χ. 30" step="1"><br>
+    <button onclick="calculateFuse()">Υπολόγισε Ασφάλεια</button>
+    <div id="fuseResult"></div>
+
+    <script>
+        function calculateResistance() {
+            let coilVoltage = parseFloat(document.getElementById('coilVoltage').value);
+            let supplyVoltage = parseFloat(document.getElementById('supplyVoltage').value);
+            let relayCurrent = 0.1875; // Σταθερό ρεύμα λειτουργίας (A)
+
+            if (isNaN(coilVoltage) || isNaN(supplyVoltage) || supplyVoltage <= coilVoltage) {
+                document.getElementById('result').innerHTML = "Δώσε σωστές τιμές (η τάση τροφοδοσίας πρέπει να είναι μεγαλύτερη από την τάση πηνίου).";
+                return;
+            }
+
+            let voltageDrop = supplyVoltage - coilVoltage; // Πτώση τάσης πάνω στην αντίσταση
+            let resistance = voltageDrop / relayCurrent; // Νόμος του Ohm: R = V/I
+            let powerDissipation = voltageDrop * relayCurrent; // P = V * I
+
+            document.getElementById('result').innerHTML = 
+                `<b>Υπολογισμοί:</b><br>` +
+                `Πτώση τάσης στην αντίσταση: <b>V<sub>R</sub> = V<sub>supply</sub> - V<sub>coil</sub> = ${voltageDrop.toFixed(2)}V</b><br>` +
+                `Απαιτούμενη Αντίσταση: <b>R = V<sub>R</sub> / I = ${resistance.toFixed(2)}Ω</b><br>` +
+                `Ισχύς που θα διαχειρίζεται: <b>P = V<sub>R</sub> × I = ${powerDissipation.toFixed(2)}W</b><br>` +
+                `Συνιστώμενη ισχύς αντίστασης σε σειρά εξόδου: <b>${(powerDissipation * 2).toFixed(2)}W (για ασφάλεια)</b><br><br>` +
+                `<b>Επιλέγουμε μεγαλύτερη αντίσταση σε Watt για να αποφύγουμε τις μεγάλες θερμοκρασίες.</b>`;
+        }
+
+        function calculateFuse() {
+            let transformerPower = parseFloat(document.getElementById('transformerPower').value);
+            let primaryVoltage = 230; // Σταθερή τάση πρωτεύοντος
+
+            if (isNaN(transformerPower) || transformerPower <= 0) {
+                document.getElementById('fuseResult').innerHTML = "Δώσε σωστή τιμή ισχύος μετασχηματιστή.";
+                return;
+            }
+
+            let primaryCurrent = transformerPower / primaryVoltage; // I = P / V
+            let recommendedFuse = (primaryCurrent * 1.5).toFixed(2); // Ασφάλεια 1.5x το ρεύμα
+
+            document.getElementById('fuseResult').innerHTML = 
+                `<b>Υπολογισμοί Ασφάλειας:</b><br>` +
+                `Ρεύμα πρωτεύοντος: <b>I = P / V = ${primaryCurrent.toFixed(2)}A</b><br>` +
+                `Συνιστώμενη ασφάλεια: <b>${recommendedFuse}A (ταχείας τήξης)</b>`;
+        }
+    </script>
+</body>
+</html>
