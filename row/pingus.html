@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Δημιουργία BAT Αρχείου</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121826;
+            color: #ffffff;
+            margin: 50px;
+        }
+        input, button {
+            font-size: 16px;
+            margin: 10px;
+            padding: 10px;
+            background-color: #1f2937;
+            color: #fff;
+            border: 1px solid #3b82f6;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3b82f6;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+        #codePreview {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #1f2937;
+            border: 1px solid #3b82f6;
+            text-align: left;
+            white-space: pre-wrap;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Δημιουργία .BAT Αρχείου για Ping</h2>
+    <label for="minutes">Δώσε διάρκεια σε λεπτά:</label>
+    <input type="number" id="minutes" min="1" value="1">
+    <button onclick="generateBatFile()">Λήψη BAT</button>
+    <button onclick="previewBatFile()">Προεπισκόπηση Κώδικα</button>
+    
+    <input type="checkbox" id="copyResult" />
+    <label for="copyResult">Αντιγραφή αποτελέσματος</label>
+    
+    <div class="button-container">
+        <button onclick="generatePresetBat(30)">30 λεπτά</button>
+        <button onclick="generatePresetBat(60)">1 ώρα</button>
+        <button onclick="generatePresetBat(120)">2 ώρες</button>
+        <button onclick="generatePresetBat(240)">4 ώρες</button>
+        <button onclick="generatePresetBat(1440)">24 ώρες</button>
+        <button onclick="generatePresetBat(1440000)">1000 μέρες</button>
+    </div>
+    
+    <pre id="codePreview"></pre>
+    
+    <script>
+        function generateBatFile() {
+            let minutes = document.getElementById('minutes').value;
+            createAndDownloadBat(minutes);
+        }
+        
+        function generatePresetBat(minutes) {
+            createAndDownloadBat(minutes);
+        }
+        
+        function createAndDownloadBat(minutes) {
+            let batCode = generateBatContent(minutes);
+            let blob = new Blob([batCode], { type: 'text/plain' });
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `ping_${minutes}min.bat`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function previewBatFile() {
+            let minutes = document.getElementById('minutes').value;
+            let batCode = generateBatContent(minutes);
+            let preview = document.getElementById('codePreview');
+            preview.textContent = batCode;
+            preview.style.display = 'block';
+
+            // Αντιγραφή αποτελέσματος
+            let copyCheckbox = document.getElementById('copyResult');
+            if (copyCheckbox.checked) {
+                navigator.clipboard.writeText(batCode).then(function() {
+                    console.log('Αποτέλεσμα αντιγραφεί');
+                }, function(err) {
+                    console.error('Αδυναμία αντιγραφής: ', err);
+                });
+            }
+        }
+        
+        function generateBatContent(minutes) {
+            let seconds = minutes * 60;
+
+            return `@echo off\nchcp 65001 > nul\nsetlocal enabledelayedexpansion\n\n:: Ζητάμε από τον χρήστη να εισάγει την IP διεύθυνση\nset /p target_ip=Παρακαλώ εισάγετε την IP διεύθυνση της συσκευής: \n\n:: Δημιουργία ονόματος αρχείου με βάση την IP\nset output_file=%target_ip%.txt\n\n:: Εκτέλεση του ping για ${seconds} δευτερόλεπτα\necho Εκτέλεση ping στην IP %target_ip% για ${seconds} δευτερόλεπτα...\necho.\n\n:: Αρχικοποίηση μετρητών\nset sent=0\nset received=0\nset lost=0\nset total_ms=0\n\n:: Αποθήκευση της τρέχουσας ημερομηνίας και ώρας\nfor /f \"tokens=2-4 delims=/ \" %%a in ('date /t') do (\n set current_date=%%a/%%b/%%c\n)\nfor /f \"tokens=1-2 delims=: \" %%a in ('time /t') do (\n set current_time=%%a:%%b\n)\n\n:: Καθαρισμός ARP cache και προετοιμασία για εύρεση MAC\nping -n 1 %target_ip% > nul\n\n:: Εκτέλεση ping για ${seconds} δευτερόλεπτα\nfor /L %%i in (1,1,${seconds}) do (\n set /a sent+=1\n ping -n 1 -w 1000 %target_ip% > ping_temp.txt\n \n findstr /C:\"Reply from\" ping_temp.txt > nul\n if !errorlevel! equ 0 (\n set /a received+=1\n for /f \"tokens=4 delims==\" %%t in ('findstr /C:\"time\" ping_temp.txt') do (\n set ms_str=%%t\n set ms_str=!ms_str:~1!\n set ms_str=!ms_str:ms=!\n set ms_str=!ms_str: =!\n set \"num=!ms_str!\"\n set \"invalid=\"\n for /f \"delims=0123456789.\" %%a in (\"!num!\") do set \"invalid=%%a\"\n if \"!invalid!\"==\"\" (\n if not \"!ms_str!\"==\"\" (\n set /a total_ms+=!ms_str!\n )\n )\n )\n ) else (\n set /a lost+=1\n )\n timeout /t 1 > nul\n)\n\n:: Υπολογισμός του μέσου όρου ms\nset avg_ms=0\nif !received! GTR 0 (\n set /a avg_ms=total_ms/received\n)\n\n:: Εύρεση MAC διεύθυνσης\nset mac_address=Δεν βρέθηκε\n\n:: Προσπάθεια εύρεσης MAC μέσω ARP\nping -n 1 %target_ip% > nul\nfor /f \"skip=3 tokens=1-3\" %%a in ('arp -a %target_ip%') do (\n if \"%%a\"==\"%target_ip%\" (\n set mac_address=%%b\n )\n)\n\n:: Καθαρισμός του mac_address αν είναι "dynamic"\nif \"!mac_address!\"==\"dynamic\" (\n set mac_address=Δεν βρέθηκε\n)\n\n:: Δημιουργία του αρχείου εξόδου\necho Ημερομηνία: %current_date% %current_time% > %output_file%\necho Αποτελέσματα ping για την IP: %target_ip% >> %output_file%\necho Πακέτα που στάλθηκαν: %sent% >> %output_file%\necho Πακέτα που ελήφθησαν επιτυχώς: %received% >> %output_file%\necho Πακέτα που χάθηκαν: %lost% >> %output_file%\necho Μέσος όρος χρόνου απόκρισης: %avg_ms% ms >> %output_file%\necho MAC διεύθυνση: %mac_address% >> %output_file%\n\n:: Καθαρισμός προσωρινών αρχείων\ndel ping_temp.txt > nul 2>&1\n\necho.\necho Η διαδικασία ολοκληρώθηκε! Τα αποτελέσματα αποθηκεύτηκαν στο αρχείο %output_file%\necho.\n\nendlocal\npause`;
+        }
+    </script>
+</body>
+</html>
