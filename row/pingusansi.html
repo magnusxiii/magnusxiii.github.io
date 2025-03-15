@@ -72,7 +72,7 @@
         
         function createAndDownloadBat(minutes) {
             let batCode = generateBatContent(minutes);
-            let blob = new Blob([new TextEncoder("windows-1252").encode(batCode)], { type: 'text/plain' });
+            let blob = new Blob([new TextEncoder("iso-8859-7").encode(batCode)], { type: 'text/plain' });
             let a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = `ping_${minutes}min.bat`;
