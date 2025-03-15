@@ -102,7 +102,129 @@
         function generateBatContent(minutes) {
             let seconds = minutes * 60;
  
-            return `@echo off\nCHCP 737 > nul\nsetlocal enabledelayedexpansion\n\n:: Ζητάμε από τον χρήστη να εισάγει την IP διεύθυνση\nset /p target_ip=Παρακαλώ εισάγετε την IP διεύθυνση της συσκευής: \n\n:: Δημιουργία ονόματος αρχείου με βάση την IP\nset output_file=%target_ip%.txt\n\n:: Εκτέλεση του ping για ${seconds} δευτερόλεπτα\necho Εκτέλεση ping στην IP %target_ip% για ${seconds} δευτερόλεπτα...\necho.\n\n:: Αρχικοποίηση μετρητών\nset sent=0\nset received=0\nset lost=0\nset total_ms=0\n\n:: Αποθήκευση της τρέχουσας ημερομηνίας και ώρας\nfor /f \"tokens=2-4 delims=/ \" %%a in ('date /t') do (\n set current_date=%%a/%%b/%%c\n)\nfor /f \"tokens=1-2 delims=: \" %%a in ('time /t') do (\n set current_time=%%a:%%b\n)\n\n:: Καθαρισμός ARP cache και προετοιμασία για εύρεση MAC\nping -n 1 %target_ip% > nul\n\n:: Εκτέλεση ping για ${seconds} δευτερόλεπτα\nfor /L %%i in (1,1,${seconds}) do (\n set /a sent+=1\n ping -n 1 -w 1000 %target_ip% > ping_temp.txt\n \n findstr /C:\"Reply from\" ping_temp.txt > nul\n if !errorlevel! equ 0 (\n set /a received+=1\n for /f \"tokens=4 delims==\" %%t in ('findstr /C:\"time\" ping_temp.txt') do (\n set ms_str=%%t\n set ms_str=!ms_str:~1!\n set ms_str=!ms_str:ms=!\n set ms_str=!ms_str: =!\n set \"num=!ms_str!\"\n set \"invalid=\"\n for /f \"delims=0123456789.\" %%a in (\"!num!\") do set \"invalid=%%a\"\n if \"!invalid!\"==\"\" (\n if not \"!ms_str!\"==\"\" (\n set /a total_ms+=!ms_str!\n )\n )\n )\n ) else (\n set /a lost+=1\n )\n timeout /t 1 > nul\n)\n\n:: Υπολογισμός του μέσου όρου ms\nset avg_ms=0\nif !received! GTR 0 (\n set /a avg_ms=total_ms/received\n)\n\n:: Εύρεση MAC διεύθυνσης\nset mac_address=Δεν βρέθηκε\n\n:: Προσπάθεια εύρεσης MAC μέσω ARP\nping -n 1 %target_ip% > nul\nfor /f \"skip=3 tokens=1-3\" %%a in ('arp -a %target_ip%') do (\n if \"%%a\"==\"%target_ip%\" (\n set mac_address=%%b\n )\n)\n\n:: Καθαρισμός του mac_address αν είναι "dynamic"\nif \"!mac_address!\"==\"dynamic\" (\n set mac_address=Δεν βρέθηκε\n)\n\n:: Δημιουργία του αρχείου εξόδου\necho Ημερομηνία: %current_date% %current_time% > %output_file%\necho Αποτελέσματα ping για την IP: %target_ip% >> %output_file%\necho Πακέτα που στάλθηκαν: %sent% >> %output_file%\necho Πακέτα που ελήφθησαν επιτυχώς: %received% >> %output_file%\necho Πακέτα που χάθηκαν: %lost% >> %output_file%\necho Μέσος όρος χρόνου απόκρισης: %avg_ms% ms >> %output_file%\necho MAC διεύθυνση: %mac_address% >> %output_file%\n\n:: Καθαρισμός προσωρινών αρχείων\ndel ping_temp.txt > nul 2>&1\n\necho.\necho Η διαδικασία ολοκληρώθηκε! Τα αποτελέσματα αποθηκεύτηκαν στο αρχείο %output_file%\necho.\n\nendlocal\npause`;
+            return ` @echo off\n
+ CHCP 1253 > nul\n
+ setlocal enabledelayedexpansion\n
+ echo RBS Ip scammer :D\n:input_ip\n
+:: Ζητάμε από τον χρήστη να εισάγει την IP διεύθυνση\n
+set /p target_ip= Please enter the device's IP address: \n
+\n
+:: Έλεγχος εγκυρότητας IP\n
+for /f "tokens=1-4 delims=." %%a in ("%target_ip%") do (\n
+    set /a "octet1=%%a+0, octet2=%%b+0, octet3=%%c+0, octet4=%%d+0" 2>nul\n
+)\n
+if "%octet1%"=="" goto invalid_ip\n
+if "%octet2%"=="" goto invalid_ip\n
+if "%octet3%"=="" goto invalid_ip\n
+if "%octet4%"=="" goto invalid_ip\n
+\n
+if %octet1% lss 0 goto invalid_ip\n
+if %octet1% gtr 255 goto invalid_ip\n
+if %octet2% lss 0 goto invalid_ip\n
+if %octet2% gtr 255 goto invalid_ip\n
+if %octet3% lss 0 goto invalid_ip\n
+if %octet3% gtr 255 goto invalid_ip\n
+if %octet4% lss 0 goto invalid_ip\n
+if %octet4% gtr 255 goto invalid_ip\n
+\n
+goto valid_ip\n
+\n
+:invalid_ip\n
+echo Η διεύθυνση IP που εισάγατε δεν είναι έγκυρη. Παρακαλώ δοκιμάστε ξανά.\n
+goto input_ip\n
+\n
+:valid_ip\n
+:: Δημιουργία ονόματος αρχείου με βάση την IP\n
+set output_file=%target_ip%.txt\n
+\n
+:: Εκτέλεση του ping για 60 δευτερόλεπτα\n
+echo  Ping task IP %target_ip% for  60 seconds...\n
+echo.\n
+\n
+:: Αρχικοποίηση μετρητών\n
+set sent=0\n
+set received=0\n
+set lost=0\n
+set total_ms=0\n
+\n
+:: Αποθήκευση της τρέχουσας ημερομηνίας και ώρας\n
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (\n
+ set current_date=%%a/%%b/%%c\n
+)\n
+for /f "tokens=1-2 delims=: " %%a in ('time /t') do (\n
+ set current_time=%%a:%%b\n
+)\n
+\n
+:: Καθαρισμός ARP cache και προετοιμασία για εύρεση MAC\n
+ping -n 1 %target_ip% > nul\n
+\n
+:: Εκτέλεση ping για 60 δευτερόλεπτα\n
+for /L %%i in (1,1,60) do (\n
+ set /a sent+=1\n
+ ping -n 1 -w 1000 %target_ip% > ping_temp.txt\n
+ \n
+ findstr /C:"Reply from" ping_temp.txt > nul\n
+ if !errorlevel! equ 0 (\n
+ set /a received+=1\n
+ for /f "tokens=4 delims==" %%t in ('findstr /C:"time" ping_temp.txt') do (\n
+ set ms_str=%%t\n
+ set ms_str=!ms_str:~1!\n
+ set ms_str=!ms_str:ms=!\n
+ set ms_str=!ms_str: =!\n
+ set "num=!ms_str!"\n
+ set "invalid="\n
+ for /f "delims=0123456789." %%a in ("!num!") do set "invalid=%%a"\n
+ if "!invalid!"=="" (\n
+ if not "!ms_str!"=="" (\n
+ set /a total_ms+=!ms_str!\n
+ )\n
+ )\n
+ )\n
+ ) else (\n
+ set /a lost+=1\n
+ )\n
+ timeout /t 1 > nul\n
+)\n
+\n
+:: Υπολογισμός του μέσου όρου ms\n
+set avg_ms=0\n
+if !received! GTR 0 (\n
+ set /a avg_ms=total_ms/received\n
+)\n
+\n
+:: Εύρεση MAC διεύθυνσης\n
+set mac_address=Δεν βρέθηκε\n
+\n
+:: Προσπάθεια εύρεσης MAC μέσω ARP\n
+ping -n 1 %target_ip% > nul\n
+for /f "skip=3 tokens=1-3" %%a in ('arp -a %target_ip%') do (\n
+ if "%%a"=="%target_ip%" (\n
+ set mac_address=%%b\n
+ )\n
+)\n
+\n
+:: Καθαρισμός του mac_address αν είναι "dynamic"\n
+if "!mac_address!"=="dynamic" (\n
+ set mac_address=Δεν βρέθηκε\n
+)\n
+\n
+:: Δημιουργία του αρχείου εξόδου\n
+echo Ημερομηνία: %current_date% %current_time% > %output_file%\n
+echo Αποτελέσματα ping για την IP: %target_ip% >> %output_file%\n
+echo Πακέτα που στάλθηκαν: %sent% >> %output_file%\n
+echo Πακέτα που ελήφθησαν επιτυχώς: %received% >> %output_file%\n
+echo Πακέτα που χάθηκαν: %lost% >> %output_file%\n
+echo Μέσος όρος χρόνου απόκρισης: %avg_ms% ms >> %output_file%\n
+echo MAC διεύθυνση: %mac_address% >> %output_file%\n
+\n
+:: Καθαρισμός προσωρινών αρχείων\n
+del ping_temp.txt > nul 2>&1\n
+\n
+echo.\n
+echo The process has completed. The results have been saved to the file %output_file%\n
+\necho.\n
+\n
+\n:: Αυτόματη άνοιξη του αρχείου εξόδου\nstart %output_file%\nendlocal\npause`;
         }
     </script>
 </body>
