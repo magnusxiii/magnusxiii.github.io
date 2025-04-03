@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wikipedia Style Menu</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+      color: #202122;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+      margin: 0;
+      padding-top: 5vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 20px;
+      border: 1px solid #a2a9b1;
+      border-radius: 4px;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    label {
+      font-size: 16px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+      color: #0645ad;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      background-color: #ffffff;
+      color: #202122;
+      border: 1px solid #a2a9b1;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .details-container {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #a2a9b1;
+      background-color: #eef2f6;
+      display: none;
+      text-align: left;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #a2a9b1;
+    }
+
+    th {
+      background-color: #c8ccd1;
+      color: #202122;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <label for="teardown"><h3>ΚΩΔΙΚΟΙ ΔΙΑΒΙΒΑΖΟΜΕΝΩΝ ΠΑΡΑΣΤΑΤΙΚΩΝ ΜΕ ΠΟΣΑ</h3></label>
+    <select id="teardown" onchange="showDetails()">
+    <option value="">Επιλέξτε...</option>
+      <option value="1">Λιανική πώληση εμπορευμάτων</option>
+      <option value="2">Πιστωτικά λιανικής πώλησης εμπορευμάτων</option>
+      <option value="3">Λιανική πώληση προϊόντων</option>
+      <option value="4">Πιστωτικά λιανικής πώλησης προϊόντων</option>
+      <option value="5">Λιανική παροχή υπηρεσιών</option>
+      <option value="6">Πιστωτικά λιανικής παροχής υπηρεσιών</option>
+      <option value="7">Λιανική πώληση και πίστωτικά με κωδικούς 233,235</option>
+      <option value="8">Τιμολόγια πώλησης εμπορευμάτων</option>
+      <option value="9">Πιστωτικά Τιμολόγια πώλησης εμπορευμάτων</option>
+      <option value="10">Τιμολόγια πώλησης προϊόντων</option>
+      <option value="11">Πιστωτικά τιμολόγια πώλησης προϊόντων</option>
+      <option value="12">Τιμολόγια παροχής υπηρεσιών</option>
+      <option value="13">Πιστωτικά τιμολόγια παροχής υπηρεσιών</option>
+      <option value="14">Λοιπά Τιμολόγια</option>
+      <option value="15">Τιμολόγια αγοράς και Εκκαθαρίσεις</option>
+      <option value="16">Λοιπά παραστατικά με ποσά</option>
+    </select>
+
+    <div id="details" class="details-container"></div>
+  </div>
+
+  <script>
+    const descriptions = {
+     1: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">173</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΛΙΑΝΙΚΗΣ ΠΩΛΗΣΗΣ ΕΜΠΟΡΕΥΜΑΤΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light"><td valign="middle">176</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΕΙΣΠΡΑΞΗΣ ΣΥΝΔΡΟΜΩΝ ΕΦΗΜΕΡΙΔΩΝ ΚΑΙ ΠΕΡΙΟΔΙΚΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" ev_light"><td valign="middle">190</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΩΛΗΣΗΣ ΑΕΡΟΠΟΡΙΚΩΝ ΕΙΣΙΤΗΡΙΩΝ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">231</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΛΙΑΝΙΚΗΣ ΠΩΛΗΣΗΣ-ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">253</td><td valign="middle">ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ- ΑΠΟΔΕΙΞΗ ΛΙΑΝΙΚΗΣ ΠΩΛΗΣΗΣ-ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">258</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΩΛΗΣΗΣ ΕΙΣΙΤΗΡΙΩΝ - ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">39</td><td valign="middle">ΣΥΝΟΛΑ ΦΟΡΟΛΟΓΙΚΗΣ ΜΝΗΜΗΣ ΣΕ ΠΕΡΙΠΤΩΣΗ ΚΑΤΑΣΤΡΟΦΗΣ ΑΡΧΕΙΟΥ S.TXT</td><td valign="middle" title="A.1173/2022">A.1173/2022</td></tr><tr class="odd_light "><td valign="middle">&nbsp;</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΕΣΟΔΟΥ ΑΠΟ ΤΑΜΕΙΑΚΗ ΜΗΧΑΝΗ Ή ΑΔΗΜΕ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr></tbody>
+        </table>
+      `,
+       2: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light rowselected"><td valign="middle">175</td><td valign="middle" class=" cellselected">ΠΙΣΤΩΤΙΚΗ ΑΠΟΔΕΙΞΗ ΛΙΑΝΙΚΗΣ ΠΩΛΗΣΗΣ ΕΜΠΟΡΕΥΜΑΤΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light "><td valign="middle">215</td><td valign="middle" title="ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ" class=" ">ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ</td><td valign="middle" title="ΠΟΛ 1220/2012, ΠΟΛ 1195/2018">ΠΟΛ 1220/2012, ΠΟΛ 1195/2018</td></tr></tbody>
+        </table>
+      `,
+        3: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">172</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΛΙΑΝΙΚΗΣ ΠΩΛΗΣΗΣ ΠΡΟΪΟΝΤΩΝ</td><td valign="middle">A.1173/2022</td></tr></tbody>
+        </table>
+      `,
+        4: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">351</td><td valign="middle">ΠΙΣΤΩΤΙΚΗ ΑΠΟΔΕΙΞΗ ΛΙΑΝΙΚΗΣ ΠΩΛΗΣΗΣ ΠΡΟΪΟΝΤΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light"><td valign="middle">215</td><td valign="middle">ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ</td><td valign="middle">ΠΟΛ 1220/2012, ΠΟΛ 1195/2018</td></tr></tbody>
+        </table>
+      `,
+        5: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">54</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΑΣΦΑΛΙΣΤΡΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" odd_light"><td valign="middle">137</td><td valign="middle">ΕΙΣΙΤΗΡΙΟ ΚΕΝΤΡΩΝ ΔΙΑΣΚΕΔΑΣΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" ev_light"><td valign="middle">138</td><td valign="middle">ΕΙΣΙΤΗΡΙΟ ΘΕΑΜΑΤΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">139</td><td valign="middle">ΕΙΣΙΤΗΡΙΟ ΣΥΓΚΟΙΝΩΝΙΑΚΩΝ ΜΕΣΩΝ ΕΚΤΟΣ ΠΛΟΙΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">145</td><td valign="middle">ΕΙΣΙΤΗΡΙΟ ΠΛΟΙΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">147</td><td valign="middle">ΕΙΣΙΤΗΡΙΟ ΥΔΡΟΘΕΡΑΠΕΙΑΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">174</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">183</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΜΕΤΑΦΟΡΑΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">217</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΒΙΒΛΙΟ ΣΤΑΘΜΕΥΣΗΣ ΟΧΗΜΑΤΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">218</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΒΙΒΛΙΟ ΣΤΑΘΜΕΥΣΗΣ ΣΚΑΦΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">232</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">239</td><td valign="middle">ΕΙΣΙΤΗΡΙΟ - ΑΠΟΔΕΙΞΗ ΜΕΤΑΦΟΡΑΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">242</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΒΙΒΛΙΟ ΕΙΣΕΡΧΟΜΕΝΩΝ (ΓΙΑ ΠΛΥΝΤΗΡΙΑ)</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">246</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΚΑΙ ΗΜΕΡΟΛΟΓΙΟ ΜΕΤΑΦΟΡΑΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">247</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΜΗΤΡΩΟ ΜΑΘΗΤΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">252</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΜΙΣΘΩΤΗΡΙΟ ΣΥΜΒΟΛΑΙΟ ΑΥΤΟΚΙΝΗΤΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">254</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΒΙΒΛΙΟ ΕΠΙΣΚΕΨΗΣ ΑΣΘΕΝΩΝ (Διαγνωστικά)</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">259</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΒΙΒΛΙΟ ΕΠΙΣΚΕΨΗΣ ΑΣΘΕΝΩΝ (γιατροί, οδοντίατροι)</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">268</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΛΑΒΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">279</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΛΑΒΗΣ -  ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">301</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΛΑΒΗΣ ΕΚΜΙΣΘ.DVD</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">302</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΔΟΣΗΣ ΕΚΜΙΣΘ.DVD</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">306</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ - ΔΕΛ.ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΛΑΒΗΣ ΕΚΜΙΣΘ.DVD</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">307</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ - ΔΕΛ.ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΔΟΣΗΣ ΕΚΜΙΣΘ.DVD</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">308</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΒΙΒΛΙΟ ΕΙΣΕΡΧΟΜΕΝΩΝ - ΒΙΒΛΙΟ ΣΤΑΘΜΕΥΣΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">313</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΒΙΒΛΙΟ ΠΕΛΑΤΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">328</td><td valign="middle">ΕΙΣΙΤΗΡΙΟ ΕΚΔΗΛΩΣΕΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr></tbody>
+        </table>
+      `,
+        6: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">353</td><td valign="middle">ΠΙΣΤΩΤΙΚΗ ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light"><td valign="middle">56</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΕΠΙΣΤΡΟΦΗΣ ΑΣΦΑΛΙΣΤΡΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" ev_light"><td valign="middle">182</td><td valign="middle">ΔΙΟΡΘΩΤΙΚΟ ΣΗΜΕΙΩΜΑ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">215</td><td valign="middle">ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ</td><td valign="middle">ΠΟΛ 1220/2012, ΠΟΛ 1195/2018</td></tr></tbody>
+        </table>
+      `,
+        7: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr><br>
+            <h3>Η χρήση τους συνεπάγεται ότι το άθροισμα λιανικής υπολογίζεται κατά ημερομηνία (και όχι κατά Ζ) (Α.1171/2021). Σε περίπτωση μη έγκαιρης διαβίβασης (π.χ. λόγω βλάβης internet), τα ποσά δεν αθροίζονται, σε αντιδιαστολή με όλους τους άλλους κωδικούς όπου τα ποσά αθροίζονται όταν διαβιβαστεί το Ζ.
+ </h3>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">233</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΑΠΟΔΕΙΞΗ ΛΙΑΝΙΚΗΣ ΠΩΛΗΣΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" odd_light"><td valign="middle">235</td><td valign="middle" title="ΑΠΟΔΕΙΞΗ ΕΠΙΣΤΡΟΦΗΣ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΑΠΟΔΕΙΞΗ ΕΠΙΣΤΡΟΦΗΣ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class=" ev_light"><td valign="middle" title="215">215</td><td valign="middle" title="ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ ΠΟΥ ΑΚΥΡΩΝΕΙ ΠΑΡΑΣΤΑΤΙΚΑ ΚΩΔΙΚΟΎ 233 Ή 235">ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ ΠΟΥ ΑΚΥΡΩΝΕΙ ΠΑΡΑΣΤΑΤΙΚΑ ΚΩΔΙΚΟΎ 233 Ή 235</td><td valign="middle" title="ΠΟΛ 1220/2012, ΠΟΛ 1195/2018">ΠΟΛ 1220/2012, ΠΟΛ 1195/2018</td></tr></tbody>
+        </table>
+      `,
+        8: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">165</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ</td><td valign="middle">A.1173/2022, ΠΟΛ 1195/2018</td></tr><tr class=" odd_light"><td valign="middle" title="167">167</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΕΜΠΟΡΕΥΜΑΤΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" ev_light"><td valign="middle" title="222">222</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΕΜΠΟΡΕΥΜΑΤΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΕΜΠΟΡΕΥΜΑΤΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="A.1173/2022">A.1173/2022</td></tr></tbody>
+        </table>
+      `,
+        9: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">169</td><td valign="middle">ΠΙΣΤΩΤΙΚΟ ΤΙΜΟΛΟΓΙΟ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light"><td valign="middle">354</td><td valign="middle">ΠΙΣΤΩΤΙΚΟ ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΕΜΠΟΡΕΥΜΑΤΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" ev_light"><td valign="middle">215</td><td valign="middle">ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ</td><td valign="middle">ΠΟΛ 1220/2012, ΠΟΛ 1195/2018</td></tr></tbody>
+        </table>
+      `,
+       10: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">166</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΠΡΟΙΟΝΤΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light"><td valign="middle">214</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΠΡΟΙΟΝΤΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">A.1173/2022</td></tr></tbody>
+        </table>
+      `,
+        11: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">350</td><td valign="middle">ΠΙΣΤΩΤΙΚΟ ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΠΡΟΪΟΝΤΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light"><td valign="middle">215</td><td valign="middle" title="ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ">ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ</td><td valign="middle">ΠΟΛ 1220/2012, ΠΟΛ 1195/2018</td></tr></tbody>
+        </table>
+      `,
+        12: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">162</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light"><td valign="middle">180</td><td valign="middle" title="ΦΟΡΤΩΤΙΚΗ">ΦΟΡΤΩΤΙΚΗ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" ev_light"><td valign="middle">223</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">237</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΦΟΡΤΩΤΙΚΗ">ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΦΟΡΤΩΤΙΚΗ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">240</td><td valign="middle" title="ΣΥΓΚΕΝΤΡΩΤΙΚΗ ΦΟΡΤΩΤΙΚΗ">ΣΥΓΚΕΝΤΡΩΤΙΚΗ ΦΟΡΤΩΤΙΚΗ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr></tbody>
+        </table>
+      `,
+        13: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">352</td><td valign="middle">ΠΙΣΤΩΤΙΚΟ ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ</td><td valign="middle">A.1173/2022</td></tr><tr class=" odd_light"><td valign="middle">215</td><td valign="middle" title="ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ">ΕΙΔΙΚΟ ΑΚΥΡΩΤΙΚΟ ΣΤΟΙΧΕΙΟ</td><td valign="middle" title="ΠΟΛ 1220/2012, ΠΟΛ 1195/2018">ΠΟΛ 1220/2012, ΠΟΛ 1195/2018</td></tr></tbody>
+        </table>
+      `,
+        14: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">161</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΑΓΑΘΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" odd_light"><td valign="middle">163</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΕΠΙΔΟΤ. ΑΠΟΖΗΜ. ΚΛΠ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" ev_light"><td valign="middle">221</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle" title="226">226</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΑΓΑΘΩΝ">ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΑΓΑΘΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">227</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΑΓΑΘΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ ΑΓΑΘΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">257</td><td valign="middle" title="ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΑΠΟΔΕΙΞΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΤΙΜΟΛΟΓΙΟ ΠΩΛΗΣΗΣ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">260</td><td valign="middle" title="ΒΙΒΛΙΟ ΕΡΓΩΝ - ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΒΙΒΛΙΟ ΕΡΓΩΝ - ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">267</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">229</td><td valign="middle" title="ΠΙΣΤΩΤΙΚΟ ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΛΑΒΗΣ">ΠΙΣΤΩΤΙΚΟ ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΛΑΒΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">236</td><td valign="middle" title="ΠΙΣΤΩΤΙΚΟ ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΠΙΣΤΩΤΙΚΟ ΤΙΜΟΛΟΓΙΟ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr></tbody>
+        </table>
+      `,
+        15: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">58</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΠΟ ΑΓΡΟΤΕΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" odd_light"><td valign="middle">60</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΠΟ ΙΔΙΩΤΕΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" ev_light"><td valign="middle">62</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΠΟ ΑΡΝΟΥΜΕΝΟΥΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">224</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΠΟ ΙΔΙΩΤΗ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">225</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΓΡΟΤΙΚΩΝ ΠΡΟΪΟΝΤΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΓΡΟΤΙΚΩΝ ΠΡΟΪΟΝΤΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">245</td><td valign="middle" title="ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΓΡΟΤΙΚΩΝ ΠΡΟΪΟΝΤΩΝ - ΕΚΚΑΘΑΡΙΣΗ">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΓΡΟΤΙΚΩΝ ΠΡΟΪΟΝΤΩΝ - ΕΚΚΑΘΑΡΙΣΗ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">270</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">272</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">295</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ - ΔΕΛΤΙΟ ΠΟΣΟΤΙΚΗΣ ΠΑΡΑΛΑΒΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">329</td><td valign="middle">ΤΙΜΟΛΟΓΙΟ ΑΓΟΡΑΣ ΑΓΡΟΤΙΚΩΝ ΠΡΟΪΟΝΤΩΝ - ΤΙΜΟΛΟΓΙΟ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">168</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">191</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ ΑΕΡΟΠΟΡΙΚΩΝ ΕΙΣΙΤΗΡΙΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">193</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ Εισιτήρια αστικών συγκοινωνιών</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">194</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ Εφημερίδων και περιοδικών</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">195</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ μεριδίων αμοιβαίων κεφαλαίων</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">197</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ καρτών στάθμευσης δημ.χωρ.</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">199</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ πώλησης ανθέων μέσω ΙΝΤΕΡΦΛΟΡΑ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">200</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ εισιτηρίων καλαθοσφαίρισης</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">209</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ ΚΤΕΛ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">210</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ ΙΜΕ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">211</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ ασφαλιστικών επιχειρήσεων</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">212</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ κοινοπραξιών πλοίων</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">213</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ λοιπές περιπτώσεις</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">228</td><td valign="middle">ΕΚΚΑΘΑΡΙΣΗ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr></tbody>
+        </table>
+      `,
+        16: `
+        <table>
+          <thead>
+            <tr>
+              <th>ΚΩΔΙΚΟΣ</th>
+              <th>ΕΙΔΟΣ ΠΑΡΑΣΤΑΤΙΚΟΥ </th>
+              <th>ΕΓΓΡΑΦΟ ΑΝΑΦΟΡΑΣ</th>
+            </tr>
+          </thead>
+          <tbody><tr style="height: auto;"><th style="height: 0px; width: 88px;"></th><th style="height: 0px; width: 373px;"></th><th style="height: 0px; width: 402px;"></th></tr><tr class=" ev_light"><td valign="middle">178</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΑΥΤΟΠΑΡΑΔΟΣΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class=" odd_light"><td valign="middle">179</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΔΑΠΑΝΗΣ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class=" ev_light"><td valign="middle">192</td><td valign="middle" title="ΑΠΟΔΕΙΞΗ ΠΑΡΑΔΟΘΕΝΤΩΝ ΕΙΣΙΤΗΡΙΩΝ">ΑΠΟΔΕΙΞΗ ΠΑΡΑΔΟΘΕΝΤΩΝ ΕΙΣΙΤΗΡΙΩΝ</td><td valign="middle" title="ΠΟΛ 1220/2012">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">196</td><td valign="middle" title="ΑΠΟΔΕΙΞΗ ΠΑΡΑΔΟΘΕΝΤΩΝ ΚΑΡΤΩΝ">ΑΠΟΔΕΙΞΗ ΠΑΡΑΔΟΘΕΝΤΩΝ ΚΑΡΤΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">234</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΕΠΑΓΓΕΛΜΑΤΙΚΗΣ ΔΑΠΑΝΗΣ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">251</td><td valign="middle">ΑΠΟΔΕΙΞΗ ΑΥΤΟΠΑΡΑΔΟΣΗΣ - ΔΕΛΤΙΟ ΑΠΟΣΤΟΛΗΣ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="ev_light "><td valign="middle">310</td><td valign="middle">ΠΑΡΑΔΟΣΗ ΚΤΙΣΜΑΤΩΝ</td><td valign="middle">ΠΟΛ 1220/2012</td></tr><tr class="odd_light "><td valign="middle">501</td><td valign="middle">ΔΕΛΤΙΟ ΙΣΟΖΥΓΙΟΥ ΗΜΕΡΑΣ</td><td valign="middle">ΠΟΛ 1195/2018</td></tr></tbody>
+        </table>
+      `
+    };
+
+    function showDetails() {
+      const selection = document.getElementById("teardown").value;
+      const detailsDiv = document.getElementById("details");
+
+      if (selection) {
+        detailsDiv.innerHTML = descriptions[selection] || "Δεν υπάρχουν διαθέσιμα στοιχεία.";
+        detailsDiv.style.display = "block";
+      } else {
+        detailsDiv.style.display = "none";
+      }
+    }
+  </script>
+</body>
+</html>
