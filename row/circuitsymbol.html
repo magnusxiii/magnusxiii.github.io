@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Σύμβολα Ηλεκτρονικών Κυκλωμάτων</title>
+  <style>
+    :root {
+      --bg-color: #f4f4f9;
+      --text-color: #333;
+      --table-bg: #fff;
+      --table-th: #3498db;
+      --table-th-text: #fff;
+      --table-hover: #f1f1f1;
+    }
+    body.dark-mode {
+      --bg-color: #1a1a1a;
+      --text-color: #e0e0e0;
+      --table-bg: #232323;
+      --table-th: #222e3c;
+      --table-th-text: #00bfff;
+      --table-hover: #2d2d2d;
+      --table-h1: #f2f2f2;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 20px;
+      color: var(--text-color);
+    }
+    h1 {
+      text-align: center;
+      color: #3498db;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px;
+      width: 90%;
+      max-width: 500px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--table-bg);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      vertical-align: top;
+    }
+    th {
+      background-color: var(--table-th);
+      color: var(--table-th-text);
+      font-size: 1em;
+    }
+    tr:hover {
+      background-color: var(--table-hover);
+    }
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #fff;
+        padding: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+      td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        font-size: 0.95em;
+      }
+      td::before {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+      td:nth-of-type(1)::before { content: "Σύμβολο"; }
+      td:nth-of-type(2)::before { content: "Περιγραφή"; }
+      td:nth-of-type(3)::before { content: "Συνδέσεις"; }
+    }
+  </style>
+  
+</head>
+
+<body>
+   <button id="darkModeToggle" style="float:right; margin: 10px 0 20px 0; padding:8px 18px; border-radius:8px; border:none; background:#3498db; color:#fff; cursor:pointer;">
+    🌙 Dark Mode
+  </button>
+  <script>
+    const toggle = document.getElementById('darkModeToggle');
+    if(localStorage.getItem('darkMode') === 'enabled') {
+      document.body.classList.add('dark-mode');
+      toggle.textContent = '☀️ Light Mode';
+    }
+    toggle.addEventListener('click', function() {
+      document.body.classList.toggle('dark-mode');
+      if(document.body.classList.contains('dark-mode')) {
+        toggle.textContent = '☀️ Light Mode';
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        toggle.textContent = '🌙 Dark Mode';
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    });
+      </script><br><br><br><br>
+    <h1>Σύμβολα Ηλεκτρονικών Κυκλωμάτων</h1>
+  <input type="text" id="searchInput" placeholder="Αναζήτηση...">
+  <table id="symbolTable">
+    <thead>
+      <tr>
+        <th>Σύμβολο</th>
+        <th>Περιγραφή</th>
+        <th>Συνδέσεις</th>
+      </tr>
+    </thead>
+    <tbody>
+     <tr><td>VCC</td><td>Κύρια θετική τάση τροφοδοσίας (συνήθως για λογικά κυκλώματα TTL/CMOS, τρανζίστορ NPN).</td><td>Συνδέεις την κύρια θετική τάση (π.χ. +3.3V, +5V, +12V).</td></tr>
+<tr><td>VSS</td><td>Συνήθως γείωση ή αρνητική τάση σε CMOS/ψηφιακά κυκλώματα (Source Voltage).</td><td>Συνδέεις GND ή αρνητική τάση, ανάλογα το κύκλωμα.</td></tr>
+<tr><td>VDD</td><td>Θετική τάση τροφοδοσίας για MOSFET/CMOS (Drain Voltage).</td><td>Συνδέεις κύρια τάση τροφοδοσίας (συχνά ίδια με VCC).</td></tr>
+<tr><td>V+</td><td>Θετική τάση τροφοδοσίας σε διπολικά κυκλώματα (π.χ. op-amp).</td><td>Συνδέεις θετική τάση (π.χ. +12V, +15V).</td></tr>
+<tr><td>V-</td><td>Αρνητική τάση τροφοδοσίας σε διπολικά κυκλώματα.</td><td>Συνδέεις αρνητική τάση (π.χ. -12V, -15V).</td></tr>
+<tr><td>VIN</td><td>Είσοδος τάσης (Input Voltage).</td><td>Συνδέεις την τάση εισόδου (π.χ. από τροφοδοτικό, μπαταρία).</td></tr>
+<tr><td>VOUT</td><td>Έξοδος τάσης (Output Voltage).</td><td>Εδώ παίρνεις την τάση εξόδου (π.χ. από ρυθμιστή τάσης, ενισχυτή).</td></tr>
+<tr><td>GND</td><td>Γείωση (Ground), σημείο αναφοράς.</td><td>Συνδέεις το κοινό σημείο επιστροφής ρεύματος, αρνητικό τροφοδοσίας.</td></tr>
+<tr><td>AGND</td><td>Αναλογική γείωση (Analog Ground).</td><td>Συνδέεις γείωση για αναλογικά σήματα, ξεχωριστή από ψηφιακή για αποφυγή θορύβου.</td></tr>
+<tr><td>DGND</td><td>Ψηφιακή γείωση (Digital Ground).</td><td>Συνδέεις γείωση για ψηφιακά κυκλώματα.</td></tr>
+<tr><td>PGND</td><td>Γείωση ισχύος (Power Ground).</td><td>Συνδέεις γείωση για κυκλώματα ισχύος (π.χ. MOSFETs, μετατροπείς DC/DC).</td></tr>
+<tr><td>EN</td><td>Ενεργοποίηση/Απενεργοποίηση κυκλώματος (Enable).</td><td>Συνδέεις ψηφιακό σήμα (0/1 ή LOW/HIGH) για ενεργοποίηση ή απενεργοποίηση.</td></tr>
+<tr><td>ENABL</td><td>Εναλλακτική ονομασία για Enable.</td><td>Συνδέεις ψηφιακό σήμα για ενεργοποίηση/απενεργοποίηση.</td></tr>
+<tr><td>ENABLE</td><td>Εναλλακτική ονομασία για Enable.</td><td>Συνδέεις ψηφιακό σήμα για ενεργοποίηση/απενεργοποίηση.</td></tr>
+<tr><td>CTRL</td><td>Έλεγχος λειτουργίας (Control).</td><td>Συνδέεις σήμα ελέγχου (αναλογικό ή ψηφιακό).</td></tr>
+<tr><td>CNTRL</td><td>Εναλλακτική ονομασία για Control.</td><td>Συνδέεις σήμα ελέγχου.</td></tr>
+<tr><td>DTC</td><td>Dead Time Control, ρύθμιση νεκρού χρόνου σε κυκλώματα PWM.</td><td>Συνδέεις αντίσταση/πυκνωτή για ρύθμιση dead time.</td></tr>
+<tr><td>SS</td><td>Soft Start, ομαλή εκκίνηση τροφοδοσίας.</td><td>Συνδέεις πυκνωτή για καθυστέρηση στην εκκίνηση.</td></tr>
+<tr><td>CT</td><td>Timing Capacitor, πυκνωτής χρονισμού.</td><td>Συνδέεις πυκνωτή για χρονισμό (σε ταλαντωτές, PWM, timers).</td></tr>
+<tr><td>SYNC</td><td>Συγχρονισμός (Synchronization).</td><td>Συνδέεις σήμα συγχρονισμού από άλλο κύκλωμα ή γεννήτρια.</td></tr>
+<tr><td>RESET</td><td>Επαναφορά (Reset), αρχικοποίηση κυκλώματος.</td><td>Συνδέεις σήμα reset (συνήθως μέσω κουμπιού ή κυκλώματος watchdog).</td></tr>
+<tr><td>FB</td><td>Feedback, ανατροφοδότηση.</td><td>Συνδέεις σήμα από έξοδο προς είσοδο ελέγχου (π.χ. σε ρυθμιστές τάσης, ενισχυτές).</td></tr>
+<tr><td>SENSE</td><td>Μέτρηση ρεύματος ή τάσης (Sense).</td><td>Συνδέεις σημείο μέτρησης (π.χ. μετά από shunt resistor).</td></tr>
+<tr><td>SNS</td><td>Εναλλακτική ονομασία για Sense.</td><td>Συνδέεις σημείο μέτρησης.</td></tr>
+<tr><td>ISEN</td><td>Current Sense, μέτρηση ρεύματος.</td><td>Συνδέεις shunt resistor ή κύκλωμα μέτρησης ρεύματος.</td></tr>
+<tr><td>CS</td><td>Current Sense ή Chip Select (ανάλογα το κύκλωμα).</td><td>Συνδέεις shunt resistor για μέτρηση ρεύματος ή σήμα επιλογής chip σε SPI.</td></tr>
+<tr><td>SHUNT</td><td>Shunt Resistor, αντίσταση μέτρησης ρεύματος.</td><td>Συνδέεις χαμηλής τιμής αντίσταση σε σειρά με το φορτίο.</td></tr>
+<tr><td>PGOOD</td><td>Power Good, ένδειξη σωστής λειτουργίας τροφοδοσίας.</td><td>Συνδέεις LED, μικροελεγκτή ή κύκλωμα παρακολούθησης.</td></tr>
+<tr><td>FAULT</td><td>Ένδειξη σφάλματος.</td><td>Συνδέεις κύκλωμα ειδοποίησης ή μικροελεγκτή για ανίχνευση σφαλμάτων.</td></tr>
+<tr><td>OVP</td><td>Over Voltage Protection, προστασία υπέρτασης.</td><td>Συνδέεις κύκλωμα προστασίας ή παρακολούθησης.</td></tr>
+<tr><td>UVLO</td><td>Under Voltage Lock Out, προστασία υποτάσεως.</td><td>Συνδέεις κύκλωμα παρακολούθησης τάσης.</td></tr>
+<tr><td>CLK</td><td>Ρολόι (Clock), σήμα χρονισμού.</td><td>Συνδέεις γεννήτρια ρολογιού ή εξωτερικό oscillator.</td></tr>
+<tr><td>XTAL</td><td>Κρύσταλλος (Crystal Oscillator).</td><td>Συνδέεις κρύσταλλο χαλαζία για ακριβή χρονισμό.</td></tr>
+<tr><td>OSC</td><td>Oscillator, ταλαντωτής.</td><td>Συνδέεις εξωτερικό ταλαντωτή ή κύκλωμα χρονισμού.</td></tr>
+<tr><td>IN</td><td>Είσοδος σήματος.</td><td>Συνδέεις σήμα εισόδου (αναλογικό ή ψηφιακό).</td></tr>
+<tr><td>OUT</td><td>Έξοδος σήματος.</td><td>Συνδέεις το φορτίο ή το επόμενο στάδιο κυκλώματος.</td></tr>
+<tr><td>INT</td><td>Διακοπή (Interrupt).</td><td>Συνδέεις σήμα διακοπής σε μικροελεγκτή ή CPU.</td></tr>
+<tr><td>IO</td><td>Είσοδος/Έξοδος γενικής χρήσης (Input/Output).</td><td>Συνδέεις σήματα εισόδου/εξόδου, κουμπιά, LED, αισθητήρες.</td></tr>
+<tr><td>GPIO</td><td>General Purpose Input/Output, είσοδος/έξοδος γενικής χρήσης.</td><td>Συνδέεις σήματα εισόδου/εξόδου, κουμπιά, LED, αισθητήρες.</td></tr>
+<tr><td>TX</td><td>Μετάδοση (Transmit), έξοδος σειριακής επικοινωνίας.</td><td>Συνδέεις στη γραμμή RX άλλης συσκευής (π.χ. UART, RS232).</td></tr>
+<tr><td>RX</td><td>Λήψη (Receive), είσοδος σειριακής επικοινωνίας.</td><td>Συνδέεις στη γραμμή TX άλλης συσκευής.</td></tr>
+<tr><td>SDA</td><td>Data Line για I2C.</td><td>Συνδέεις στη γραμμή δεδομένων I2C bus (pull-up resistor απαιτείται).</td></tr>
+<tr><td>SCL</td><td>Clock Line για I2C.</td><td>Συνδέεις στη γραμμή ρολογιού I2C bus (pull-up resistor απαιτείται).</td></tr>
+<tr><td>MISO</td><td>Master In Slave Out (SPI).</td><td>Συνδέεις έξοδο slave στη γραμμή εισόδου του master.</td></tr>
+<tr><td>MOSI</td><td>Master Out Slave In (SPI).</td><td>Συνδέεις έξοδο master στη γραμμή εισόδου του slave.</td></tr>
+<tr><td>SCK</td><td>Serial Clock (SPI).</td><td>Συνδέεις σήμα ρολογιού SPI από master σε slave(s).</td></tr>
+<tr><td>SS</td><td>Slave Select (SPI).</td><td>Συνδέεις σήμα επιλογής slave (ενεργοποίηση slave όταν είναι LOW).</td></tr>
+<tr><td>SPI</td><td>Serial Peripheral Interface.</td><td>Συνδέεις όλα τα παραπάνω (MISO, MOSI, SCK, SS) για SPI επικοινωνία.</td></tr>
+<tr><td>BOOT</td><td>Boot Mode, επιλογή λειτουργίας εκκίνησης.</td><td>Συνδέεις σε GND ή VCC για επιλογή τρόπου εκκίνησης (π.χ. bootloader).</td></tr>
+<tr><td>BST</td><td>Boost, pin για floating capacitor σε buck/boost converters.</td><td>Συνδέεις πυκνωτή boost (bootstrap) μεταξύ BST και SW.</td></tr>
+<tr><td>NC</td><td>No Connection, δεν συνδέεται.</td><td>Δεν συνδέεις τίποτα (αφήνεται ανοιχτό).</td></tr>
+<tr><td>EPAD</td><td>Exposed Pad, μεταλλική βάση για ψύξη/γείωση.</td><td>Συνδέεις στη γείωση PCB για θερμική διαχείριση και ηλεκτρική σύνδεση.</td></tr>
+<tr><td>TEMP</td><td>Θερμοκρασία, pin αισθητήρα θερμοκρασίας.</td><td>Συνδέεις αισθητήρα ή κύκλωμα μέτρησης θερμοκρασίας.</td></tr>
+<tr><td>ADDR</td><td>Διεύθυνση (Address), επιλογή διεύθυνσης σε bus (π.χ. I2C).</td><td>Συνδέεις σε GND ή VCC για να ορίσεις μοναδική διεύθυνση.</td></tr>
+<tr><td>RT</td><td>Timing Resistor, αντίσταση χρονισμού.</td><td>Συνδέεις αντίσταση για ρύθμιση συχνότητας ή χρόνου.</td></tr>
+<tr><td>COMP</td><td>Compensation, σταθεροποίηση ελέγχου (συνήθως σε ρυθμιστές τάσης).</td><td>Συνδέεις κύκλωμα αντιστάσεων/πυκνωτών για σταθεροποίηση loop.</td></tr>
+
+
+
+      
+<!-- <tr><td>     </td><td>     .</td><td>    </td></tr> -->
+    </tbody>
+  </table>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = document.querySelectorAll('#symbolTable tbody tr');
+
+    searchInput.addEventListener('input', function () {
+      const filter = searchInput.value.toLowerCase();
+      tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
