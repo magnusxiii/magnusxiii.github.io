@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <title>Υπολογιστής Κέρδους Κιτ</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    h2 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+    input[type="number"] { width: 100px; }
+    button { padding: 8px 12px; margin-top: 10px; }
+    .result { margin-top: 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h2>Υπολογιστής Κέρδους Ανά Κιτ</h2>
+  <table id="itemsTable">
+    <thead>
+      <tr>
+        <th>Περιγραφή</th>
+        <th>Τιμή Παρτίδας (€)</th>
+        <th>Ποσότητα Παρτίδας</th>
+        <th>Χρήση Ανά Κιτ</th>
+        <th>Κόστος Ανά Κιτ (€)</th>
+        <th>Διαγραφή</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody">
+    </tbody>
+  </table>
+
+  <button onclick="addItem()">➕ Προσθήκη Είδους</button>
+
+  <div style="margin-top: 20px;">
+    <label>Τιμή Πώλησης Κιτ (€): <input type="number" id="sellPrice" value="15" step="0.01"></label>
+    <button onclick="calculateProfit()">Υπολογισμός Κέρδους</button>
+  </div>
+
+  <div class="result" id="results"></div>
+
+  <script>
+    function addItem(description = '', batchPrice = 0, batchQty = 1, usedPerKit = 1) {
+      const tbody = document.getElementById("itemsBody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" value="${description}"/></td>
+        <td><input type="number" value="${batchPrice}" step="0.01"/></td>
+        <td><input type="number" value="${batchQty}" step="1"/></td>
+        <td><input type="number" value="${usedPerKit}" step="1"/></td>
+        <td class="costPerKit">0.00</td>
+        <td><button onclick="this.parentElement.parentElement.remove()">🗑️</button></td>
+      `;
+      tbody.appendChild(row);
+    }
+
+    function calculateProfit() {
+      let totalCost = 0;
+      const rows = document.querySelectorAll("#itemsBody tr");
+
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("input");
+        const batchPrice = parseFloat(cells[1].value);
+        const batchQty = parseFloat(cells[2].value);
+        const usedPerKit = parseFloat(cells[3].value);
+
+        const unitPrice = batchPrice / batchQty;
+        const costPerKit = unitPrice * usedPerKit;
+        row.querySelector(".costPerKit").textContent = costPerKit.toFixed(2);
+        totalCost += costPerKit;
+      });
+
+      const sellPrice = parseFloat(document.getElementById("sellPrice").value);
+      const profit = sellPrice - totalCost;
+      const marginOnCost = (profit / totalCost) * 100;
+      const marginOnSell = (profit / sellPrice) * 100;
+
+      document.getElementById("results").innerHTML = `
+        <strong>Σύνολο Κόστους Ανά Κιτ:</strong> €${totalCost.toFixed(2)}<br>
+        <strong>Καθαρό Κέρδος:</strong> €${profit.toFixed(2)}<br>
+        <strong>Ποσοστό Κέρδους επί Κόστους:</strong> ${marginOnCost.toFixed(2)}%<br>
+        <strong>Ποσοστό Κέρδους επί Πώλησης:</strong> ${marginOnSell.toFixed(2)}%
+      `;
+    }
+
+    // Προσθέτουμε τα προκαθορισμένα είδη
+    addItem("Πρίζα αυτοκινήτου", 12, 15, 1);
+    addItem("Καλώδιο 5.5x2.1 (1μ)", 0.5, 1, 1);
+    addItem("Πυκνωτής 220μF 25V", 1.8, 20, 1);
+    addItem("Πυκνωτής 100nF", 1.59, 100, 1);
+    addItem("Αντίσταση 680k", 1.91, 100, 1);
+    addItem("PCB Board", 3.5, 1, 1);
+    addItem("3D Printed Case", 0.5, 1, 1);
+  </script>
+</body>
+</html>
