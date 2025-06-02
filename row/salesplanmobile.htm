@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Υπολογιστής Κέρδους Κιτ</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      background: #f4f4f4;
+      color: #000;
+      transition: background 0.3s, color 0.3s;
+      margin: 0;
+    }
+    
+    h2 { 
+      color: #333; 
+      text-align: center;
+      font-size: clamp(1.2rem, 4vw, 2rem);
+    }
+    
+    /* Responsive Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    
+    /* Responsive Table */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    
+    th, td {
+      padding: clamp(8px, 2vw, 12px);
+      border: 1px solid #ccc;
+      text-align: left;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+    }
+    
+    th {
+      background: #f8f9fa;
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+    }
+    
+    /* Responsive Inputs */
+    input[type="number"], input[type="text"] { 
+      width: 100%;
+      min-width: 80px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+    }
+    
+    /* Responsive Buttons */
+    button { 
+      padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      transition: background 0.3s;
+      min-height: 44px; /* Touch-friendly */
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    button:active {
+      transform: translateY(1px);
+    }
+    
+    /* Button Container */
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    /* Form Controls */
+    .form-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group label {
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+    
+    /* Results Section */
+    .result { 
+      margin-top: 20px; 
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      line-height: 1.6;
+    }
+    
+    /* Dark Mode */
+    .dark-mode {
+      background: #121212;
+      color: #f4f4f4;
+    }
+    
+    .dark-mode .container,
+    .dark-mode .form-controls,
+    .dark-mode .result,
+    .dark-mode table { 
+      background: #1e1e1e; 
+    }
+    
+    .dark-mode th, 
+    .dark-mode td { 
+      border-color: #555; 
+    }
+    
+    .dark-mode th {
+      background: #2d2d2d;
+    }
+    
+    .dark-mode input, 
+    .dark-mode button {
+      background: #333;
+      color: #f4f4f4;
+      border: 1px solid #555;
+    }
+    
+    .dark-mode button {
+      background: #0d6efd;
+    }
+    
+    .dark-mode button:hover {
+      background: #0b5ed7;
+    }
+    
+    /* Mobile Specific */
+    @media (max-width: 768px) {
+      body {
+        padding: 5px;
+      }
+      
+      .button-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      button {
+        width: 100%;
+        margin: 5px 0;
+      }
+      
+      .form-controls {
+        grid-template-columns: 1fr;
+        padding: 15px;
+      }
+      
+      th, td {
+        padding: 6px;
+        font-size: 0.8rem;
+      }
+      
+      table {
+        min-width: 500px;
+      }
+    }
+    
+    /* Tablet Specific */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .form-controls {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .button-container {
+        justify-content: space-around;
+      }
+    }
+    
+    /* Large Desktop */
+    @media (min-width: 1200px) {
+      body {
+        padding: 20px;
+      }
+      
+      .container {
+        padding: 0 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Υπολογιστής Κέρδους Ανά Κιτ mobile</h2>
+
+    <label><input type="checkbox" id="darkToggle" onchange="toggleDarkMode()"> 🌙 Σκοτεινή λειτουργία</label>
+
+    <div class="table-container">
+      <table id="itemsTable">
+        <thead>
+          <tr>
+            <th>Περιγραφή</th>
+            <th>Τιμή Παρτίδας (€)</th>
+            <th>Ποσότητα Παρτίδας</th>
+            <th>Χρήση Ανά Κιτ</th>
+            <th>Κόστος Ανά Κιτ (€)</th>
+            <th>Διαγραφή</th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="button-container">
+      <button onclick="addItem()">➕ Προσθήκη Είδους</button>
+    </div>
+
+    <div class="form-controls">
+      <div class="form-group">
+        <label for="sellPrice">Τιμή Πώλησης Κιτ (€):</label>
+        <input type="number" id="sellPrice" placeholder="π.χ. 15" step="0.01">
+      </div>
+      <div class="form-group">
+        <label for="productionCount">Πλήθος Παραγωγής:</label>
+        <input type="number" id="productionCount" placeholder="π.χ. 5" step="1">
+      </div>
+    </div>
+
+    <div class="button-container">
+      <button onclick="calculateProfit()">Υπολογισμός Κέρδους</button>
+      <button onclick="exportData()">📤 Εξαγωγή CSV</button>
+      <button onclick="exportPDF()">📄 Εξαγωγή PDF</button>
+      <button onclick="exportExcel()">📊 Εξαγωγή Excel</button>
+    </div>
+
+    <div class="result" id="results"></div>
+  </div>
+
+  <script>
+    let lastResults = {};
+
+    function addItem(description = '', batchPrice = 0, batchQty = 1, usedPerKit = 1) {
+      const tbody = document.getElementById("itemsBody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" value="${description}"/></td>
+        <td><input type="number" value="${batchPrice}" step="0.01"/></td>
+        <td><input type="number" value="${batchQty}" step="1"/></td>
+        <td><input type="number" value="${usedPerKit}" step="1"/></td>
+        <td class="costPerKit">0.00</td>
+        <td><button onclick="this.parentElement.parentElement.remove()">🗑️</button></td>
+      `;
+      tbody.appendChild(row);
+    }
+
+    function calculateProfit() {
+      let totalCost = 0;
+      const rows = document.querySelectorAll("#itemsBody tr");
+
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("input");
+        const batchPrice = parseFloat(cells[1].value);
+        const batchQty = parseFloat(cells[2].value);
+        const usedPerKit = parseFloat(cells[3].value);
+
+        if (isNaN(batchPrice) || isNaN(batchQty) || isNaN(usedPerKit) || batchQty === 0) return;
+
+        const unitPrice = batchPrice / batchQty;
+        const costPerKit = unitPrice * usedPerKit;
+        row.querySelector(".costPerKit").textContent = costPerKit.toFixed(2);
+        totalCost += costPerKit;
+      });
+
+      const sellPrice = parseFloat(document.getElementById("sellPrice").value);
+      const productionCount = parseInt(document.getElementById("productionCount").value);
+      if (isNaN(sellPrice) || isNaN(productionCount)) return;
+
+      const profit = sellPrice - totalCost;
+      const marginOnCost = (profit / totalCost) * 100;
+      const marginOnSell = (profit / sellPrice) * 100;
+      const halfProfit = profit * 0.5;
+      const totalProfit = profit * productionCount;
+
+      lastResults = {
+        totalCost: totalCost.toFixed(2),
+        profit: profit.toFixed(2),
+        marginOnCost: marginOnCost.toFixed(2),
+        marginOnSell: marginOnSell.toFixed(2),
+        halfProfit: halfProfit.toFixed(2),
+        totalProfit: totalProfit.toFixed(2),
+        productionCount
+      };
+
+      document.getElementById("results").innerHTML = `
+        <strong>Σύνολο Κόστους Ανά Κιτ:</strong> €${lastResults.totalCost}<br>
+        <strong>Καθαρό Κέρδος Ανά Κιτ:</strong> €${lastResults.profit}<br>
+        <strong>Ποσοστό Κέρδους επί Κόστους:</strong> ${lastResults.marginOnCost}%<br>
+        <strong>Ποσοστό Κέρδους επί Πώλησης:</strong> ${lastResults.marginOnSell}%<br>
+        <strong>Το 50% του Κέρδους Ανά Κιτ:</strong> €${lastResults.halfProfit}<br>
+        <strong>Σύνολο Κέρδους (${productionCount} κιτ):</strong> €${lastResults.totalProfit}
+      `;
+    }
+
+    // CSV EXPORT (ΗΔΗ ΔΟΥΛΕΥΕΙ ΣΩΣΤΑ)
+    function exportData() {
+      let csv = '\uFEFF';
+      csv += 'Περιγραφή,Τιμή Παρτίδας,Ποσότητα Παρτίδας,Χρήση Ανά Κιτ,Κόστος Ανά Κιτ\n';
+      
+      const rows = document.querySelectorAll("#itemsBody tr");
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("input");
+        const description = cells[0].value;
+        const batchPrice = cells[1].value;
+        const batchQty = cells[2].value;
+        const usedPerKit = cells[3].value;
+        const costPerKit = row.querySelector(".costPerKit").textContent;
+        
+        csv += `"${description}","${batchPrice}","${batchQty}","${usedPerKit}","${costPerKit}"\n`;
+      });
+
+      csv += '\n"Ανάλυση Κέρδους"\n';
+      csv += `"Σύνολο Κόστους Ανά Κιτ:","€${lastResults.totalCost}"\n`;
+      csv += `"Καθαρό Κέρδος Ανά Κιτ:","€${lastResults.profit}"\n`;
+      csv += `"Ποσοστό Κέρδους επί Κόστους:","${lastResults.marginOnCost}%"\n`;
+      csv += `"Ποσοστό Κέρδους επί Πώλησης:","${lastResults.marginOnSell}%"\n`;
+      csv += `"Το 50% του Κέρδους Ανά Κιτ:","€${lastResults.halfProfit}"\n`;
+      csv += `"Σύνολο Κέρδους (${lastResults.productionCount} κιτ):","€${lastResults.totalProfit}"\n`;
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.setAttribute("href", URL.createObjectURL(blob));
+      link.setAttribute("download", "profit-analysis.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ΔΙΟΡΘΩΜΕΝΟ PDF EXPORT - ΜΕ ΛΑΤΙΝΙΚΟΥΣ ΧΑΡΑΚΤΗΡΕΣ
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      let y = 20;
+      
+      // Χρησιμοποιούμε λατινικούς χαρακτήρες για να αποφύγουμε τα "κινέζικα"
+      doc.setFontSize(16);
+      doc.text("ANALISI KERDOUS KIT", 10, y);
+      y += 15;
+
+      doc.setFontSize(12);
+      doc.text("Leptomereies Eidon:", 10, y);
+      y += 10;
+
+      const rows = document.querySelectorAll("#itemsBody tr");
+      rows.forEach((row, i) => {
+        const cells = row.querySelectorAll("input");
+        const description = cells[0].value;
+        const batchPrice = cells[1].value;
+        const batchQty = cells[2].value;
+        const usedPerKit = cells[3].value;
+        const costPerKit = row.querySelector(".costPerKit").textContent;
+
+        doc.setFontSize(10);
+        // Μετατρέπουμε τα ελληνικά σε λατινικά για το PDF
+        const greekToLatin = (text) => {
+          return text.replace(/[αάΑΆ]/g, 'a')
+                    .replace(/[βΒ]/g, 'b')
+                    .replace(/[γΓ]/g, 'g')
+                    .replace(/[δΔ]/g, 'd')
+                    .replace(/[εέΕΈ]/g, 'e')
+                    .replace(/[ζΖ]/g, 'z')
+                    .replace(/[ηήΗΉ]/g, 'i')
+                    .replace(/[θΘ]/g, 'th')
+                    .replace(/[ιίΙΊ]/g, 'i')
+                    .replace(/[κΚ]/g, 'k')
+                    .replace(/[λΛ]/g, 'l')
+                    .replace(/[μΜ]/g, 'm')
+                    .replace(/[νΝ]/g, 'n')
+                    .replace(/[ξΞ]/g, 'x')
+                    .replace(/[οόΟΌ]/g, 'o')
+                    .replace(/[πΠ]/g, 'p')
+                    .replace(/[ρΡ]/g, 'r')
+                    .replace(/[σςΣ]/g, 's')
+                    .replace(/[τΤ]/g, 't')
+                    .replace(/[υύΥΎ]/g, 'u')
+                    .replace(/[φΦ]/g, 'f')
+                    .replace(/[χΧ]/g, 'ch')
+                    .replace(/[ψΨ]/g, 'ps')
+                    .replace(/[ωώΩΏ]/g, 'o');
+        };
+
+        const latinDescription = greekToLatin(description);
+        const line = `${i + 1}) ${latinDescription} | Timi: €${batchPrice} | Pos.: ${batchQty} | Chrisi: ${usedPerKit} | Kostos/Kit: €${costPerKit}`;
+        doc.text(line, 10, y);
+        y += 7;
+        
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+
+      y += 10;
+      doc.setFontSize(12);
+      doc.text("Analisi Kerdous:", 10, y);
+      y += 10;
+
+      doc.setFontSize(10);
+      doc.text(`Synolo Kostous Ana Kit: €${lastResults.totalCost}`, 10, y); y += 7;
+      doc.text(`Katharo Kerdos Ana Kit: €${lastResults.profit}`, 10, y); y += 7;
+      doc.text(`Pososto Kerdous epi Kostous: ${lastResults.marginOnCost}%`, 10, y); y += 7;
+      doc.text(`Pososto Kerdous epi Polisis: ${lastResults.marginOnSell}%`, 10, y); y += 7;
+      doc.text(`To 50% tou Kerdous Ana Kit: €${lastResults.halfProfit}`, 10, y); y += 7;
+      doc.text(`Synolo Kerdous (${lastResults.productionCount} kit): €${lastResults.totalProfit}`, 10, y);
+
+      doc.save("profit-analysis.pdf");
+    }
+
+    // ΝΕΟ! EXCEL EXPORT
+    function exportExcel() {
+      // Δημιουργία workbook
+      const wb = XLSX.utils.book_new();
+      
+      // Δεδομένα για το φύλλο εργασίας
+      const wsData = [];
+      
+      // Headers
+      wsData.push(['Περιγραφή', 'Τιμή Παρτίδας (€)', 'Ποσότητα Παρτίδας', 'Χρήση Ανά Κιτ', 'Κόστος Ανά Κιτ (€)']);
+      
+      // Δεδομένα από τον πίνακα
+      const rows = document.querySelectorAll("#itemsBody tr");
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("input");
+        const description = cells[0].value;
+        const batchPrice = parseFloat(cells[1].value) || 0;
+        const batchQty = parseFloat(cells[2].value) || 0;
+        const usedPerKit = parseFloat(cells[3].value) || 0;
+        const costPerKit = parseFloat(row.querySelector(".costPerKit").textContent) || 0;
+        
+        wsData.push([description, batchPrice, batchQty, usedPerKit, costPerKit]);
+      });
+      
+      // Κενή γραμμή
+      wsData.push([]);
+      
+      // Ανάλυση κέρδους
+      wsData.push(['Ανάλυση Κέρδους']);
+      wsData.push(['Σύνολο Κόστους Ανά Κιτ:', `€${lastResults.totalCost}`]);
+      wsData.push(['Καθαρό Κέρδος Ανά Κιτ:', `€${lastResults.profit}`]);
+      wsData.push(['Ποσοστό Κέρδους επί Κόστους:', `${lastResults.marginOnCost}%`]);
+      wsData.push(['Ποσοστό Κέρδους επί Πώλησης:', `${lastResults.marginOnSell}%`]);
+      wsData.push(['Το 50% του Κέρδους Ανά Κιτ:', `€${lastResults.halfProfit}`]);
+      wsData.push([`Σύνολο Κέρδους (${lastResults.productionCount} κιτ):`, `€${lastResults.totalProfit}`]);
+      
+      // Δημιουργία worksheet
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Προσθήκη του worksheet στο workbook
+      XLSX.utils.book_append_sheet(wb, ws, "Ανάλυση Κέρδους");
+      
+      // Εξαγωγή αρχείου
+      XLSX.writeFile(wb, "profit-analysis.xlsx");
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+  </script>
+</body>
+</html>
