@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Υπολογιστής Κέρδους Κιτ</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-color: #667eea;
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-color: #f093fb;
+      --accent-color: #4facfe;
+      --text-color: #2d3748;
+      --bg-color: #f7fafc;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --border-radius: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      transition: var(--transition);
+      padding: 20px;
+    }
+
+    /* Simple Header with Dark Mode Toggle */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1rem 0;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Dark Mode Toggle */
+    .theme-toggle {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 50px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: rigth;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow-light);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      text-align: center;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 3rem;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Modern Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+      overflow: hidden;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-medium);
+      transform: translateY(-0.1px);
+    }
+
+    /* Table Styling */
+    .table-container {
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+
+    .modern-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-light);
+    }
+
+    .modern-table th {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 1rem;
+      font-weight: 600;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+
+    .modern-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      transition: var(--transition);
+    }
+
+    .modern-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    .modern-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Modern Inputs */
+    .modern-input {
+      width: 100%;
+      padding: 1rem 1rem;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: .76rem;
+      transition: var(--transition);
+      background: var(--card-bg);
+    }
+
+    .modern-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Modern Buttons */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      font-size: 0.95rem;
+      min-height: 44px;
+    }
+
+    .btn-primary {
+      background: var(--primary-gradient);
+      color: white;
+      box-shadow: var(--shadow-light);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .btn-secondary {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary-color);
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    /* Action Buttons Container */
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    /* Form Controls */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--text-color);
+      font-size: 0.95rem;
+    }
+
+    /* Results Card */
+    .results-card {
+      margin-top: 2rem;
+      padding: 2rem;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-medium);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .results-card h3 {
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+      font-size: 1.25rem;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      padding: .75rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .result-item:last-child {
+      border-bottom: none;
+    }
+
+    .result-label {
+      font-weight: 500;
+    }
+
+    .result-value {
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    /* Dark Mode */
+    .dark-mode {
+      --text-color: #e2e8f0;
+      --bg-color: #1a202c;
+      --card-bg: #2d3748;
+      --border-color: #4a5568;
+    }
+
+    .dark-mode .modern-table tr:hover td {
+      background: #374151;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modern-table {
+        font-size: 0.85rem;
+      }
+
+      .modern-table th,
+      .modern-table td {
+        padding: 0.5rem;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeInUp 0.6s ease-out;
+    }
+	.dark-mode .modern-input {
+  color: #ffffff; /* Άσπρο κείμενο */
+}
+  </style>
+</head>
+<body>
+  <!-- Simple Header with Dark Mode Only -->
+  <div class="header">
+    <div class="logo">
+      
+    </div>
+    
+    <div class="theme-toggle" onclick="toggleDarkMode()">
+      <i class="fas fa-moon"></i>
+      <span>Dark Mode</span>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <h1 class="page-title fade-in">Υπολογιστής Κέρδους Ανά Κιτ</h1>
+
+    <!-- Calculator Section -->
+    <section class="card fade-in">
+      <div class="table-container">
+        <table class="modern-table" id="itemsTable">
+          <thead>
+            <tr>
+              <th><i class="fas fa-tag"></i> Περιγραφή</th>
+              <th><i class="fas fa-euro-sign"></i> Τιμή Παρτίδας</th>
+              <th><i class="fas fa-boxes"></i> Ποσότητα</th>
+              <th><i class="fas fa-tools"></i> Χρήση/Κιτ</th>
+              <th><i class="fas fa-calculator"></i> Κόστος/Κιτ</th>
+              <th><i class="fas fa-trash"></i> Ενέργειες</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="addItem()">
+          <i class="fas fa-plus"></i> Προσθήκη Είδους
+        </button>
+      </div>
+    </section>
+
+    <!-- Form Controls -->
+    <section class="card fade-in">
+      <div style="padding: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">
+          <i class="fas fa-cog"></i> Ρυθμίσεις Υπολογισμού
+        </h3>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="sellPrice">
+              <i class="fas fa-tag"></i> Τιμή Πώλησης Κιτ (€)
+            </label>
+            <input type="number" id="sellPrice" class="modern-input" placeholder="π.χ. 15.00" step="0.01">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="productionCount">
+              <i class="fas fa-industry"></i> Πλήθος Παραγωγής
+            </label>
+            <input type="number" id="productionCount" class="modern-input" placeholder="π.χ. 100" step="1">
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="calculateProfit()">
+            <i class="fas fa-calculator"></i> Υπολογισμός Κέρδους
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <div class="results-card" id="resultsCard" style="display: none;">
+      <h3><i class="fas fa-chart-line"></i> Αποτελέσματα Ανάλυσης</h3>
+      <div id="resultsContent"></div>
+    </div>
+
+    <!-- Export Section -->
+    <section class="card fade-in">
+      <div style="padding: 2rem; text-align: center;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--primary-color);">
+          <i class="fas fa-download"></i> Εξαγωγή Δεδομένων
+        </h3>
+        
+        <div class="action-buttons">
+          <button class="btn btn-secondary" onclick="exportData()">
+            <i class="fas fa-file-csv"></i> Εξαγωγή CSV
+          </button>
+          <button class="btn btn-secondary" onclick="exportPDF()">
+            <i class="fas fa-file-pdf"></i> Εξαγωγή PDF
+          </button>
+          <button class="btn btn-secondary" onclick="exportExcel()">
+            <i class="fas fa-file-excel"></i> Εξαγωγή Excel
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let lastResults = {};
+
+    // Add Item Function
+    function addItem(description = '', batchPrice = 0, batchQty = 1, usedPerKit = 1) {
+      const tbody = document.getElementById("itemsBody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" class="modern-input" value="${description}" placeholder="Περιγραφή προϊόντος"/></td>
+        <td><input type="number" class="modern-input" value="${batchPrice}" step="0.01" placeholder="0.00"/></td>
+        <td><input type="number" class="modern-input" value="${batchQty}" step="1" placeholder="1"/></td>
+        <td><input type="number" class="modern-input" value="${usedPerKit}" step="1" placeholder="1"/></td>
+        <td class="costPerKit" style="font-weight: 600; color: var(--primary-color);">€0.00</td>
+        <td>
+          <button class="btn btn-danger" onclick="this.closest('tr').remove()" style="padding: 0.5rem;">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(row);
+      row.classList.add('fade-in');
+    }
+
+    // Calculate Profit Function
+    function calculateProfit() {
+      let totalCost = 0;
+      const rows = document.querySelectorAll("#itemsBody tr");
+
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("input");
+        const batchPrice = parseFloat(cells[1].value) || 0;
+        const batchQty = parseFloat(cells[2].value) || 1;
+        const usedPerKit = parseFloat(cells[3].value) || 1;
+
+        if (batchQty === 0) return;
+
+        const unitPrice = batchPrice / batchQty;
+        const costPerKit = unitPrice * usedPerKit;
+        row.querySelector(".costPerKit").textContent = `€${costPerKit.toFixed(2)}`;
+        totalCost += costPerKit;
+      });
+
+      const sellPrice = parseFloat(document.getElementById("sellPrice").value) || 0;
+      const productionCount = parseInt(document.getElementById("productionCount").value) || 1;
+
+      const profit = sellPrice - totalCost;
+      const marginOnCost = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+      const marginOnSell = sellPrice > 0 ? (profit / sellPrice) * 100 : 0;
+      const halfProfit = profit * 0.5;
+      const totalProfit = profit * productionCount;
+
+      lastResults = {
+        totalCost: totalCost.toFixed(2),
+        profit: profit.toFixed(2),
+        marginOnCost: marginOnCost.toFixed(2),
+        marginOnSell: marginOnSell.toFixed(2),
+        halfProfit: halfProfit.toFixed(2),
+        totalProfit: totalProfit.toFixed(2),
+        productionCount,
+        sellPrice: sellPrice.toFixed(2)
+      };
+
+      const resultsCard = document.getElementById("resultsCard");
+      const resultsContent = document.getElementById("resultsContent");
+      
+      resultsContent.innerHTML = `
+        <div class="result-item">
+          <span class="result-label">Σύνολο Κόστους Ανά Κιτ:</span>
+          <span class="result-value">€${lastResults.totalCost}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Τιμή Πώλησης Ανά Κιτ:</span>
+          <span class="result-value">€${lastResults.sellPrice}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Καθαρό Κέρδος Ανά Κιτ:</span>
+          <span class="result-value" style="color: ${profit >= 0 ? '#10b981' : '#ef4444'}">€${lastResults.profit}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Ποσοστό Κέρδους επί Κόστους:</span>
+          <span class="result-value">${lastResults.marginOnCost}%</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Ποσοστό Κέρδους επί Πώλησης:</span>
+          <span class="result-value">${lastResults.marginOnSell}%</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Το 50% του Κέρδους Ανά Κιτ:</span>
+          <span class="result-value">€${lastResults.halfProfit}</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Σύνολο Κέρδους (${productionCount} κιτ):</span>
+          <span class="result-value" style="font-size: 1.1em; color: ${totalProfit >= 0 ? '#10b981' : '#ef4444'}">€${lastResults.totalProfit}</span>
+        </div>
+      `;
+      
+      resultsCard.style.display = 'block';
+      resultsCard.classList.add('fade-in');
+      resultsCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Export Functions
+    function exportData() {
+      let csv = '\uFEFF';
+      csv += 'Περιγραφή,Τιμή Παρτίδας,Ποσότητα Παρτίδας,Χρήση Ανά Κιτ,Κόστος Ανά Κιτ\n';
+      
+      const rows = document.querySelectorAll("#itemsBody tr");
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("input");
+        const description = cells[0].value;
+        const batchPrice = cells[1].value;
+        const batchQty = cells[2].value;
+        const usedPerKit = cells[3].value;
+        const costPerKit = row.querySelector(".costPerKit").textContent.replace('€', '');
+        
+        csv += `"${description}","${batchPrice}","${batchQty}","${usedPerKit}","${costPerKit}"\n`;
+      });
+
+      csv += '\n"Ανάλυση Κέρδους"\n';
+      csv += `"Σύνολο Κόστους Ανά Κιτ:","€${lastResults.totalCost}"\n`;
+      csv += `"Καθαρό Κέρδος Ανά Κιτ:","€${lastResults.profit}"\n`;
+      csv += `"Ποσοστό Κέρδους επί Κόστους:","${lastResults.marginOnCost}%"\n`;
+      csv += `"Ποσοστό Κέρδους επί Πώλησης:","${lastResults.marginOnSell}%"\n`;
+      csv += `"Το 50% του Κέρδους Ανά Κιτ:","€${lastResults.halfProfit}"\n`;
+      csv += `"Σύνολο Κέρδους (${lastResults.productionCount} κιτ):","€${lastResults.totalProfit}"\n`;
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.setAttribute("href", URL.createObjectURL(blob));
+      link.setAttribute("download", "profit-analysis.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      let y = 20;
+      
+      doc.setFontSize(16);
+      doc.text("ANALISI KERDOUS KIT", 10, y);
+      y += 15;
+
+      doc.setFontSize(12);
+      doc.text("Leptomereies Eidon:", 10, y);
+      y += 10;
+
+      const rows = document.querySelectorAll("#itemsBody tr");
+      rows.forEach((row, i) => {
+        const cells = row.querySelectorAll("input");
+        const description = cells[0].value;
+        const batchPrice = cells[1].value;
+        const batchQty = cells[2].value;
+        const usedPerKit = cells[3].value;
+        const costPerKit = row.querySelector(".costPerKit").textContent;
+
+        doc.setFontSize(10);
+        const greekToLatin = (text) => {
+          return text.replace(/[αάΑΆ]/g, 'a')
+                    .replace(/[βΒ]/g, 'b')
+                    .replace(/[γΓ]/g, 'g')
+                    .replace(/[δΔ]/g, 'd')
+                    .replace(/[εέΕΈ]/g, 'e')
+                    .replace(/[ζΖ]/g, 'z')
+                    .replace(/[ηήΗΉ]/g, 'i')
+                    .replace(/[θΘ]/g, 'th')
+                    .replace(/[ιίΙΊ]/g, 'i')
+                    .replace(/[κΚ]/g, 'k')
+                    .replace(/[λΛ]/g, 'l')
+                    .replace(/[μΜ]/g, 'm')
+                    .replace(/[νΝ]/g, 'n')
+                    .replace(/[ξΞ]/g, 'x')
+                    .replace(/[οόΟΌ]/g, 'o')
+                    .replace(/[πΠ]/g, 'p')
+                    .replace(/[ρΡ]/g, 'r')
+                    .replace(/[σςΣ]/g, 's')
+                    .replace(/[τΤ]/g, 't')
+                    .replace(/[υύΥΎ]/g, 'u')
+                    .replace(/[φΦ]/g, 'f')
+                    .replace(/[χΧ]/g, 'ch')
+                    .replace(/[ψΨ]/g, 'ps')
+                    .replace(/[ωώΩΏ]/g, 'o');
+        };
+
+        const latinDescription = greekToLatin(description);
+        const line = `${i + 1}) ${latinDescription} | Timi: €${batchPrice} | Pos.: ${batchQty} | Chrisi: ${usedPerKit} | Kostos/Kit: ${costPerKit}`;
+        doc.text(line, 10, y);
+        y += 7;
+        
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+
+      y += 10;
+      doc.setFontSize(12);
+      doc.text("Analisi Kerdous:", 10, y);
+      y += 10;
+
+      doc.setFontSize(10);
+      doc.text(`Synolo Kostous Ana Kit: €${lastResults.totalCost}`, 10, y); y += 7;
+      doc.text(`Katharo Kerdos Ana Kit: €${lastResults.profit}`, 10, y); y += 7;
+      doc.text(`Pososto Kerdous epi Kostous: ${lastResults.marginOnCost}%`, 10, y); y += 7;
+      doc.text(`Pososto Kerdous epi Polisis: ${lastResults.marginOnSell}%`, 10, y); y += 7;
+      doc.text(`To 50% tou Kerdous Ana Kit: €${lastResults.halfProfit}`, 10, y); y += 7;
+      doc.text(`Synolo Kerdous (${lastResults.productionCount} kit): €${lastResults.totalProfit}`, 10, y);
+
+      doc.save("profit-analysis.pdf");
+    }
+
+    function exportExcel() {
+      const wb = XLSX.utils.book_new();
+      const wsData = [];
+      
+      wsData.push(['Περιγραφή', 'Τιμή Παρτίδας (€)', 'Ποσότητα Παρτίδας', 'Χρήση Ανά Κιτ', 'Κόστος Ανά Κιτ (€)']);
+      
+      const rows = document.querySelectorAll("#itemsBody tr");
+      rows.forEach(row => {
+        const cells = row.querySelectorAll("input");
+        const description = cells[0].value;
+        const batchPrice = parseFloat(cells[1].value) || 0;
+        const batchQty = parseFloat(cells[2].value) || 0;
+        const usedPerKit = parseFloat(cells[3].value) || 0;
+        const costPerKit = parseFloat(row.querySelector(".costPerKit").textContent.replace('€', '')) || 0;
+        
+        wsData.push([description, batchPrice, batchQty, usedPerKit, costPerKit]);
+      });
+      
+      wsData.push([]);
+      wsData.push(['Ανάλυση Κέρδους']);
+      wsData.push(['Σύνολο Κόστους Ανά Κιτ:', `€${lastResults.totalCost}`]);
+      wsData.push(['Καθαρό Κέρδος Ανά Κιτ:', `€${lastResults.profit}`]);
+      wsData.push(['Ποσοστό Κέρδους επί Κόστους:', `${lastResults.marginOnCost}%`]);
+      wsData.push(['Ποσοστό Κέρδους επί Πώλησης:', `${lastResults.marginOnSell}%`]);
+      wsData.push(['Το 50% του Κέρδους Ανά Κιτ:', `€${lastResults.halfProfit}`]);
+      wsData.push([`Σύνολο Κέρδους (${lastResults.productionCount} κιτ):`, `€${lastResults.totalProfit}`]);
+      
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, "Ανάλυση Κέρδους");
+      XLSX.writeFile(wb, "profit-analysis.xlsx");
+    }
+
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+      const icon = document.querySelector('.theme-toggle i');
+      const text = document.querySelector('.theme-toggle span');
+      
+      if (document.body.classList.contains('dark-mode')) {
+        icon.className = 'fas fa-sun';
+        text.textContent = 'Light Mode';
+      } else {
+        icon.className = 'fas fa-moon';
+        text.textContent = 'Dark Mode';
+      }
+    }
+
+    // Initialize with one empty row
+    document.addEventListener('DOMContentLoaded', function() {
+      addItem();
+    });
+  </script>
+</body>
+</html>
