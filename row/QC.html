@@ -8,344 +8,194 @@
     :root {
       color-scheme: light dark;
     }
-    
-    * {
-      box-sizing: border-box;
-    }
-    
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background: #1e1e1e;
       color: #f0f0f0;
       margin: 0;
-      padding: 1rem;
+      padding: 2rem;
       transition: background 0.3s, color 0.3s;
-      line-height: 1.6;
     }
-    
     .light-mode {
       background: #ffffff;
       color: #000000;
     }
-    
     .container {
-      max-width: 100%;
+      max-width: 15000px;
       margin: auto;
       background: #2a2a2a;
-      padding: 1rem;
+      padding: 2rem;
       border-radius: 16px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
       transition: background 0.3s;
     }
-    
     .light-mode .container {
       background: #f5f5f5;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: none;
     }
-    
     h1 {
       color: #4aa3ff;
-      text-align: center;
-      font-size: clamp(1.5rem, 4vw, 2.5rem);
-      margin-bottom: 1.5rem;
+      text-align: left;
     }
-    
     .light-mode h1 {
       color: #003366;
     }
-    
-    .toggle-btn {
-      display: block;
-      margin: 0 auto 2rem auto;
-      padding: 0.75rem 1.5rem;
-      font-size: clamp(0.9rem, 2.5vw, 1rem);
-      background-color: #4aa3ff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      width: 100%;
-      max-width: 300px;
-    }
-    
-    .toggle-btn:hover {
-      background-color: #3a93e6;
-    }
-    
-    /* Responsive Table Container */
-    .table-container {
-      overflow-x: auto;
-      margin-bottom: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    
     table {
-      width: 100%;
-      min-width: 800px;
+      width: 80%;
       border-collapse: collapse;
-      font-size: clamp(0.7rem, 1.8vw, 0.95rem);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      text-align: center;
     }
-    
     th, td {
       border: 1px solid #555;
-      padding: 0.5rem;
+      padding: 0.75rem;
       text-align: center;
-      white-space: nowrap;
     }
-    
     th {
       background-color: #333;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      font-weight: 600;
     }
-    
     .light-mode th {
       background-color: #ddd;
-      color: #333;
     }
-    
-    .light-mode th, .light-mode td {
-      border-color: #ccc;
-    }
-    
-    /* First column sticky */
-    th:first-child, td:first-child {
-      position: sticky;
-      left: 0;
-      background-color: inherit;
-      z-index: 5;
-      font-weight: bold;
-    }
-    
-    tr:nth-child(even) {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-    
-    .light-mode tr:nth-child(even) {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
-    
     h2 {
       color: #7bc4ff;
       border-bottom: 2px solid #444;
-      padding-bottom: 0.5rem;
+      padding-bottom: 0.3rem;
       margin-top: 2rem;
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
     }
-    
     .light-mode h2 {
       color: #003366;
       border-color: #ccc;
     }
-    
     ul {
       line-height: 1.8;
-      padding-left: 1rem;
     }
-    
-    li {
-      margin-bottom: 0.5rem;
-    }
-    
     .highlight {
       background: #333;
       padding: 0.2rem 0.5rem;
       border-radius: 6px;
       font-weight: bold;
-      display: inline-block;
-      margin-right: 0.5rem;
     }
-    
     .light-mode .highlight {
-      background: #ddd;
-      color: #333;
+      background: #ccc;
     }
-    
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
-      body {
-        padding: 0.5rem;
-      }
-      
-      .container {
-        padding: 0.75rem;
-        border-radius: 8px;
-      }
-      
-      h1 {
-        margin-bottom: 1rem;
-      }
-      
-      .toggle-btn {
-        margin-bottom: 1rem;
-        padding: 0.6rem 1rem;
-      }
-      
-      table {
-        min-width: 600px;
-        font-size: 0.75rem;
-      }
-      
-      th, td {
-        padding: 0.4rem 0.3rem;
-      }
-      
-      ul {
-        padding-left: 0.5rem;
-      }
-      
-      .highlight {
-        font-size: 0.85em;
-        padding: 0.1rem 0.3rem;
-      }
-    }
-    
-    /* Tablet styles */
-    @media (min-width: 769px) and (max-width: 1024px) {
-      .container {
-        padding: 1.5rem;
-      }
-      
-      table {
-        font-size: 0.85rem;
-      }
-      
-      th, td {
-        padding: 0.6rem;
-      }
-    }
-    
-    /* Large desktop styles */
-    @media (min-width: 1200px) {
-      .container {
-        max-width: 1400px;
-        padding: 2.5rem;
-      }
-      
-      body {
-        padding: 2rem;
-      }
-    }
-    
-    /* Print styles */
     @media print {
       body {
-        background: white !important;
-        color: black !important;
-        padding: 0;
+        background: white;
+        color: black;
       }
-      
       .container {
-        background: white !important;
-        box-shadow: none !important;
-        padding: 1rem;
-      }
-      
-      .toggle-btn {
-        display: none;
-      }
-      
-      table {
-        font-size: 0.8rem;
-      }
-      
-      .table-container {
-        overflow: visible;
+        background: white;
+        box-shadow: none;
       }
     }
-    
-    /* High contrast mode */
-    @media (prefers-contrast: high) {
-      th, td {
-        border-width: 2px;
-      }
-      
-      .highlight {
-        border: 2px solid currentColor;
-      }
-    }
-    
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        transition: none !important;
-      }
+    .toggle-btn {
+      display: block;
+      margin: 0 auto 2rem auto;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background-color: #4aa3ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: right;
     }
   </style>
 </head>
 <body>
+     <button class="toggle-btn" onclick="toggleDarkMode()">Εναλλαγή Σκοτεινού / Φωτεινού Θέματος</button>
   <div class="container">
-    <button class="toggle-btn" onclick="toggleDarkMode()">Εναλλαγή Σκοτεινού / Φωτεινού Θέματος</button>
-    
+  <div class="container">
     <h1>Αναλυτικός Πίνακας Πρωτοκόλλων Φόρτισης</h1>
-    
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Ολοκληρωμένο</th>
-            <th>PD 2.0</th>
-            <th>PD 3.0</th>
-            <th>PPS</th>
-            <th>QC 2.0</th>
-            <th>QC 3.0</th>
-            <th>QC 4.0</th>
-            <th>QC 4+</th>
-            <th>QC 5.0</th>
-            <th>AFC</th>
-            <th>FCP</th>
-            <th>SCP</th>
-            <th>PE 1.1</th>
-            <th>PE 2.0</th>
-            <th>SFCP</th>
-            <th>TFCP</th>
-            <th>VOOC</th>
-            <th>Apple 2.4A</th>
-            <th>Samsung 2A</th>
-            <th>BC1.2</th>
-            <th>Wattage</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>SW3556</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>140w</td>
-          </tr>
-          <tr>
-            <td>SW3518</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>100w</td>
-          </tr>
-          <tr>
-            <td>XPM52C</td>
-            <td>✅</td><td>✅</td><td>❌</td>
-            <td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>✅</td><td>✅</td><td>❌</td>
-            <td>❌</td><td>✅</td><td>✅</td><td>❌</td><td>✅</td><td>65w</td>
-          </tr>
-          <tr>
-            <td>IP6505</td>
-            <td>❌</td><td>❌</td><td>❌</td>
-            <td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>✅</td><td>✅</td><td>✅</td>
-            <td>❌</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>25w</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+ 
+ <table>
+  <thead>
+    <tr>
+      <th>Ολοκληρωμένο</th>
+      <th>PD 2.0</th>
+      <th>PD 3.0</th>
+      <th>PPS</th>
+      <th>QC 2.0</th>
+      <th>QC 3.0</th>
+      <th>QC 4.0</th>
+      <th>QC 4+</th>
+      <th>QC 5.0</th>
+      <th>AFC</th>
+      <th>FCP</th>
+      <th>SCP</th>
+      <th>PE 1.1</th>
+      <th>PE 2.0</th>
+      <th>SFCP</th>
+      <th>TFCP</th>
+      <th>VOOC</th>
+      <th>VOOC 2.0</th>
+      <th>VOOC 4.0</th>
+      <th>SuperVOOC</th>
+      <th>Apple 2.4A</th>
+      <th>Samsung 2A</th>
+      <th>BC1.2</th>
+      <th>Wattage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SW3556</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+      <td>❌</td><td>❌</td><td>❌</td><td>140w</td>
+    </tr>
+    <tr>
+      <td>SW3518</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>❌</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>✅</td><td>100w</td>
+    </tr>
+	<tr>
+      <td>SW3516</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>✅</td><td>60W</td>
+    </tr>
+    <tr>
+      <td>XPM52C</td>
+      <td>✅</td><td>✅</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>❌</td>
+      <td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td>
+      <td>✅</td><td>❌</td><td>✅</td><td>65w</td>
+    </tr>
+    <tr>
+      <td>IP6505</td>
+      <td>❌</td><td>❌</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>✅</td><td>25w</td>
+    </tr>
+    <tr>
+      <td>SW2303</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>✅</td><td>✅</td><td>✅</td>
+      <td>❌</td><td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+      <td>✅</td><td>✅</td><td>✅</td><td>100w</td>
+    </tr>
+  </tbody>
+</table>
 
     <h2>SW3556 - Αναλυτική Υποστήριξη</h2>
     <ul>
@@ -363,7 +213,14 @@
       <li><span class="highlight">Άλλα:</span> AFC, FCP, SCP, PE 1.1 / 2.0, SFCP, VOOC 5V@4A</li>
       <li><span class="highlight">Επιπλέον:</span> Apple 2.4A, Samsung 2A, BC1.2 DCP</li>
     </ul>
-
+<h2>SW3516 - Αναλυτική Υποστήριξη</h2>
+<ul>
+  <li><span class="highlight">PD:</span> PD 2.0, PD 3.0 έως 20V@3A (60W)</li>
+  <li><span class="highlight">PPS:</span> 3V έως 5.9V@5A, 3V έως 20V@3A</li>
+  <li><span class="highlight">QC:</span> QC 2.0, 3.0, 4.0, 4+ (Class A/B)</li>
+  <li><span class="highlight">Άλλα:</span> AFC, FCP, SCP (5V@4.5A / 4.5V@5A), PE 1.1 / 2.0, SFCP, BC1.2, Apple 2.4A, Samsung 2A</li>
+  <li><span class="highlight">VOOC / SuperVOOC:</span> Όχι υποστηριζόμενα</li>
+</ul>
     <h2>XPM52C - Αναλυτική Υποστήριξη</h2>
     <ul>
       <li><span class="highlight">PD:</span> Υποστήριξη πλήρους USB Type-C και PD</li>
@@ -378,24 +235,24 @@
       <li><span class="highlight">Άλλα:</span> PE 1.1 / 2.0, FCP, SCP, AFC, SFCP</li>
       <li><span class="highlight">Επιπλέον:</span> Apple 2.4A, Samsung 2A, BC1.2 DCP</li>
     </ul>
+	<h2>SW2303 - Αναλυτική Υποστήριξη</h2>
+<ul>
+  <li><span class="highlight">PD:</span> PD 2.0, PD 3.0 έως 20V@5A</li>
+  <li><span class="highlight">PPS:</span> 3.3V έως 21V (4 APDOs)</li>
+  <li><span class="highlight">QC:</span> QC 2.0, 3.0 (3.6–20V), 4.0, 4+, 5.0 (Class A/B)</li>
+  <li><span class="highlight">Άλλα:</span> AFC, FCP, SCP (χαμηλή/υψηλή τάση), PE 1.1 / 2.0, SFCP</li>
+  <li><span class="highlight">Legacy:</span> Apple 2.4A, Samsung 2A, BC1.2 DCP</li>
+  <li><span class="highlight">Max Ρεύμα:</span> έως 5A</li>
+  <li><span class="highlight">PDOs:</span> 5V, 9V, 12V, 15V, 20V (5 FPDOs)</li>
+  <li><span class="highlight">PPS APDOs:</span> 3.3–5.9V / 11V / 16V / 21V</li>
+  <li><span class="highlight">Έξοδος:</span> Type-C DFP + VCONN, υποστήριξη NMOS/PMOS</li>
+  <li><span class="highlight">Λειτουργίες:</span> I2C, Dynamic Power Allocation, OVP, OCP, UVP, OTP, NTC, ESD ±4KV</li>
+</ul>
   </div>
-  
-  <script>
+   <script>
     function toggleDarkMode() {
       document.body.classList.toggle('light-mode');
-      
-      // Save preference to localStorage
-      const isLightMode = document.body.classList.contains('light-mode');
-      localStorage.setItem('lightMode', isLightMode);
     }
-    
-    // Load saved theme preference
-    document.addEventListener('DOMContentLoaded', function() {
-      const savedTheme = localStorage.getItem('lightMode');
-      if (savedTheme === 'true') {
-        document.body.classList.add('light-mode');
-      }
-    });
   </script>
 </body>
 </html>
