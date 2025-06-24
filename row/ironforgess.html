@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Σύγκριση Υλικών Εργαλείων Χειρός - Πλήρης Ανάλυση</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #64b5f6, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            font-size: 0.75rem;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+            transition: all 0.3s ease;
+        }
+
+        .high { color: #4caf50; font-weight: bold; }
+        .medium { color: #ff9800; font-weight: bold; }
+        .low { color: #f44336; font-weight: bold; }
+        .extreme { color: #e91e63; font-weight: bold; }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .chart-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            color: #64b5f6;
+        }
+
+        .filter-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .filter-btn {
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(45deg, #4caf50, #388e3c);
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-label {
+            color: #64b5f6;
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .control-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #e0e0e0;
+            min-width: 150px;
+        }
+
+        .chart-mode-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            border-color: #ff9800;
+        }
+
+        .large-chart {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 1200px) {
+            .large-chart {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            h1 { font-size: 2rem; }
+            table { font-size: 0.7rem; }
+            th, td { padding: 4px; }
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Σύγκριση Υλικών Εργαλείων Χειρός</h1>
+            <p class="subtitle">Πλήρης ανάλυση με ευκαμψία και θερμικές ιδιότητες</p>
+        </header>
+
+        <div class="controls-panel">
+            <div class="control-group">
+                <span class="control-label">Τύπος Γραφήματος:</span>
+                <div class="chart-mode-selector">
+                    <button class="mode-btn active" onclick="switchChartMode('standard')">Κλασικά</button>
+                    <button class="mode-btn" onclick="switchChartMode('comparison')">Σύγκριση</button>
+                    <button class="mode-btn" onclick="switchChartMode('thermal')">Θερμικά</button>
+                    <button class="mode-btn" onclick="switchChartMode('scatter')">Διασπορά</button>
+                    <button class="mode-btn" onclick="switchChartMode('advanced')">Προηγμένα</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <span class="control-label">Φίλτρο Θερμοκρασίας:</span>
+                <input type="range" class="control-input" id="tempRange" min="0" max="4000" value="4000" 
+                       onchange="filterByTemperature(this.value)">
+                <span id="tempValue">4000°C</span>
+            </div>
+        </div>
+
+        <div class="filter-container">
+            <button class="filter-btn active" onclick="filterTable('all')">Όλα τα Υλικά</button>
+            <button class="filter-btn" onclick="filterTable('high-strength')">Υψηλή Αντοχή</button>
+            <button class="filter-btn" onclick="filterTable('rust-resistant')">Αντιοξειδωτικά</button>
+            <button class="filter-btn" onclick="filterTable('lightweight')">Ελαφριά</button>
+            <button class="filter-btn" onclick="filterTable('flexible')">Εύκαμπτα</button>
+            <button class="filter-btn" onclick="filterTable('high-temp')">Υψηλές Θερμοκρασίες</button>
+        </div>
+
+        <div class="table-container">
+            <table id="materialsTable">
+                <thead>
+                    <tr>
+                        <th>Υλικό</th>
+                        <th>Αντοχή<br>(GPa)</th>
+                        <th>Αντοχή σε<br>Σκουριά</th>
+                        <th>Βάρος<br>(g/cm³)</th>
+                        <th>Ευκαμψία<br>(1-10)</th>
+                        <th>Σημείο Τήξης<br>(°C)</th>
+                        <th>Σημείο Βρασμού<br>(°C)</th>
+                        <th>Καταλληλότητα</th>
+                        <th>Κόστος</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-category="high-strength rust-resistant high-temp">
+                        <td><strong>Βολφράμιο</strong></td>
+                        <td class="high">410</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>19.3</td>
+                        <td class="low">2</td>
+                        <td class="extreme">3695</td>
+                        <td class="extreme">5828</td>
+                        <td>Εργαλεία ακριβείας, ηλεκτρόδια</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant lightweight high-temp flexible">
+                        <td><strong>Τιτάνιο</strong></td>
+                        <td class="high">120</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>4.5</td>
+                        <td class="medium">6</td>
+                        <td class="high">1668</td>
+                        <td class="high">3287</td>
+                        <td>Αεροδιαστημική, ιατρικά</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant high-temp">
+                        <td><strong>Χρώμιο</strong></td>
+                        <td class="high">279</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>7.2</td>
+                        <td class="low">3</td>
+                        <td class="high">1907</td>
+                        <td class="high">2671</td>
+                        <td>Επιστρώσεις, κράματα</td>
+                        <td class="medium">Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant high-temp">
+                        <td><strong>Μολυβδαίνιο</strong></td>
+                        <td class="high">329</td>
+                        <td class="high">Πολύ Καλή</td>
+                        <td>10.3</td>
+                        <td class="low">3</td>
+                        <td class="high">2623</td>
+                        <td class="high">4639</td>
+                        <td>Κράματα χάλυβα, καταλύτες</td>
+                        <td class="high">Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant high-temp">
+                        <td><strong>Κοβάλτιο</strong></td>
+                        <td class="medium">200</td>
+                        <td class="high">Πολύ Καλή</td>
+                        <td>8.9</td>
+                        <td class="medium">4</td>
+                        <td class="high">1495</td>
+                        <td class="high">2927</td>
+                        <td>Μαγνήτες, κράματα</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength">
+                        <td><strong>Ατσάλι (σκληρυμένο)</strong></td>
+                        <td class="high">200</td>
+                        <td class="low">Χαμηλή</td>
+                        <td>7.8</td>
+                        <td class="medium">5</td>
+                        <td class="high">1538</td>
+                        <td class="high">2862</td>
+                        <td>Εργαλεία γενικής χρήσης</td>
+                        <td class="low">Χαμηλό</td>
+                    </tr>
+                    <tr data-category="rust-resistant high-temp flexible">
+                        <td><strong>Ανοξείδωτο Ατσάλι</strong></td>
+                        <td class="medium">180</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>8.0</td>
+                        <td class="medium">6</td>
+                        <td class="high">1400</td>
+                        <td class="high">2750</td>
+                        <td>Εργαλεία κουζίνας, ιατρικά</td>
+                        <td class="medium">Μέτριο</td>
+                    </tr>
+                    <tr data-category="">
+                        <td><strong>Σίδηρος</strong></td>
+                        <td class="medium">170</td>
+                        <td class="low">Πολύ Χαμηλή</td>
+                        <td>7.9</td>
+                        <td class="medium">5</td>
+                        <td class="high">1538</td>
+                        <td class="high">2862</td>
+                        <td>Βασικά εργαλεία</td>
+                        <td class="low">Πολύ Χαμηλό</td>
+                    </tr>
+                    <tr data-category="lightweight flexible">
+                        <td><strong>Μόλυβδος</strong></td>
+                        <td class="low">16</td>
+                        <td class="medium">Μέτρια</td>
+                        <td>11.3</td>
+                        <td class="high">9</td>
+                        <td class="low">327</td>
+                        <td class="high">1749</td>
+                        <td>Βάρη, θωράκιση</td>
+                        <td class="low">Χαμηλό</td>
+                    </tr>
+                    <tr data-category="lightweight flexible">
+                        <td><strong>Κασσίτερος</strong></td>
+                        <td class="low">50</td>
+                        <td class="medium">Καλή</td>
+                        <td>7.3</td>
+                        <td class="high">8</td>
+                        <td class="low">232</td>
+                        <td class="high">2602</td>
+                        <td>Επιστρώσεις, κράματα</td>
+                        <td class="medium">Μέτριο</td>
+                    </tr>
+                    <tr data-category="lightweight rust-resistant flexible">
+                        <td><strong>Αλουμίνιο</strong></td>
+                        <td class="low">70</td>
+                        <td class="high">Πολύ Καλή</td>
+                        <td>2.7</td>
+                        <td class="high">7</td>
+                        <td class="medium">660</td>
+                        <td class="high">2519</td>
+                        <td>Ελαφριά εργαλεία</td>
+                        <td class="low">Χαμηλό</td>
+                    </tr>
+                    <tr data-category="lightweight flexible">
+                        <td><strong>Μαγνήσιο</strong></td>
+                        <td class="low">45</td>
+                        <td class="low">Χαμηλή</td>
+                        <td>1.7</td>
+                        <td class="high">8</td>
+                        <td class="medium">650</td>
+                        <td class="medium">1090</td>
+                        <td>Ελαφριά κράματα</td>
+                        <td class="medium">Μέτριο</td>
+                    </tr>
+                    <tr data-category="rust-resistant flexible">
+                        <td><strong>Χαλκός</strong></td>
+                        <td class="low">130</td>
+                        <td class="medium">Καλή</td>
+                        <td>8.9</td>
+                        <td class="high">9</td>
+                        <td class="medium">1085</td>
+                        <td class="high">2562</td>
+                        <td>Ηλεκτρικά εργαλεία</td>
+                        <td class="medium">Μέτριο</td>
+                    </tr>
+                    <tr data-category="rust-resistant high-temp">
+                        <td><strong>Νικέλιο</strong></td>
+                        <td class="medium">200</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>8.9</td>
+                        <td class="medium">4</td>
+                        <td class="high">1455</td>
+                        <td class="high">2913</td>
+                        <td>Επιστρώσεις, κράματα</td>
+                        <td class="high">Υψηλό</td>
+                    </tr>
+                    <tr data-category="rust-resistant flexible">
+                        <td><strong>Ψευδάργυρος</strong></td>
+                        <td class="low">108</td>
+                        <td class="medium">Καλή</td>
+                        <td>7.1</td>
+                        <td class="medium">6</td>
+                        <td class="low">420</td>
+                        <td class="medium">907</td>
+                        <td>Επιστρώσεις, κράματα</td>
+                        <td class="low">Χαμηλό</td>
+                    </tr>
+                    <tr data-category="high-strength lightweight high-temp">
+                        <td><strong>Βηρύλλιο</strong></td>
+                        <td class="high">287</td>
+                        <td class="medium">Καλή</td>
+                        <td>1.8</td>
+                        <td class="low">3</td>
+                        <td class="high">1287</td>
+                        <td class="high">2471</td>
+                        <td>Εργαλεία ακριβείας</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant high-temp">
+                        <td><strong>Ζιρκόνιο</strong></td>
+                        <td class="medium">150</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>6.5</td>
+                        <td class="medium">4</td>
+                        <td class="high">1855</td>
+                        <td class="high">4409</td>
+                        <td>Πυρηνικές εφαρμογές</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant high-temp">
+                        <td><strong>Ιρίδιο</strong></td>
+                        <td class="high">528</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>22.6</td>
+                        <td class="low">2</td>
+                        <td class="high">2466</td>
+                        <td class="high">4428</td>
+                        <td>Εργαλεία ακριβείας</td>
+                        <td class="high">Εξαιρετικά Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant high-temp">
+                        <td><strong>Οσμήριο</strong></td>
+                        <td class="high">550</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>22.6</td>
+                        <td class="low">1</td>
+                        <td class="extreme">3033</td>
+                        <td class="extreme">5012</td>
+                        <td>Εργαλεία ακριβείας</td>
+                        <td class="high">Εξαιρετικά Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant high-temp">
+                        <td><strong>Ρουθήνιο</strong></td>
+                        <td class="high">220</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>12.4</td>
+                        <td class="low">2</td>
+                        <td class="high">2334</td>
+                        <td class="high">4150</td>
+                        <td>Καταλύτες, ηλεκτρονικά</td>
+                        <td class="high">Εξαιρετικά Υψηλό</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="charts-container" id="chartsContainer">
+            <!-- Τα γραφήματα θα δημιουργηθούν δυναμικά -->
+        </div>
+    </div>
+
+    <script>
+        // Δεδομένα υλικών με επεκταμένες ιδιότητες
+        const materials = [
+            {name: 'Βολφράμιο', strength: 410, density: 19.3, corrosion: 5, melting: 3695, boiling: 5828, flexibility: 2, category: 'high-strength rust-resistant high-temp'},
+            {name: 'Τιτάνιο', strength: 120, density: 4.5, corrosion: 5, melting: 1668, boiling: 3287, flexibility: 6, category: 'high-strength rust-resistant lightweight high-temp flexible'},
+            {name: 'Χρώμιο', strength: 279, density: 7.2, corrosion: 5, melting: 1907, boiling: 2671, flexibility: 3, category: 'high-strength rust-resistant high-temp'},
+            {name: 'Μολυβδαίνιο', strength: 329, density: 10.3, corrosion: 4, melting: 2623, boiling: 4639, flexibility: 3, category: 'high-strength rust-resistant high-temp'},
+            {name: 'Κοβάλτιο', strength: 200, density: 8.9, corrosion: 4, melting: 1495, boiling: 2927, flexibility: 4, category: 'high-strength rust-resistant high-temp'},
+            {name: 'Ατσάλι', strength: 200, density: 7.8, corrosion: 1, melting: 1538, boiling: 2862, flexibility: 5, category: 'high-strength'},
+            {name: 'Ανοξείδωτο', strength: 180, density: 8.0, corrosion: 5, melting: 1400, boiling: 2750, flexibility: 6, category: 'rust-resistant high-temp flexible'},
+            {name: 'Σίδηρος', strength: 170, density: 7.9, corrosion: 1, melting: 1538, boiling: 2862, flexibility: 5, category: ''},
+            {name: 'Αλουμίνιο', strength: 70, density: 2.7, corrosion: 4, melting: 660, boiling: 2519, flexibility: 7, category: 'lightweight rust-resistant flexible'},
+            {name: 'Χαλκός', strength: 130, density: 8.9, corrosion: 3, melting: 1085, boiling: 2562, flexibility: 9, category: 'rust-resistant flexible'},
+            {name: 'Μόλυβδος', strength: 16, density: 11.3, corrosion: 3, melting: 327, boiling: 1749, flexibility: 9, category: 'lightweight flexible'},
+            {name: 'Κασσίτερος', strength: 50, density: 7.3, corrosion: 3, melting: 232, boiling: 2602, flexibility: 8, category: 'lightweight flexible'},
+            {name: 'Μαγνήσιο', strength: 45, density: 1.7, corrosion: 1, melting: 650, boiling: 1090, flexibility: 8, category: 'lightweight flexible'},
+            {name: 'Νικέλιο', strength: 200, density: 8.9, corrosion: 5, melting: 1455, boiling: 2913, flexibility: 4, category: 'rust-resistant high-temp'},
+            {name: 'Ψευδάργυρος', strength: 108, density: 7.1, corrosion: 3, melting: 420, boiling: 907, flexibility: 6, category: 'rust-resistant flexible'},
+            {name: 'Βηρύλλιο', strength: 287, density: 1.8, corrosion: 3, melting: 1287, boiling: 2471, flexibility: 3, category: 'high-strength lightweight high-temp'},
+            {name: 'Ζιρκόνιο', strength: 150, density: 6.5, corrosion: 5, melting: 1855, boiling: 4409, flexibility: 4, category: 'high-strength rust-resistant high-temp'},
+            {name: 'Ιρίδιο', strength: 528, density: 22.6, corrosion: 5, melting: 2466, boiling: 4428, flexibility: 2, category: 'high-strength rust-resistant high-temp'},
+            {name: 'Οσμήριο', strength: 550, density: 22.6, corrosion: 5, melting: 3033, boiling: 5012, flexibility: 1, category: 'high-strength rust-resistant high-temp'},
+            {name: 'Ρουθήνιο', strength: 220, density: 12.4, corrosion: 5, melting: 2334, boiling: 4150, flexibility: 2, category: 'high-strength rust-resistant high-temp'}
+        ];
+
+        let currentChartMode = 'standard';
+        let charts = {};
+
+        // Δημιουργία γραφημάτων
+        function createCharts(mode = 'standard') {
+            const container = document.getElementById('chartsContainer');
+            container.innerHTML = '';
+
+            // Καταστροφή υπαρχόντων γραφημάτων
+            Object.values(charts).forEach(chart => {
+                if (chart && typeof chart.destroy === 'function') {
+                    chart.destroy();
+                }
+            });
+            charts = {};
+
+            switch(mode) {
+                case 'standard':
+                    createStandardCharts();
+                    break;
+                case 'comparison':
+                    createComparisonCharts();
+                    break;
+                case 'thermal':
+                    createThermalCharts();
+                    break;
+                case 'scatter':
+                    createScatterCharts();
+                    break;
+                case 'advanced':
+                    createAdvancedCharts();
+                    break;
+            }
+        }
+
+        function createStandardCharts() {
+            const container = document.getElementById('chartsContainer');
+            
+            container.innerHTML = `
+                <div class="chart-box">
+                    <h3 class="chart-title">Αντοχή Υλικών (GPa)</h3>
+                    <canvas id="strengthChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Ευκαμψία Υλικών (1-10)</h3>
+                    <canvas id="flexibilityChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Σημεία Τήξης (°C)</h3>
+                    <canvas id="meltingChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Σημεία Βρασμού (°C)</h3>
+                    <canvas id="boilingChart"></canvas>
+                </div>
+            `;
+
+            setTimeout(() => {
+                createStrengthChart();
+                createFlexibilityChart();
+                createMeltingChart();
+                createBoilingChart();
+            }, 100);
+        }
+
+        function createThermalCharts() {
+            const container = document.getElementById('chartsContainer');
+            
+            container.innerHTML = `
+                <div class="chart-box large-chart">
+                    <h3 class="chart-title">Θερμικό Εύρος (Τήξη - Βρασμός)</h3>
+                    <canvas id="thermalRangeChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Θερμικές Ιδιότητες - Scatter</h3>
+                    <canvas id="thermalScatterChart"></canvas>
+                </div>
+            `;
+
+            setTimeout(() => {
+                createThermalRangeChart();
+                createThermalScatterChart();
+            }, 100);
+        }
+
+        function createScatterCharts() {
+            const container = document.getElementById('chartsContainer');
+            
+            container.innerHTML = `
+                <div class="chart-box large-chart">
+                    <h3 class="chart-title">Αντοχή vs Πυκνότητα</h3>
+                    <canvas id="strengthDensityScatter"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Bubble Chart - Πολλαπλές Ιδιότητες</h3>
+                    <canvas id="bubbleChart"></canvas>
+                </div>
+            `;
+
+            setTimeout(() => {
+                createStrengthDensityScatter();
+                createBubbleChart();
+            }, 100);
+        }
+
+        function createComparisonCharts() {
+            const container = document.getElementById('chartsContainer');
+            
+            container.innerHTML = `
+                <div class="chart-box large-chart">
+                    <h3 class="chart-title">Σύγκριση Όλων των Ιδιοτήτων</h3>
+                    <canvas id="radarComparisonChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Κανονικοποιημένες Τιμές</h3>
+                    <canvas id="normalizedChart"></canvas>
+                </div>
+            `;
+
+            setTimeout(() => {
+                createRadarComparisonChart();
+                createNormalizedChart();
+            }, 100);
+        }
+
+        function createAdvancedCharts() {
+            const container = document.getElementById('chartsContainer');
+            
+            container.innerHTML = `
+                <div class="chart-box">
+                    <h3 class="chart-title">Ευκαμψία vs Αντοχή</h3>
+                    <canvas id="flexibilityStrengthChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Κατανομή Πυκνότητας</h3>
+                    <canvas id="densityDistributionChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Θερμική Αντοχή</h3>
+                    <canvas id="thermalResistanceChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3 class="chart-title">Συνολική Αξιολόγηση</h3>
+                    <canvas id="overallRatingChart"></canvas>
+                </div>
+            `;
+
+            setTimeout(() => {
+                createFlexibilityStrengthChart();
+                createDensityDistributionChart();
+                createThermalResistanceChart();
+                createOverallRatingChart();
+            }, 100);
+        }
+
+        // Υλοποίηση γραφημάτων
+        function createStrengthChart() {
+            const ctx = document.getElementById('strengthChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.strength = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: materials.map(m => m.name),
+                    datasets: [{
+                        label: 'Αντοχή (GPa)',
+                        data: materials.map(m => m.strength),
+                        backgroundColor: materials.map(m => 
+                            m.strength > 300 ? 'rgba(244, 67, 54, 0.8)' :
+                            m.strength > 150 ? 'rgba(255, 152, 0, 0.8)' :
+                            'rgba(76, 175, 80, 0.8)'
+                        ),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: { 
+                            ticks: { color: '#e0e0e0', maxRotation: 45 },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createFlexibilityChart() {
+            const ctx = document.getElementById('flexibilityChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.flexibility = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: materials.map(m => m.name),
+                    datasets: [{
+                        label: 'Ευκαμψία',
+                        data: materials.map(m => m.flexibility),
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                            '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384',
+                            '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40',
+                            '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384', '#36A2EB'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { 
+                            labels: { color: '#e0e0e0' },
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createMeltingChart() {
+            const ctx = document.getElementById('meltingChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.melting = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: materials.map(m => m.name),
+                    datasets: [{
+                        label: 'Σημείο Τήξης (°C)',
+                        data: materials.map(m => m.melting),
+                        borderColor: 'rgba(255, 87, 34, 1)',
+                        backgroundColor: 'rgba(255, 87, 34, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: { 
+                            ticks: { color: '#e0e0e0', maxRotation: 45 },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createBoilingChart() {
+            const ctx = document.getElementById('boilingChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.boiling = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: materials.map(m => m.name),
+                    datasets: [{
+                        label: 'Σημείο Βρασμού (°C)',
+                        data: materials.map(m => m.boiling),
+                        backgroundColor: 'rgba(33, 150, 243, 0.8)',
+                        borderColor: 'rgba(33, 150, 243, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: { 
+                            ticks: { color: '#e0e0e0', maxRotation: 45 },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createThermalRangeChart() {
+            const ctx = document.getElementById('thermalRangeChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.thermalRange = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: materials.map(m => m.name),
+                    datasets: [
+                        {
+                            label: 'Σημείο Τήξης',
+                            data: materials.map(m => m.melting),
+                            backgroundColor: 'rgba(255, 87, 34, 0.7)',
+                            borderColor: 'rgba(255, 87, 34, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Θερμικό Εύρος',
+                            data: materials.map(m => m.boiling - m.melting),
+                            backgroundColor: 'rgba(33, 150, 243, 0.7)',
+                            borderColor: 'rgba(33, 150, 243, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: { color: '#e0e0e0', maxRotation: 45 },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    }
+                }
+            });
+        }
+
+        function createThermalScatterChart() {
+            const ctx = document.getElementById('thermalScatterChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.thermalScatter = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Θερμικές Ιδιότητες',
+                        data: materials.map(m => ({
+                            x: m.melting,
+                            y: m.boiling
+                        })),
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${materials[context.dataIndex].name}: Τήξη ${context.parsed.x}°C, Βρασμός ${context.parsed.y}°C`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Σημείο Τήξης (°C)', color: '#e0e0e0' },
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Σημείο Βρασμού (°C)', color: '#e0e0e0' },
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createStrengthDensityScatter() {
+            const ctx = document.getElementById('strengthDensityScatter')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.strengthDensity = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Αντοχή vs Πυκνότητα',
+                        data: materials.map(m => ({
+                            x: m.strength,
+                            y: m.density
+                        })),
+                        backgroundColor: materials.map(m => 
+                            m.flexibility > 7 ? 'rgba(76, 175, 80, 0.7)' :
+                            m.flexibility > 4 ? 'rgba(255, 152, 0, 0.7)' :
+                            'rgba(244, 67, 54, 0.7)'
+                        ),
+                        borderColor: materials.map(m => 
+                            m.flexibility > 7 ? 'rgba(76, 175, 80, 1)' :
+                            m.flexibility > 4 ? 'rgba(255, 152, 0, 1)' :
+                            'rgba(244, 67, 54, 1)'
+                        ),
+                        pointRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const material = materials[context.dataIndex];
+                                    return `${material.name}: Αντοχή ${material.strength}GPa, Πυκνότητα ${material.density}g/cm³, Ευκαμψία ${material.flexibility}/10`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Αντοχή (GPa)', color: '#e0e0e0' },
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Πυκνότητα (g/cm³)', color: '#e0e0e0' },
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createBubbleChart() {
+            const ctx = document.getElementById('bubbleChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.bubble = new Chart(ctx, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'Υλικά (Αντοχή vs Πυκνότητα vs Ευκαμψία)',
+                        data: materials.map(m => ({
+                            x: m.strength,
+                            y: m.density,
+                            r: m.flexibility * 3
+                        })),
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const material = materials[context.dataIndex];
+                                    return `${material.name}: Αντοχή ${material.strength}GPa, Πυκνότητα ${material.density}g/cm³, Ευκαμψία ${material.flexibility}/10`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Αντοχή (GPa)', color: '#e0e0e0' },
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Πυκνότητα (g/cm³)', color: '#e0e0e0' },
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createRadarComparisonChart() {
+            const ctx = document.getElementById('radarComparisonChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            // Κανονικοποίηση δεδομένων για radar chart
+            const maxValues = {
+                strength: Math.max(...materials.map(m => m.strength)),
+                density: Math.max(...materials.map(m => m.density)),
+                corrosion: 5,
+                flexibility: 10,
+                melting: Math.max(...materials.map(m => m.melting))
+            };
+
+            const topMaterials = materials.slice(0, 5); // Πρώτα 5 υλικά για καλύτερη οπτικοποίηση
+
+            charts.radarComparison = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Αντοχή', 'Πυκνότητα', 'Αντοχή σε Σκουριά', 'Ευκαμψία', 'Σημείο Τήξης'],
+                    datasets: topMaterials.map((material, index) => ({
+                        label: material.name,
+                        data: [
+                            (material.strength / maxValues.strength) * 100,
+                            (material.density / maxValues.density) * 100,
+                            (material.corrosion / maxValues.corrosion) * 100,
+                            (material.flexibility / maxValues.flexibility) * 100,
+                            (material.melting / maxValues.melting) * 100
+                        ],
+                        backgroundColor: `rgba(${50 + index * 40}, ${100 + index * 30}, ${200 - index * 20}, 0.2)`,
+                        borderColor: `rgba(${50 + index * 40}, ${100 + index * 30}, ${200 - index * 20}, 1)`,
+                        pointBackgroundColor: `rgba(${50 + index * 40}, ${100 + index * 30}, ${200 - index * 20}, 1)`
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { color: '#e0e0e0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createNormalizedChart() {
+            const ctx = document.getElementById('normalizedChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            // Κανονικοποίηση όλων των τιμών σε κλίμακα 0-100
+            const maxValues = {
+                strength: Math.max(...materials.map(m => m.strength)),
+                density: Math.max(...materials.map(m => m.density)),
+                flexibility: 10,
+                melting: Math.max(...materials.map(m => m.melting))
+            };
+
+            charts.normalized = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: materials.map(m => m.name),
+                    datasets: [
+                        {
+                            label: 'Αντοχή (κανονικοποιημένη)',
+                            data: materials.map(m => (m.strength / maxValues.strength) * 100),
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                        },
+                        {
+                            label: 'Ευκαμψία (κανονικοποιημένη)',
+                            data: materials.map(m => (m.flexibility / maxValues.flexibility) * 100),
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                        },
+                        {
+                            label: 'Σημείο Τήξης (κανονικοποιημένο)',
+                            data: materials.map(m => (m.melting / maxValues.melting) * 100),
+                            backgroundColor: 'rgba(255, 206, 86, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: { 
+                            ticks: { color: '#e0e0e0', maxRotation: 45 },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createFlexibilityStrengthChart() {
+            const ctx = document.getElementById('flexibilityStrengthChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.flexibilityStrength = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Ευκαμψία vs Αντοχή',
+                        data: materials.map(m => ({
+                            x: m.flexibility,
+                            y: m.strength
+                        })),
+                        backgroundColor: 'rgba(156, 39, 176, 0.6)',
+                        borderColor: 'rgba(156, 39, 176, 1)',
+                        pointRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const material = materials[context.dataIndex];
+                                    return `${material.name}: Ευκαμψία ${material.flexibility}/10, Αντοχή ${material.strength}GPa`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Ευκαμψία (1-10)', color: '#e0e0e0' },
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Αντοχή (GPa)', color: '#e0e0e0' },
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createDensityDistributionChart() {
+            const ctx = document.getElementById('densityDistributionChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            // Κατηγοριοποίηση πυκνότητας
+            const lightMaterials = materials.filter(m => m.density < 5).length;
+            const mediumMaterials = materials.filter(m => m.density >= 5 && m.density < 15).length;
+            const heavyMaterials = materials.filter(m => m.density >= 15).length;
+
+            charts.densityDistribution = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Ελαφριά (<5 g/cm³)', 'Μέτρια (5-15 g/cm³)', 'Βαριά (>15 g/cm³)'],
+                    datasets: [{
+                        data: [lightMaterials, mediumMaterials, heavyMaterials],
+                        backgroundColor: [
+                            'rgba(76, 175, 80, 0.8)',
+                            'rgba(255, 152, 0, 0.8)',
+                            'rgba(244, 67, 54, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    }
+                }
+            });
+        }
+
+        function createThermalResistanceChart() {
+            const ctx = document.getElementById('thermalResistanceChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            charts.thermalResistance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: materials.map(m => m.name),
+                    datasets: [{
+                        label: 'Θερμική Αντοχή (Σημείο Τήξης / 100)',
+                        data: materials.map(m => m.melting / 100),
+                        borderColor: 'rgba(255, 87, 34, 1)',
+                        backgroundColor: 'rgba(255, 87, 34, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: { 
+                            ticks: { color: '#e0e0e0', maxRotation: 45 },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+                function createOverallRatingChart() {
+            const ctx = document.getElementById('overallRatingChart')?.getContext('2d');
+            if (!ctx) return;
+            
+            // Υπολογισμός συνολικής βαθμολογίας
+            const overallRatings = materials.map(m => {
+                const strengthScore = (m.strength / 550) * 25; // Max 25 points
+                const flexibilityScore = (m.flexibility / 10) * 25; // Max 25 points
+                const corrosionScore = (m.corrosion / 5) * 25; // Max 25 points
+                const thermalScore = (m.melting / 4000) * 25; // Max 25 points
+                return strengthScore + flexibilityScore + corrosionScore + thermalScore;
+            });
+
+            charts.overallRating = new Chart(ctx, {
+                type: 'horizontalBar',
+                data: {
+                    labels: materials.map(m => m.name),
+                    datasets: [{
+                        label: 'Συνολική Βαθμολογία (0-100)',
+                        data: overallRatings,
+                        backgroundColor: overallRatings.map(rating => 
+                            rating > 75 ? 'rgba(76, 175, 80, 0.8)' :
+                            rating > 50 ? 'rgba(255, 152, 0, 0.8)' :
+                            'rgba(244, 67, 54, 0.8)'
+                        ),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0' } }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: { 
+                            ticks: { color: '#e0e0e0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Λειτουργίες ελέγχου
+        function switchChartMode(mode) {
+            currentChartMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            createCharts(mode);
+        }
+
+        function filterTable(category) {
+            const rows = document.querySelectorAll('#materialsTable tbody tr');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            rows.forEach(row => {
+                if (category === 'all' || row.dataset.category.includes(category)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filterByTemperature(maxTemp) {
+            document.getElementById('tempValue').textContent = maxTemp + '°C';
+            const rows = document.querySelectorAll('#materialsTable tbody tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 5) {
+                    const meltingTemp = parseInt(cells[5].textContent);
+                    if (meltingTemp <= maxTemp) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Επιπλέον λειτουργίες
+        function exportData() {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Υλικό,Αντοχή,Πυκνότητα,Ευκαμψία,Σημείο Τήξης,Σημείο Βρασμού,Αντοχή σε Σκουριά\n"
+                + materials.map(m => 
+                    `${m.name},${m.strength},${m.density},${m.flexibility},${m.melting},${m.boiling},${m.corrosion}`
+                ).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "υλικα_εργαλειων.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function resetFilters() {
+            document.querySelectorAll('#materialsTable tbody tr').forEach(row => {
+                row.style.display = '';
+            });
+            document.getElementById('tempRange').value = 4000;
+            document.getElementById('tempValue').textContent = '4000°C';
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.filter-btn').classList.add('active');
+        }
+
+        // Προσθήκη κουμπιών εξαγωγής στο interface
+        function addExportButtons() {
+            const controlsPanel = document.querySelector('.controls-panel');
+            const exportGroup = document.createElement('div');
+            exportGroup.className = 'control-group';
+            exportGroup.innerHTML = `
+                <span class="control-label">Εξαγωγή:</span>
+                <button class="mode-btn" onclick="exportData()">CSV</button>
+                <button class="mode-btn" onclick="printReport()">Εκτύπωση</button>
+                <button class="mode-btn" onclick="resetFilters()">Επαναφορά</button>
+            `;
+            controlsPanel.appendChild(exportGroup);
+        }
+
+        // Προσθήκη στατιστικών
+        function addStatistics() {
+            const container = document.querySelector('.container');
+            const statsPanel = document.createElement('div');
+            statsPanel.className = 'controls-panel';
+            statsPanel.innerHTML = `
+                <h3 style="color: #64b5f6; margin-bottom: 15px;">📊 Στατιστικά Υλικών</h3>
+                <div class="control-group">
+                    <span class="control-label">Συνολικά Υλικά:</span>
+                    <span style="color: #4caf50; font-weight: bold;">${materials.length}</span>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Μέση Αντοχή:</span>
+                    <span style="color: #ff9800; font-weight: bold;">${(materials.reduce((sum, m) => sum + m.strength, 0) / materials.length).toFixed(1)} GPa</span>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Μέση Ευκαμψία:</span>
+                    <span style="color: #2196f3; font-weight: bold;">${(materials.reduce((sum, m) => sum + m.flexibility, 0) / materials.length).toFixed(1)}/10</span>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Υψηλότερο Σημείο Τήξης:</span>
+                    <span style="color: #f44336; font-weight: bold;">${Math.max(...materials.map(m => m.melting))}°C (${materials.find(m => m.melting === Math.max(...materials.map(m => m.melting))).name})</span>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Πιο Εύκαμπτο:</span>
+                    <span style="color: #9c27b0; font-weight: bold;">${materials.find(m => m.flexibility === Math.max(...materials.map(m => m.flexibility))).name} (${Math.max(...materials.map(m => m.flexibility))}/10)</span>
+                </div>
+            `;
+            
+            container.insertBefore(statsPanel, document.querySelector('.filter-container'));
+        }
+
+        // Προσθήκη tooltips για καλύτερη UX
+        function addTooltips() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .tooltip {
+                    position: relative;
+                    display: inline-block;
+                }
+                
+                .tooltip .tooltiptext {
+                    visibility: hidden;
+                    width: 200px;
+                    background-color: rgba(0, 0, 0, 0.9);
+                    color: #fff;
+                    text-align: center;
+                    border-radius: 6px;
+                    padding: 8px;
+                    position: absolute;
+                    z-index: 1;
+                    bottom: 125%;
+                    left: 50%;
+                    margin-left: -100px;
+                    opacity: 0;
+                    transition: opacity 0.3s;
+                    font-size: 0.8rem;
+                }
+                
+                .tooltip:hover .tooltiptext {
+                    visibility: visible;
+                    opacity: 1;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Προσθήκη animation effects
+        function addAnimations() {
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                .chart-box {
+                    animation: fadeInUp 0.6s ease-out;
+                }
+                
+                .chart-box:nth-child(1) { animation-delay: 0.1s; }
+                .chart-box:nth-child(2) { animation-delay: 0.2s; }
+                .chart-box:nth-child(3) { animation-delay: 0.3s; }
+                .chart-box:nth-child(4) { animation-delay: 0.4s; }
+                
+                .table-container {
+                    animation: fadeInUp 0.8s ease-out;
+                }
+                
+                .controls-panel {
+                    animation: fadeInUp 0.5s ease-out;
+                }
+                
+                tr:hover {
+                    transform: scale(1.02);
+                    box-shadow: 0 4px 8px rgba(100, 181, 246, 0.3);
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Αρχικοποίηση
+        document.addEventListener('DOMContentLoaded', function() {
+            createCharts('standard');
+            addExportButtons();
+            addStatistics();
+            addTooltips();
+            addAnimations();
+            
+            // Προσθήκη loading indicator
+            setTimeout(() => {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.innerHTML = '<p style="text-align: center; color: #4caf50; font-weight: bold;">✅ Όλα τα γραφήματα φορτώθηκαν επιτυχώς!</p>';
+                document.querySelector('.container').appendChild(loadingDiv);
+                
+                setTimeout(() => {
+                    loadingDiv.remove();
+                }, 3000);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
