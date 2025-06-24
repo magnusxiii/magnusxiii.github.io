@@ -6,13 +6,13 @@
   <title>Σύγκριση Μετάλλων Εργαλείων Χειρός</title>
   <style>
     :root {
-      --bg: #0d1117;
-      --card: #161b22;
-      --text: #c9d1d9;
-      --accent: #58a6ff;
-      --highlight: #238636;
-      --warning: #d29922;
-      --danger: #da3633;
+      --bg: #121212;
+      --card: #1e1e1e;
+      --text: #e0e0e0;
+      --accent: #4caf50;
+      --highlight: #2196f3;
+      --warning: #ff9800;
+      --danger: #f44336;
     }
 
     body {
@@ -21,77 +21,67 @@
       font-family: "Segoe UI", sans-serif;
       margin: 0;
       padding: 2rem;
-      line-height: 1.6;
     }
 
     h1, h2 {
       color: var(--accent);
       text-align: center;
-      margin-bottom: 1rem;
     }
 
     .card {
       background-color: var(--card);
-      border: 1px solid #30363d;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      padding: 2rem;
-      margin-bottom: 2.5rem;
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      transition: transform 0.3s;
     }
 
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+      transform: scale(1.02);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
-      border-radius: 12px;
-      overflow: hidden;
     }
 
     th, td {
-      border: 1px solid #30363d;
-      padding: 0.8rem;
+      border: 1px solid #333;
+      padding: 0.75rem;
       text-align: center;
     }
 
     th {
       background-color: var(--highlight);
       color: white;
-      font-weight: 600;
     }
 
     td {
-      background-color: #21262d;
+      background-color: #2a2a2a;
     }
 
     .tag {
-      padding: 0.4rem 0.8rem;
-      border-radius: 8px;
+      padding: 0.3rem 0.7rem;
+      border-radius: 5px;
       font-weight: bold;
-      font-size: 0.9rem;
       display: inline-block;
     }
-
-    .tag.good { background: var(--highlight); color: #fff; }
+    .tag.good { background: var(--accent); color: #fff; }
     .tag.medium { background: var(--warning); color: #000; }
     .tag.bad { background: var(--danger); color: #fff; }
 
     canvas {
       max-width: 100%;
-      background-color: #0d1117;
-      border-radius: 12px;
-      padding: 1rem;
+      background-color: #fff;
+      border-radius: 10px;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Σύγκριση Υλικών Εργαλείων Χειρός</h1>
+  <h1>Σύγκριση Υλικών Εργαλείων Χειρός</h1>
   
 
   <div class="card">
@@ -195,7 +185,7 @@
         </tr>
       </thead>
       <tbody>
-           <tr><td>Cr-V</td><td>Υψηλή</td><td>Υψηλή</td><td>Μέτριο</td><td>Επαγγελματική Χρήση</td></tr>
+        <tr><td>Cr-V</td><td>Υψηλή</td><td>Υψηλή</td><td>Μέτριο</td><td>Επαγγελματική Χρήση</td></tr>
         <tr><td>Ανθρακούχος Χάλυβας</td><td>Καλή</td><td>Χαμηλή</td><td>Βαρύ</td><td>Κοπτικά Εργαλεία</td></tr>
         <tr><td>Αλουμίνιο</td><td>Χαμηλή</td><td>Υψηλή</td><td>Πολύ Ελαφρύ</td><td>Ειδική Χρήση</td></tr>
         <tr><td>Ανοξείδωτος Χάλυβας</td><td>Καλή</td><td>Πολύ Υψηλή</td><td>Μέτριο</td><td>Υγρό Περιβάλλον</td></tr>
@@ -207,7 +197,7 @@
       </tbody>
     </table>
   </div>
-
+  
   <div class="card">
     <h2>Γράφημα Σύγκρισης (Άριστα 10)</h2>
     <canvas id="chart" height="300"></canvas>
@@ -220,30 +210,30 @@
       data: {
         labels: ['Αντοχή', 'Αντοχή σε Σκουριά', 'Βάρος (αντιστροφή)'],
         datasets: [
-          { label: 'Cr-V', data: [9, 9, 6], backgroundColor: 'rgba(88, 166, 255, 0.3)', borderColor: '#58a6ff' },
-          { label: 'Ανθρακούχος Χάλυβας', data: [7, 3, 3], backgroundColor: 'rgba(210, 153, 34, 0.3)', borderColor: '#d29922' },
-          { label: 'Αλουμίνιο', data: [4, 9, 10], backgroundColor: 'rgba(35, 134, 54, 0.3)', borderColor: '#238636' },
-          { label: 'Ανοξ. Χάλυβας', data: [7, 10, 6], backgroundColor: 'rgba(200, 200, 200, 0.2)', borderColor: '#ccc' },
+          { label: 'Cr-V', data: [9, 9, 6], backgroundColor: 'rgba(76, 175, 80, 0.3)', borderColor: '#4caf50' },
+          { label: 'Ανθρακούχος Χάλυβας', data: [7, 3, 3], backgroundColor: 'rgba(255, 152, 0, 0.3)', borderColor: '#ff9800' },
+          { label: 'Αλουμίνιο', data: [4, 9, 10], backgroundColor: 'rgba(33, 150, 243, 0.3)', borderColor: '#2196f3' },
+          { label: 'Ανοξ. Χάλυβας', data: [7, 10, 6], backgroundColor: 'rgba(255, 255, 255, 0.2)', borderColor: '#bbb' },
           { label: 'Ατσάλι', data: [9, 6, 5], backgroundColor: 'rgba(0, 150, 136, 0.3)', borderColor: '#009688' },
           { label: 'Βολφράμιο', data: [10, 7, 2], backgroundColor: 'rgba(156, 39, 176, 0.3)', borderColor: '#9c27b0' },
           { label: 'Σίδηρος', data: [6, 3, 3], backgroundColor: 'rgba(255, 235, 59, 0.3)', borderColor: '#ffeb3b' },
-          { label: 'Μόλυβδος', data: [2, 7, 1], backgroundColor: 'rgba(218, 54, 51, 0.3)', borderColor: '#da3633' },
+          { label: 'Μόλυβδος', data: [2, 7, 1], backgroundColor: 'rgba(244, 67, 54, 0.3)', borderColor: '#f44336' },
           { label: 'Κασσίτερος', data: [3, 7, 8], backgroundColor: 'rgba(158, 158, 158, 0.3)', borderColor: '#9e9e9e' }
         ]
       },
       options: {
         scales: {
           r: {
-            angleLines: { color: '#30363d' },
-            grid: { color: '#30363d' },
-            pointLabels: { color: '#c9d1d9' },
+            angleLines: { color: '#444' },
+            grid: { color: '#444' },
+            pointLabels: { color: '#eee' },
             suggestedMin: 0,
             suggestedMax: 10
           }
         },
         plugins: {
           legend: {
-            labels: { color: '#c9d1d9' }
+            labels: { color: '#eee' }
           }
         }
       }
