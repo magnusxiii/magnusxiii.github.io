@@ -1,243 +1,474 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Σύγκριση Μετάλλων Εργαλείων Χειρός</title>
-  <style>
-    :root {
-      --bg: #121212;
-      --card: #1e1e1e;
-      --text: #e0e0e0;
-      --accent: #4caf50;
-      --highlight: #2196f3;
-      --warning: #ff9800;
-      --danger: #f44336;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Σύγκριση Υλικών Εργαλείων Χειρός</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 2rem;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
 
-    h1, h2 {
-      color: var(--accent);
-      text-align: center;
-    }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-    .card {
-      background-color: var(--card);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      transition: transform 0.3s;
-    }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    .card:hover {
-      transform: scale(1.02);
-    }
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #64b5f6, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+        }
 
-    th, td {
-      border: 1px solid #333;
-      padding: 0.75rem;
-      text-align: center;
-    }
+        .table-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
 
-    th {
-      background-color: var(--highlight);
-      color: white;
-    }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
 
-    td {
-      background-color: #2a2a2a;
-    }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-    .tag {
-      padding: 0.3rem 0.7rem;
-      border-radius: 5px;
-      font-weight: bold;
-      display: inline-block;
-    }
-    .tag.good { background: var(--accent); color: #fff; }
-    .tag.medium { background: var(--warning); color: #000; }
-    .tag.bad { background: var(--danger); color: #fff; }
+        th {
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
 
-    canvas {
-      max-width: 100%;
-      background-color: #fff;
-      border-radius: 10px;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+            transition: all 0.3s ease;
+        }
+
+        .high { color: #4caf50; font-weight: bold; }
+        .medium { color: #ff9800; font-weight: bold; }
+        .low { color: #f44336; font-weight: bold; }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .chart-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            color: #64b5f6;
+        }
+
+        .filter-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .filter-btn {
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(45deg, #4caf50, #388e3c);
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            h1 { font-size: 2rem; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 8px; }
+        }
+    </style>
 </head>
 <body>
-  <h1>Σύγκριση Υλικών Εργαλείων Χειρός</h1>
-  
+    <div class="container">
+        <header>
+            <h1>Σύγκριση Υλικών Εργαλείων Χειρός</h1>
+            <p class="subtitle">Αναλυτική σύγκριση ιδιοτήτων μεταλλικών υλικών</p>
+        </header>
 
-  <div class="card">
-    <h2>Cr-V (Chrome Vanadium)</h2>
-    <p>Επιχρωμιωμένο βανάδιο: πολύ ανθεκτικό, με καλή προστασία από σκουριά. Ιδανικό για καρυδάκια, πένσες, κλειδιά κλπ.</p>
-    <ul>
-      <li>Αντοχή: <span class="tag good">Υψηλή</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag good">Υψηλή</span></li>
-      <li>Βάρος: <span class="tag medium">Μέτριο</span></li>
-    </ul>
-  </div>
+        <div class="filter-container">
+            <button class="filter-btn active" onclick="filterTable('all')">Όλα τα Υλικά</button>
+            <button class="filter-btn" onclick="filterTable('high-strength')">Υψηλή Αντοχή</button>
+            <button class="filter-btn" onclick="filterTable('rust-resistant')">Αντιοξειδωτικά</button>
+            <button class="filter-btn" onclick="filterTable('lightweight')">Ελαφριά</button>
+        </div>
 
-  <div class="card">
-    <h2>Ανθρακούχος Χάλυβας (Carbon Steel)</h2>
-    <p>Οικονομικό και σκληρό, αλλά οξειδώνεται εύκολα. Κατάλληλο για κοπτικά εργαλεία, όπως λίμες και τσιμπίδες.</p>
-    <ul>
-      <li>Αντοχή: <span class="tag good">Καλή</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag bad">Χαμηλή</span></li>
-      <li>Βάρος: <span class="tag medium">Βαρύ</span></li>
-    </ul>
-  </div>
- <div class="card">
-    <h2>Ατσάλι (Steel)</h2>
-    <p>Κράμα κυρίως από σίδηρο και άνθρακα, βασικό υλικό για πολλά εργαλεία λόγω αντοχής και σκληρότητας.</p>
-    <ul>
-      <li>Αντοχή: <span class="tag good">Υψηλή</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag medium">Μέτρια</span></li>
-      <li>Βάρος: <span class="tag medium">Μέτριο προς Βαρύ</span></li>
-    </ul>
-  </div>
-  <div class="card">
-    <h2>Αλουμίνιο</h2>
-    <p>Ελαφρύ και ανθεκτικό σε διάβρωση, αλλά όχι πολύ σκληρό. Χρησιμοποιείται κυρίως σε ειδικά εργαλεία (ηλεκτρονικά, ποδήλατα).</p>
-    <ul>
-      <li>Αντοχή: <span class="tag bad">Χαμηλή</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag good">Υψηλή</span></li>
-      <li>Βάρος: <span class="tag good">Πολύ Ελαφρύ</span></li>
-    </ul>
-  </div>
+        <div class="table-container">
+            <table id="materialsTable">
+                <thead>
+                    <tr>
+                        <th>Υλικό</th>
+                        <th>Αντοχή (GPa)</th>
+                        <th>Αντοχή σε Σκουριά</th>
+                        <th>Βάρος (g/cm³)</th>
+                        <th>Καταλληλότητα</th>
+                        <th>Κόστος</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-category="high-strength rust-resistant">
+                        <td><strong>Βολφράμιο</strong></td>
+                        <td class="high">410</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>19.3</td>
+                        <td>Εργαλεία ακριβείας, ηλεκτρόδια</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant lightweight">
+                        <td><strong>Τιτάνιο</strong></td>
+                        <td class="high">120</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>4.5</td>
+                        <td>Αεροδιαστημική, ιατρικά</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant">
+                        <td><strong>Χρώμιο</strong></td>
+                        <td class="high">279</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>7.2</td>
+                        <td>Επιστρώσεις, κράματα</td>
+                        <td class="medium">Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant">
+                        <td><strong>Μολυβδαίνιο</strong></td>
+                        <td class="high">329</td>
+                        <td class="high">Πολύ Καλή</td>
+                        <td>10.3</td>
+                        <td>Κράματα χάλυβα, καταλύτες</td>
+                        <td class="high">Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant">
+                        <td><strong>Κοβάλτιο</strong></td>
+                        <td class="medium">200</td>
+                        <td class="high">Πολύ Καλή</td>
+                        <td>8.9</td>
+                        <td>Μαγνήτες, κράματα</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength">
+                        <td><strong>Ατσάλι (σκληρυμένο)</strong></td>
+                        <td class="high">200</td>
+                        <td class="low">Χαμηλή</td>
+                        <td>7.8</td>
+                        <td>Εργαλεία γενικής χρήσης</td>
+                        <td class="low">Χαμηλό</td>
+                    </tr>
+                    <tr data-category="rust-resistant">
+                        <td><strong>Ανοξείδωτο Ατσάλι</strong></td>
+                        <td class="medium">180</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>8.0</td>
+                        <td>Εργαλεία κουζίνας, ιατρικά</td>
+                        <td class="medium">Μέτριο</td>
+                    </tr>
+                    <tr data-category="">
+                        <td><strong>Σίδηρος</strong></td>
+                        <td class="medium">170</td>
+                        <td class="low">Πολύ Χαμηλή</td>
+                        <td>7.9</td>
+                        <td>Βασικά εργαλεία</td>
+                        <td class="low">Πολύ Χαμηλό</td>
+                    </tr>
+                    <tr data-category="lightweight">
+                        <td><strong>Μόλυβδος</strong></td>
+                        <td class="low">16</td>
+                        <td class="medium">Μέτρια</td>
+                        <td>11.3</td>
+                        <td>Βάρη, θωράκιση</td>
+                        <td class="low">Χαμηλό</td>
+                    </tr>
+                    <tr data-category="lightweight">
+                        <td><strong>Κασσίτερος</strong></td>
+                        <td class="low">50</td>
+                        <td class="medium">Καλή</td>
+                        <td>7.3</td>
+                        <td>Επιστρώσεις, κράματα</td>
+                        <td class="medium">Μέτριο</td>
+                    </tr>
+                    <tr data-category="lightweight rust-resistant">
+                        <td><strong>Αλουμίνιο</strong></td>
+                        <td class="low">70</td>
+                        <td class="high">Πολύ Καλή</td>
+                        <td>2.7</td>
+                        <td>Ελαφριά εργαλεία</td>
+                        <td class="low">Χαμηλό</td>
+                    </tr>
+                    <tr data-category="lightweight">
+                        <td><strong>Μαγνήσιο</strong></td>
+                        <td class="low">45</td>
+                        <td class="low">Χαμηλή</td>
+                        <td>1.7</td>
+                        <td>Ελαφριά κράματα</td>
+                        <td class="medium">Μέτριο</td>
+                    </tr>
+                    <tr data-category="rust-resistant">
+                        <td><strong>Χαλκός</strong></td>
+                        <td class="low">130</td>
+                        <td class="medium">Καλή</td>
+                        <td>8.9</td>
+                        <td>Ηλεκτρικά εργαλεία</td>
+                        <td class="medium">Μέτριο</td>
+                    </tr>
+                    <tr data-category="rust-resistant">
+                        <td><strong>Νικέλιο</strong></td>
+                        <td class="medium">200</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>8.9</td>
+                        <td>Επιστρώσεις, κράματα</td>
+                        <td class="high">Υψηλό</td>
+                    </tr>
+                    <tr data-category="rust-resistant">
+                        <td><strong>Ψευδάργυρος</strong></td>
+                        <td class="low">108</td>
+                        <td class="medium">Καλή</td>
+                        <td>7.1</td>
+                        <td>Επιστρώσεις, κράματα</td>
+                        <td class="low">Χαμηλό</td>
+                    </tr>
+                    <tr data-category="high-strength lightweight">
+                        <td><strong>Βηρύλλιο</strong></td>
+                        <td class="high">287</td>
+                        <td class="medium">Καλή</td>
+                        <td>1.8</td>
+                        <td>Εργαλεία ακριβείας</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant">
+                        <td><strong>Ζιρκόνιο</strong></td>
+                        <td class="medium">150</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>6.5</td>
+                        <td>Πυρηνικές εφαρμογές</td>
+                        <td class="high">Πολύ Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant">
+                        <td><strong>Ιρίδιο</strong></td>
+                        <td class="high">528</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>22.6</td>
+                        <td>Εργαλεία ακριβείας</td>
+                        <td class="high">Εξαιρετικά Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant">
+                        <td><strong>Οσμήριο</strong></td>
+                        <td class="high">550</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>22.6</td>
+                        <td>Εργαλεία ακριβείας</td>
+                        <td class="high">Εξαιρετικά Υψηλό</td>
+                    </tr>
+                    <tr data-category="high-strength rust-resistant">
+                        <td><strong>Ρουθήνιο</strong></td>
+                        <td class="high">220</td>
+                        <td class="high">Εξαιρετική</td>
+                        <td>12.4</td>
+                        <td>Καταλύτες, ηλεκτρονικά</td>
+                        <td class="high">Εξαιρετικά Υψηλό</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-  <div class="card">
-    <h2>Ανοξείδωτος Χάλυβας (Stainless Steel)</h2>
-    <p>Ιδανικός για εργαλεία που έρχονται σε επαφή με νερό ή υγρασία. Δεν σκουριάζει εύκολα.</p>
-    <ul>
-      <li>Αντοχή: <span class="tag good">Καλή</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag good">Πολύ Υψηλή</span></li>
-      <li>Βάρος: <span class="tag medium">Μέτριο</span></li>
-    </ul>
-  </div>
+        <div class="charts-container">
+            <div class="chart-box">
+                <h3 class="chart-title">Αντοχή Υλικών (GPa)</h3>
+                <canvas id="strengthChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3 class="chart-title">Πυκνότητα Υλικών (g/cm³)</h3>
+                <canvas id="densityChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3 class="chart-title">Αντοχή σε Διάβρωση</h3>
+                <canvas id="corrosionChart"></canvas>
+            </div>
+        </div>
+    </div>
 
-  <div class="card">
-    <h2>Βολφράμιο (Tungsten)</h2>
-    <p>Πολύ σκληρό μέταλλο με υψηλό σημείο τήξης. Ιδανικό για κοπτικά εργαλεία υψηλής αντοχής.</p>
-    <ul>
-      <li>Αντοχή: <span class="tag good">Πολύ Υψηλή</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag good">Καλή</span></li>
-      <li>Βάρος: <span class="tag bad">Βαρύ</span></li>
-    </ul>
-  </div>
+    <script>
+        // Δεδομένα υλικών
+        const materials = [
+            {name: 'Βολφράμιο', strength: 410, density: 19.3, corrosion: 5},
+            {name: 'Τιτάνιο', strength: 120, density: 4.5, corrosion: 5},
+            {name: 'Χρώμιο', strength: 279, density: 7.2, corrosion: 5},
+            {name: 'Μολυβδαίνιο', strength: 329, density: 10.3, corrosion: 4},
+            {name: 'Κοβάλτιο', strength: 200, density: 8.9, corrosion: 4},
+            {name: 'Ατσάλι', strength: 200, density: 7.8, corrosion: 1},
+            {name: 'Ανοξείδωτο', strength: 180, density: 8.0, corrosion: 5},
+            {name: 'Σίδηρος', strength: 170, density: 7.9, corrosion: 1},
+            {name: 'Αλουμίνιο', strength: 70, density: 2.7, corrosion: 4},
+            {name: 'Χαλκός', strength: 130, density: 8.9, corrosion: 3}
+        ];
 
-  <div class="card">
-    <h2>Σίδηρος (Iron)</h2>
-    <p>Βασικό μέταλλο για κατασκευή χάλυβα, αλλά μόνο του είναι επιρρεπές σε σκουριά.</p>
-    <ul>
-      <li>Αντοχή: <span class="tag medium">Μέτρια</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag bad">Χαμηλή</span></li>
-      <li>Βάρος: <span class="tag medium">Βαρύ</span></li>
-    </ul>
-  </div>
+        // Γράφημα Αντοχής
+        const strengthCtx = document.getElementById('strengthChart').getContext('2d');
+        new Chart(strengthCtx, {
+            type: 'bar',
+            data: {
+                labels: materials.map(m => m.name),
+                datasets: [{
+                    label: 'Αντοχή (GPa)',
+                    data: materials.map(m => m.strength),
+                    backgroundColor: 'rgba(100, 181, 246, 0.8)',
+                    borderColor: 'rgba(100, 181, 246, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#e0e0e0' } }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { color: '#e0e0e0' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    x: { 
+                        ticks: { color: '#e0e0e0' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
 
-  <div class="card">
-    <h2>Μόλυβδος (Lead)</h2>
-    <p>Μαλακό και βαρύ μέταλλο, χρησιμοποιείται κυρίως για βάρη και προστατευτικά, όχι για εργασία.</p>
-    <ul>
-      <li>Αντοχή: <span class="tag bad">Πολύ Χαμηλή</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag good">Καλή</span></li>
-      <li>Βάρος: <span class="tag bad">Πολύ Βαρύ</span></li>
-    </ul>
-  </div>
+        // Γράφημα Πυκνότητας
+        const densityCtx = document.getElementById('densityChart').getContext('2d');
+        new Chart(densityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: materials.map(m => m.name),
+                datasets: [{
+                    data: materials.map(m => m.density),
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF',
+                        '#4BC0C0', '#FF6384'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#e0e0e0' } }
+                }
+            }
+        });
 
-  <div class="card">
-    <h2>Κασσίτερος (Tin)</h2>
-    <p>Χρησιμοποιείται σε συγκολλήσεις και επικαλύψεις, όχι κατάλληλος για δομικά εργαλεία.</p>
-    <ul>
-      <li>Αντοχή: <span class="tag bad">Χαμηλή</span></li>
-      <li>Αντοχή σε διάβρωση: <span class="tag good">Καλή</span></li>
-      <li>Βάρος: <span class="tag medium">Ελαφρύ</span></li>
-    </ul>
-  </div>
+        // Γράφημα Αντοχής σε Διάβρωση
+        const corrosionCtx = document.getElementById('corrosionChart').getContext('2d');
+        new Chart(corrosionCtx, {
+            type: 'radar',
+            data: {
+                labels: materials.map(m => m.name),
+                datasets: [{
+                    label: 'Αντοχή σε Διάβρωση',
+                    data: materials.map(m => m.corrosion),
+                    backgroundColor: 'rgba(76, 192, 192, 0.2)',
+                    borderColor: 'rgba(76, 192, 192, 1)',
+                    pointBackgroundColor: 'rgba(76, 192, 192, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { labels: { color: '#e0e0e0' } }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: { color: '#e0e0e0' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: { color: '#e0e0e0' }
+                    }
+                }
+            }
+        });
 
-  <div class="card">
-    <h2>Πίνακας Σύγκρισης</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Υλικό</th>
-          <th>Αντοχή</th>
-          <th>Αντοχή σε Σκουριά</th>
-          <th>Βάρος</th>
-          <th>Καταλληλότητα</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>Cr-V</td><td>Υψηλή</td><td>Υψηλή</td><td>Μέτριο</td><td>Επαγγελματική Χρήση</td></tr>
-        <tr><td>Ανθρακούχος Χάλυβας</td><td>Καλή</td><td>Χαμηλή</td><td>Βαρύ</td><td>Κοπτικά Εργαλεία</td></tr>
-        <tr><td>Αλουμίνιο</td><td>Χαμηλή</td><td>Υψηλή</td><td>Πολύ Ελαφρύ</td><td>Ειδική Χρήση</td></tr>
-        <tr><td>Ανοξείδωτος Χάλυβας</td><td>Καλή</td><td>Πολύ Υψηλή</td><td>Μέτριο</td><td>Υγρό Περιβάλλον</td></tr>
-        <tr><td>Ατσάλι</td><td>Υψηλή</td><td>Μέτρια</td><td>Μέτριο προς Βαρύ</td><td>Γενική Χρήση</td></tr>
-        <tr><td>Βολφράμιο</td><td>Πολύ Υψηλή</td><td>Καλή</td><td>Πολύ Βαρύ</td><td>Κοπτικά / Εξειδικευμένα</td></tr>
-        <tr><td>Σίδηρος</td><td>Μέτρια</td><td>Χαμηλή</td><td>Βαρύ</td><td>Δομική Βάση</td></tr>
-        <tr><td>Μόλυβδος</td><td>Πολύ Χαμηλή</td><td>Καλή</td><td>Πολύ Βαρύ</td><td>Αντικραδασμική / Προστατευτική</td></tr>
-        <tr><td>Κασσίτερος</td><td>Χαμηλή</td><td>Καλή</td><td>Ελαφρύ</td><td>Συγκολλήσεις</td></tr>
-      </tbody>
-    </table>
-  </div>
-  
-  <div class="card">
-    <h2>Γράφημα Σύγκρισης (Άριστα 10)</h2>
-    <canvas id="chart" height="300"></canvas>
-  </div>
-
-  <script>
-    const ctx = document.getElementById('chart').getContext('2d');
-    new Chart(ctx, {
-      type: 'radar',
-      data: {
-        labels: ['Αντοχή', 'Αντοχή σε Σκουριά', 'Βάρος (αντιστροφή)'],
-        datasets: [
-          { label: 'Cr-V', data: [9, 9, 6], backgroundColor: 'rgba(76, 175, 80, 0.3)', borderColor: '#4caf50' },
-          { label: 'Ανθρακούχος Χάλυβας', data: [7, 3, 3], backgroundColor: 'rgba(255, 152, 0, 0.3)', borderColor: '#ff9800' },
-          { label: 'Αλουμίνιο', data: [4, 9, 10], backgroundColor: 'rgba(33, 150, 243, 0.3)', borderColor: '#2196f3' },
-          { label: 'Ανοξ. Χάλυβας', data: [7, 10, 6], backgroundColor: 'rgba(255, 255, 255, 0.2)', borderColor: '#bbb' },
-          { label: 'Ατσάλι', data: [9, 6, 5], backgroundColor: 'rgba(0, 150, 136, 0.3)', borderColor: '#009688' },
-          { label: 'Βολφράμιο', data: [10, 7, 2], backgroundColor: 'rgba(156, 39, 176, 0.3)', borderColor: '#9c27b0' },
-          { label: 'Σίδηρος', data: [6, 3, 3], backgroundColor: 'rgba(255, 235, 59, 0.3)', borderColor: '#ffeb3b' },
-          { label: 'Μόλυβδος', data: [2, 7, 1], backgroundColor: 'rgba(244, 67, 54, 0.3)', borderColor: '#f44336' },
-          { label: 'Κασσίτερος', data: [3, 7, 8], backgroundColor: 'rgba(158, 158, 158, 0.3)', borderColor: '#9e9e9e' }
-        ]
-      },
-      options: {
-        scales: {
-          r: {
-            angleLines: { color: '#444' },
-            grid: { color: '#444' },
-            pointLabels: { color: '#eee' },
-            suggestedMin: 0,
-            suggestedMax: 10
-          }
-        },
-        plugins: {
-          legend: {
-            labels: { color: '#eee' }
-          }
+        // Φιλτράρισμα πίνακα
+        function filterTable(category) {
+            const rows = document.querySelectorAll('#materialsTable tbody tr');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            rows.forEach(row => {
+                if (category === 'all' || row.dataset.category.includes(category)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
