@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογιστής Αντιστάσεων - Σειρά & Παράλληλα</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --accent: #007bff;
+            --accent-hover: #0056b3;
+            --border: #dee2e6;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent: #4dabf7;
+            --accent-hover: #339af0;
+            --border: #495057;
+            --shadow: rgba(255, 255, 255, 0.1);
+            --success: #51cf66;
+            --warning: #ffd43b;
+            --danger: #ff6b6b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .header h1 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-hover);
+            transform: scale(1.1);
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 5px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: transparent;
+            border: none;
+            padding: 15px 25px;
+            cursor: pointer;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 2px;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .result {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid var(--success);
+        }
+
+        .result h3 {
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .result-box {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .result-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px var(--shadow);
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 10px 0;
+        }
+
+        .resistor-list {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid var(--border);
+        }
+
+        .resistor-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .resistor-item:last-child {
+            border-bottom: none;
+        }
+
+        .color-bands {
+            display: flex;
+            gap: 5px;
+            margin: 20px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .band {
+            width: 40px;
+            height: 200px;
+            border: 2px solid var(--border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            transition: all 0.3s ease;
+        }
+
+        .band:hover {
+            transform: scale(1.05);
+        }
+
+        .color-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .color-option {
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: var(--bg-primary);
+        }
+
+        .color-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .color-option.selected {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        .chart-container {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .chart {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar {
+            position: absolute;
+            bottom: 0;
+            background: var(--accent);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            padding: 5px;
+            font-size: 12px;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .explanation {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid var(--warning);
+        }
+
+        .formula {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            text-align: center;
+            margin: 10px 0;
+            border: 2px solid var(--accent);
+        }
+
+        .step-by-step {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid var(--border);
+        }
+
+        .step {
+            margin: 15px 0;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .fraction {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .fraction .numerator {
+            display: block;
+            border-bottom: 1px solid var(--text-primary);
+            padding-bottom: 2px;
+        }
+
+        .fraction .denominator {
+            display: block;
+            padding-top: 2px;
+        }
+
+        .color-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .color-table th,
+        .color-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .color-table th {
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+        }
+
+        .color-table tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .color-sample {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            display: inline-block;
+            border: 1px solid var(--border);
+            margin-right: 10px;
+        }
+
+        .example {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid var(--border);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .unit-converter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .unit-converter select {
+            min-width: 80px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                width: 100%;
+                margin: 2px 0;
+            }
+
+            .color-bands {
+                justify-content: center;
+            }
+
+            .band {
+                width: 30px;
+                height: 150px;
+            }
+
+            .unit-converter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Color definitions for resistor bands */
+        .black { background-color: #000000; }
+        .brown { background-color: #8B4513; }
+        .red { background-color: #FF0000; }
+        .orange { background-color: #FFA500; }
+        .yellow { background-color: #FFFF00; color: black !important; }
+        .green { background-color: #008000; }
+        .blue { background-color: #0000FF; }
+        .violet { background-color: #8B00FF; }
+        .grey { background-color: #808080; }
+        .white { background-color: #FFFFFF; color: black !important; }
+        .gold { background-color: #FFD700; color: black !important; }
+        .silver { background-color: #C0C0C0; color: black !important; }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Υπολογιστής Αντιστάσεων</h1>
+            <p>Πλήρης υπολογιστής για αντιστάσεις σε σειρά, παράλληλα και χρωματικούς κώδικες</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('series-parallel')">Σειρά & Παράλληλα</button>
+            <button class="tab" onclick="showTab('color-code')">Χρωματικός Κώδικας</button>
+            <button class="tab" onclick="showTab('examples')">Παραδείγματα</button>
+            <button class="tab" onclick="showTab('theory')">Θεωρία</button>
+        </div>
+
+        <!-- Σειρά & Παράλληλα Tab -->
+        <div id="series-parallel" class="tab-content active">
+            <h2>📊 Υπολογισμός Αντιστάσεων</h2>
+            
+            <div class="grid">
+                <div>
+                    <div class="input-group">
+                        <label>Προσθήκη Αντίστασης (Ω):</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" id="resistor-value" placeholder="Εισάγετε τιμή" step="0.01">
+                            <select id="resistor-unit">
+                                <option value="1">Ω</option>
+                                <option value="1000">kΩ</option>
+                                <option value="1000000">MΩ</option>
+                            </select>
+                            <button class="btn" onclick="addResistor()">Προσθήκη</button>
+                        </div>
+                    </div>
+
+                    <div class="resistor-list" id="resistor-list">
+                        <h3>Λίστα Αντιστάσεων:</h3>
+                        <p>Προσθέστε αντιστάσεις για να ξεκινήσετε τον υπολογισμό</p>
+                    </div>
+
+                    <div style="text-align: center; margin: 20px 0;">
+                        <button class="btn" onclick="calculateResistance()">Υπολογισμός</button>
+                        <button class="btn btn-secondary" onclick="clearResistors()">Καθαρισμός</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="result" id="calculation-result" style="display: none;">
+                        <h3>📈 Αποτελέσματα:</h3>
+                        <div id="result-content"></div>
+                    </div>
+
+                    <div class="explanation">
+                        <h3>📝 Τύποι:</h3>
+                        <div class="formula">
+                            <strong>Σειρά:</strong> R<sub>total</sub> = R₁ + R₂ + R₃ + ...
+                        </div>
+                        <div class="formula">
+                            <strong>Παράλληλα:</strong> 1/R<sub>total</sub> = 1/R₁ + 1/R₂ + 1/R₃ + ...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-by-step" id="calculation-steps" style="display: none;">
+                <h3>📝 Επεξήγηση Πράξεων</h3>
+                <div id="steps-content"></div>
+            </div>
+
+            <div class="chart-container">
+                <h3>📊 Γραφική Αναπαράσταση</h3>
+                <div class="chart" id="resistance-chart"></div>
+            </div>
+        </div>
+
+        <!-- Χρωματικός Κώδικας Tab -->
+        <div id="color-code" class="tab-content">
+            <h2>🎨 Υπολογιστής Χρωματικού Κώδικα</h2>
+            
+            <div class="input-group">
+                <label>Αριθμός Ζωνών:</label>
+                <select id="band-count" onchange="updateBandCount()">
+                    <option value="4">4 Ζώνες</option>
+                    <option value="5">5 Ζώνες</option>
+                    <option value="6">6 Ζώνες</option>
+                </select>
+            </div>
+
+            <div class="color-bands" id="color-bands">
+                <!-- Bands will be generated by JavaScript -->
+            </div>
+
+            <div class="result" id="color-result" style="display: none;">
+                <h3>🎯 Αποτέλεσμα:</h3>
+                <div id="color-result-content"></div>
+            </div>
+
+            <div class="explanation">
+                <h3>🎨 Πίνακας Χρωμάτων Αντιστάσεων</h3>
+                <table class="color-table">
+                    <thead>
+                        <tr>
+                            <th>Χρώμα</th>
+                            <th>Ψηφίο</th>
+                            <th>Πολλαπλασιαστής</th>
+                            <th>Ανοχή</th>
+                            <th>Θερμ. Συντ.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="color-sample black"></span>Μαύρο</td>
+                            <td>0</td>
+                            <td>×1</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample brown"></span>Καφέ</td>
+                            <td>1</td>
+                            <td>×10</td>
+                            <td>± 1%</td>
+                            <td>100 ppm/°C</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample red"></span>Κόκκινο</td>
+                            <td>2</td>
+                            <td>×100</td>
+                            <td>± 2%</td>
+                            <td>50 ppm/°C</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample orange"></span>Πορτοκαλί</td>
+                            <td>3</td>
+                            <td>×1kΩ</td>
+                            <td>-</td>
+                            <td>15 ppm/°C</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample yellow"></span>Κίτρινο</td>
+                            <td>4</td>
+                            <td>×10kΩ</td>
+                            <td>-</td>
+                            <td>25 ppm/°C</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample green"></span>Πράσινο</td>
+                            <td>5</td>
+                            <td>×100kΩ</td>
+                            <td>± 0.5%</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample blue"></span>Μπλε</td>
+                            <td>6</td>
+                            <td>×1MΩ</td>
+                            <td>± 0.25%</td>
+                            <td>10 ppm/°C</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample violet"></span>Βιολετί</td>
+                            <td>7</td>
+                            <td>×10MΩ</td>
+                            <td>± 0.1%</td>
+                            <td>5 ppm/°C</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample grey"></span>Γκρι</td>
+                            <td>8</td>
+                            <td>×100MΩ</td>
+                            <td>± 0.05%</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample white"></span>Άσπρο</td>
+                            <td>9</td>
+                            <td>×1GΩ</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample gold"></span>Χρυσό</td>
+                            <td>-</td>
+                            <td>×0.1</td>
+                            <td>± 5%</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td><span class="color-sample silver"></span>Ασημί</td>
+                            <td>-</td>
+                            <td>×0.01</td>
+                            <td>± 10%</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-container">
+                <h3>📊 Ανάλυση Ανοχής</h3>
+                <div class="chart" id="tolerance-chart"></div>
+            </div>
+        </div>
+
+        <!-- Παραδείγματα Tab -->
+        <div id="examples" class="tab-content">
+            <h2>💡 Παραδείγματα Υπολογισμών</h2>
+            
+            <div class="example">
+                <h3>🔗 Παράδειγμα Σειράς</h3>
+                <p><strong>Δεδομένα:</strong> R₁ = 100Ω, R₂ = 220Ω, R₃ = 330Ω</p>
+                <div class="formula">R<sub>total</sub> = 100 + 220 + 330 = 650Ω</div>
+                <p><strong>Εξήγηση:</strong> Στη σύνδεση σε σειρά, οι αντιστάσεις προστίθενται απλά.</p>
+            </div>
+
+            <div class="example">
+                <h3>⚡ Παράδειγμα Παραλλήλων</h3>
+                <p><strong>Δεδομένα:</strong> R₁ = 100Ω, R₂ = 200Ω</p>
+                <div class="step-by-step">
+                    <div class="step">
+                        <strong>Βήμα 1:</strong> Εφαρμόζουμε τον τύπο
+                        <div class="formula">
+                            <span class="fraction">
+                                <span class="numerator">1</span>
+                                <span class="denominator">R<sub>total</sub></span>
+                            </span>
+                            =
+                            <span class="fraction">
+                                <span class="numerator">1</span>
+                                <span class="denominator">R₁</span>
+                            </span>
+                            +
+                            <span class="fraction">
+                                <span class="numerator">1</span>
+                                <span class="denominator">R₂</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <strong>Βήμα 2:</strong> Αντικαθιστούμε τις τιμές
+                        <div class="formula">
+                            <span class="fraction">
+                                <span class="numerator">1</span>
+                                <span class="denominator">R<sub>total</sub></span>
+                            </span>
+                            =
+                            <span class="fraction">
+                                <span class="numerator">1</span>
+                                <span class="denominator">100</span>
+                            </span>
+                            +
+                            <span class="fraction">
+                                <span class="numerator">1</span>
+                                <span class="denominator">200</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <strong>Βήμα 3:</strong> Υπολογίζουμε
+                        <div class="formula">
+                            <span class="fraction">
+                                <span class="numerator">1</span>
+                                <span class="denominator">R<sub>total</sub></span>
+                            </span>
+                            = 0.01 + 0.005 = 0.015
+                        </div>
+                    </div>
+                    <div class="step">
+                        <strong>Βήμα 4:</strong> Βρίσκουμε το R<sub>total</sub>
+                        <div class="formula">R<sub>total</sub> = <span class="fraction">
+                            <span class="numerator">1</span>
+                            <span class="denominator">0.015</span>
+                        </span> = 66.67Ω</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>📊 Σύγκριση Μεθόδων Σύνδεσης</h3>
+                <div class="chart" id="comparison-chart"></div>
+            </div>
+        </div>
+
+        <!-- Θεωρία Tab -->
+        <div id="theory" class="tab-content">
+            <h2>📚 Θεωρητικό Υπόβαθρο</h2>
+            
+            <div class="explanation">
+                <h3>🔬 Τι είναι η Αντίσταση;</h3>
+                <p>Η αντίσταση είναι η ιδιότητα ενός υλικού να αντιστέκεται στη διέλευση του ηλεκτρικού ρεύματος. Μετριέται σε Ohm (Ω) και συμβολίζεται με το γράμμα R.</p>
+            </div>
+
+            <div class="explanation">
+                <h3>🔗 Σύνδεση σε Σειρά</h3>
+                <p>Στη σύνδεση σε σειρά, οι αντιστάσεις συνδέονται η μία μετά την άλλη. Το ρεύμα που διαρρέει όλες τις αντιστάσεις είναι το ίδιο, ενώ η τάση κατανέμεται ανάλογα με την αντίσταση κάθε στοιχείου.</p>
+                <div class="formula">R<sub>total</sub> = R₁ + R₂ + R₃ + ... + Rₙ</div>
+            </div>
+
+            <div class="explanation">
+                <h3>⚡ Σύνδεση Παράλληλα</h3>
+                <p>Στη σύνδεση παράλληλα, όλες οι αντιστάσεις συνδέονται στα ίδια σημεία. Η τάση σε όλες τις αντιστάσεις είναι η ίδια, ενώ το ρεύμα κατανέμεται ανάλογα με την αντίσταση κάθε κλάδου.</p>
+                <div class="formula">1/R<sub>total</sub> = 1/R₁ + 1/R₂ + 1/R₃ + ... + 1/Rₙ</div>
+            </div>
+
+            <div class="chart-container">
+                <h3>📊 Συμπεριφορά Αντιστάσεων</h3>
+                <div class="chart" id="behavior-chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let resistors = [];
+        let currentBandCount = 4;
+        let selectedBands = {};
+        let isDarkMode = false;
+
+        // Color codes for resistors
+        const colorCodes = {
+            'black': { value: 0, multiplier: 1, tolerance: null },
+            'brown': { value: 1, multiplier: 10, tolerance: 1 },
+            'red': { value: 2, multiplier: 100, tolerance: 2 },
+            'orange': { value: 3, multiplier: 1000, tolerance: 3 },
+            'yellow': { value: 4, multiplier: 10000, tolerance: 4 },
+            'green': { value: 5, multiplier: 100000, tolerance: 0.5 },
+            'blue': { value: 6, multiplier: 1000000, tolerance: 0.25 },
+            'violet': { value: 7, multiplier: 10000000, tolerance: 0.1 },
+            'grey': { value: 8, multiplier: 100000000, tolerance: 0.05 },
+            'white': { value: 9, multiplier: 1000000000, tolerance: null },
+            'gold': { value: null, multiplier: 0.1, tolerance: 5 },
+            'silver': { value: null, multiplier: 0.01, tolerance: 10 }
+        };
+
+        const colorNames = {
+            'black': 'Μαύρο',
+            'brown': 'Καφέ',
+            'red': 'Κόκκινο',
+            'orange': 'Πορτοκαλί',
+            'yellow': 'Κίτρινο',
+            'green': 'Πράσινο',
+            'blue': 'Μπλε',
+            'violet': 'Βιολετί',
+            'grey': 'Γκρι',
+            'white': 'Άσπρο',
+            'gold': 'Χρυσό',
+            'silver': 'Ασημί'
+        };
+
+        // Theme toggle
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+            document.querySelector('.theme-toggle').textContent = isDarkMode ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                isDarkMode = savedTheme === 'dark';
+                document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+                document.querySelector('.theme-toggle').textContent = isDarkMode ? '☀️' : '🌙';
+            }
+        }
+
+        // Tab functionality
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Add resistor to list
+        function addResistor() {
+            const value = parseFloat(document.getElementById('resistor-value').value);
+            const unit = parseFloat(document.getElementById('resistor-unit').value);
+            
+            if (isNaN(value) || value <= 0) {
+                alert('Παρακαλώ εισάγετε έγκυρη τιμή αντίστασης');
+                return;
+            }
+            
+            const resistorValue = value * unit;
+            resistors.push(resistorValue);
+            
+            updateResistorList();
+            document.getElementById('resistor-value').value = '';
+        }
+
+        // Update resistor list display
+        function updateResistorList() {
+            const listElement = document.getElementById('resistor-list');
+            
+            if (resistors.length === 0) {
+                listElement.innerHTML = '<h3>Λίστα Αντιστάσεων:</h3><p>Προσθέστε αντιστάσεις για να ξεκινήσετε τον υπολογισμό</p>';
+                return;
+            }
+            
+            let html = '<h3>Λίστα Αντιστάσεων:</h3>';
+            resistors.forEach((resistor, index) => {
+                const { value, unit } = formatResistance(resistor);
+                html += `
+                    <div class="resistor-item">
+                        <span>R${index + 1}: ${value} ${unit}</span>
+                        <button class="btn btn-danger" onclick="removeResistor(${index})">Αφαίρεση</button>
+                    </div>
+                `;
+            });
+            
+            listElement.innerHTML = html;
+        }
+
+        // Remove resistor from list
+        function removeResistor(index) {
+            resistors.splice(index, 1);
+            updateResistorList();
+            if (resistors.length > 0) {
+                calculateResistance();
+            } else {
+                document.getElementById('calculation-result').style.display = 'none';
+                document.getElementById('calculation-steps').style.display = 'none';
+            }
+        }
+
+        // Clear all resistors
+        function clearResistors() {
+            resistors = [];
+            updateResistorList();
+            document.getElementById('calculation-result').style.display = 'none';
+            document.getElementById('calculation-steps').style.display = 'none';
+            document.getElementById('resistance-chart').innerHTML = '';
+        }
+
+        // Calculate resistance
+        function calculateResistance() {
+            if (resistors.length === 0) {
+                alert('Προσθέστε τουλάχιστον μία αντίσταση');
+                return;
+            }
+            
+            const seriesResistance = resistors.reduce((sum, r) => sum + r, 0);
+            const parallelResistance = 1 / resistors.reduce((sum, r) => sum + (1/r), 0);
+            
+            displayResults(seriesResistance, parallelResistance);
+            displayCalculationSteps(seriesResistance, parallelResistance);
+            updateResistanceChart(seriesResistance, parallelResistance);
+        }
+
+        // Display calculation results with 4 boxes
+        function displayResults(series, parallel) {
+            const seriesFormatted = formatResistanceDetailed(series);
+            const parallelFormatted = formatResistanceDetailed(parallel);
+            const ratio = series / parallel;
+            const powerSeries = calculatePower(series, 12); // Assuming 12V
+            const powerParallel = calculatePower(parallel, 12);
+            
+            const resultContent = `
+                <div class="result-grid">
+                    <div class="result-box">
+                        <h4>🔗 Σύνδεση σε Σειρά</h4>
+                        <div class="result-value">${seriesFormatted.value}</div>
+                        <div>${seriesFormatted.unit}</div>
+                        <small>Τύπος: R₁ + R₂ + R₃ + ...</small>
+                    </div>
+                    <div class="result-box">
+                        <h4>⚡ Σύνδεση Παράλληλα</h4>
+                        <div class="result-value">${parallelFormatted.value}</div>
+                        <div>${parallelFormatted.unit}</div>
+                        <small>Τύπος: 1/(1/R₁ + 1/R₂ + ...)</small>
+                    </div>
+                    <div class="result-box">
+                        <h4>📊 Λόγος Σειράς/Παραλλήλων</h4>
+                        <div class="result-value">${ratio.toFixed(4)}</div>
+                        <div>φορές</div>
+                        <small>Η σειρά είναι ${ratio.toFixed(2)}× μεγαλύτερη</small>
+                    </div>
+                    <div class="result-box">
+                        <h4>⚡ Κατανάλωση Ισχύος (12V)</h4>
+                        <div class="result-value">${powerSeries.toFixed(4)}</div>
+                        <div>W (Σειρά)</div>
+                        <div class="result-value">${powerParallel.toFixed(4)}</div>
+                        <div>W (Παράλληλα)</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: var(--bg-primary); border-radius: 8px;">
+                    <h4>🔍 Λεπτομερής Ανάλυση:</h4>
+                    <p>• <strong>Σειριακή Αντίσταση:</strong> ${seriesFormatted.value} ${seriesFormatted.unit} (μεγαλύτερη από όλες τις επιμέρους)</p>
+                    <p>• <strong>Παράλληλη Αντίσταση:</strong> ${parallelFormatted.value} ${parallelFormatted.unit} (μικρότερη από τη μικρότερη επιμέρους)</p>
+                    <p>• <strong>Διαφορά:</strong> ${formatResistanceDetailed(series - parallel).value} ${formatResistanceDetailed(series - parallel).unit}</p>
+                    <p>• <strong>Ρεύμα στη Σειρά (12V):</strong> ${(12/series).toFixed(6)} A</p>
+                    <p>• <strong>Ρεύμα Παράλληλα (12V):</strong> ${(12/parallel).toFixed(6)} A</p>
+                </div>
+            `;
+            
+            document.getElementById('result-content').innerHTML = resultContent;
+            document.getElementById('calculation-result').style.display = 'block';
+        }
+
+        // Display step-by-step calculation
+        function displayCalculationSteps(series, parallel) {
+            let stepsHtml = '<h4>🔗 Υπολογισμός Σειράς:</h4>';
+            
+            stepsHtml += '<div class="step">';
+            stepsHtml += '<strong>Βήμα 1:</strong> Εφαρμόζουμε τον τύπο σειράς<br>';
+            stepsHtml += '<div class="formula">R<sub>total</sub> = R₁ + R₂ + R₃ + ...</div>';
+            stepsHtml += '</div>';
+            
+            stepsHtml += '<div class="step">';
+            stepsHtml += '<strong>Βήμα 2:</strong> Αντικαθιστούμε τις τιμές<br>';
+            stepsHtml += '<div class="formula">R<sub>total</sub> = ';
+            resistors.forEach((r, i) => {
+                const formatted = formatResistanceDetailed(r);
+                stepsHtml += `${formatted.value}${formatted.unit}`;
+                if (i < resistors.length - 1) stepsHtml += ' + ';
+            });
+            stepsHtml += '</div>';
+            stepsHtml += '</div>';
+            
+            stepsHtml += '<div class="step">';
+            stepsHtml += '<strong>Βήμα 3:</strong> Υπολογίζουμε το άθροισμα<br>';
+            const seriesFormatted = formatResistanceDetailed(series);
+            stepsHtml += `<div class="formula">R<sub>total</sub> = ${seriesFormatted.value} ${seriesFormatted.unit}</div>`;
+            stepsHtml += '</div>';
+            
+            stepsHtml += '<h4 style="margin-top: 30px;">⚡ Υπολογισμός Παραλλήλων:</h4>';
+            
+            stepsHtml += '<div class="step">';
+            stepsHtml += '<strong>Βήμα 1:</strong> Εφαρμόζουμε τον τύπο παραλλήλων<br>';
+            stepsHtml += '<div class="formula">';
+            stepsHtml += '<span class="fraction"><span class="numerator">1</span><span class="denominator">R<sub>total</sub></span></span> = ';
+            stepsHtml += '<span class="fraction"><span class="numerator">1</span><span class="denominator">R₁</span></span> + ';
+            stepsHtml += '<span class="fraction"><span class="numerator">1</span><span class="denominator">R₂</span></span> + ...';
+            stepsHtml += '</div>';
+            stepsHtml += '</div>';
+            
+            stepsHtml += '<div class="step">';
+            stepsHtml += '<strong>Βήμα 2:</strong> Αντικαθιστούμε τις τιμές<br>';
+            stepsHtml += '<div class="formula">';
+            stepsHtml += '<span class="fraction"><span class="numerator">1</span><span class="denominator">R<sub>total</sub></span></span> = ';
+            resistors.forEach((r, i) => {
+                const formatted = formatResistanceDetailed(r);
+                stepsHtml += `<span class="fraction"><span class="numerator">1</span><span class="denominator">${formatted.value}${formatted.unit}</span></span>`;
+                if (i < resistors.length - 1) stepsHtml += ' + ';
+            });
+            stepsHtml += '</div>';
+            stepsHtml += '</div>';
+            
+            stepsHtml += '<div class="step">';
+            stepsHtml += '<strong>Βήμα 3:</strong> Υπολογίζουμε τα κλάσματα<br>';
+            stepsHtml += '<div class="formula">';
+            stepsHtml += '<span class="fraction"><span class="numerator">1</span><span class="denominator">R<sub>total</sub></span></span> = ';
+            resistors.forEach((r, i) => {
+                stepsHtml += `${(1/r).toFixed(8)}`;
+                if (i < resistors.length - 1) stepsHtml += ' + ';
+            });
+            stepsHtml += ` = ${(1/parallel).toFixed(8)}`;
+            stepsHtml += '</div>';
+            stepsHtml += '</div>';
+            
+            stepsHtml += '<div class="step">';
+            stepsHtml += '<strong>Βήμα 4:</strong> Βρίσκουμε το R<sub>total</sub><br>';
+            const parallelFormatted = formatResistanceDetailed(parallel);
+            stepsHtml += `<div class="formula">R<sub>total</sub> = <span class="fraction"><span class="numerator">1</span><span class="denominator">${(1/parallel).toFixed(8)}</span></span> = ${parallelFormatted.value} ${parallelFormatted.unit}</div>`;
+            stepsHtml += '</div>';
+            
+            document.getElementById('steps-content').innerHTML = stepsHtml;
+            document.getElementById('calculation-steps').style.display = 'block';
+        }
+
+        // Calculate power consumption
+        function calculatePower(resistance, voltage) {
+            return (voltage * voltage) / resistance;
+        }
+
+        // Format resistance value with more decimal places
+        function formatResistanceDetailed(resistance) {
+            if (resistance >= 1000000) {
+                return { value: (resistance / 1000000).toFixed(6), unit: 'MΩ' };
+            } else if (resistance >= 1000) {
+                return { value: (resistance / 1000).toFixed(6), unit: 'kΩ' };
+            } else {
+                return { value: resistance.toFixed(6), unit: 'Ω' };
+            }
+        }
+
+        // Format resistance value with appropriate unit
+        function formatResistance(resistance) {
+            if (resistance >= 1000000) {
+                return { value: (resistance / 1000000).toFixed(2), unit: 'MΩ' };
+            } else if (resistance >= 1000) {
+                return { value: (resistance / 1000).toFixed(2), unit: 'kΩ' };
+            } else {
+                return { value: resistance.toFixed(2), unit: 'Ω' };
+            }
+        }
+
+        // Update resistance chart with horizontal labels
+        function updateResistanceChart(series, parallel) {
+            const chartElement = document.getElementById('resistance-chart');
+            const maxValue = Math.max(series, parallel, ...resistors);
+            
+            let html = '<div style="display: flex; justify-content: space-around; align-items: end; height: 250px; padding: 40px 20px 40px 20px; position: relative;">';
+            
+            // Individual resistors
+            resistors.forEach((resistor, index) => {
+                const height = (resistor / maxValue) * 180;
+                const formatted = formatResistance(resistor);
+                html += `
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 50px; height: ${height}px; background: #6c757d; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                ${formatted.value}${formatted.unit}
+                            </div>
+                        </div>
+                        <div class="bar-label">R${index + 1}</div>
+                    </div>
+                `;
+            });
+            
+            // Series result
+            const seriesHeight = (series / maxValue) * 180;
+            const seriesFormatted = formatResistance(series);
+            html += `
+                <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                    <div class="bar" style="width: 60px; height: ${seriesHeight}px; background: #dc3545; position: relative;">
+                        <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                            ${seriesFormatted.value}${seriesFormatted.unit}
+                        </div>
+                    </div>
+                    <div class="bar-label">Σειρά</div>
+                </div>
+            `;
+            
+            // Parallel result
+            const parallelHeight = (parallel / maxValue) * 180;
+            const parallelFormatted = formatResistance(parallel);
+            html += `
+                <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                    <div class="bar" style="width: 60px; height: ${parallelHeight}px; background: #28a745; position: relative;">
+                        <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                            ${parallelFormatted.value}${parallelFormatted.unit}
+                        </div>
+                    </div>
+                    <div class="bar-label">Παράλληλα</div>
+                </div>
+            `;
+            
+            html += '</div>';
+            chartElement.innerHTML = html;
+        }
+
+        // Color code calculator functions
+        function updateBandCount() {
+            currentBandCount = parseInt(document.getElementById('band-count').value);
+            selectedBands = {};
+            createColorBands();
+        }
+
+        function createColorBands() {
+            const bandsContainer = document.getElementById('color-bands');
+            let html = '';
+            
+            for (let i = 0; i < currentBandCount; i++) {
+                const bandClass = getBandClass(i);
+                html += `
+                    <div class="band ${selectedBands[i] || 'black'}" id="band-${i}" onclick="selectBandColor(${i})">
+                        ${getBandLabel(i)}
+                    </div>
+                `;
+            }
+            
+            bandsContainer.innerHTML = html;
+        }
+
+        function getBandClass(bandIndex) {
+            if (currentBandCount === 4) {
+                return ['digit', 'digit', 'multiplier', 'tolerance'][bandIndex];
+            } else if (currentBandCount === 5) {
+                return ['digit', 'digit', 'digit', 'multiplier', 'tolerance'][bandIndex];
+            } else {
+                return ['digit', 'digit', 'digit', 'multiplier', 'tolerance', 'temperature'][bandIndex];
+            }
+        }
+
+        function getBandLabel(bandIndex) {
+            const labels = {
+                4: ['1η', '2η', '×', '±'],
+                5: ['1η', '2η', '3η', '×', '±'],
+                6: ['1η', '2η', '3η', '×', '±', 'T']
+            };
+            return labels[currentBandCount][bandIndex];
+        }
+
+        function selectBandColor(bandIndex) {
+            const availableColors = getAvailableColors(bandIndex);
+            let html = '<h3>Επιλέξτε Χρώμα:</h3><div class="color-selector">';
+            
+            availableColors.forEach(color => {
+                html += `
+                    <div class="color-option ${color}" onclick="setBandColor(${bandIndex}, '${color}')">
+                        ${colorNames[color]}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            if (!document.getElementById('color-selector-modal')) {
+                const modal = document.createElement('div');
+                modal.id = 'color-selector-modal';
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: var(--bg-secondary);
+                    padding: 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 10px 30px var(--shadow);
+                    z-index: 1000;
+                    max-width: 500px;
+                    width: 90%;
+                `;
+                document.body.appendChild(modal);
+                
+                const backdrop = document.createElement('div');
+                backdrop.id = 'modal-backdrop';
+                backdrop.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 999;
+                `;
+                backdrop.onclick = closeColorSelector;
+                document.body.appendChild(backdrop);
+            }
+            
+            document.getElementById('color-selector-modal').innerHTML = html + 
+                '<button class="btn btn-secondary" onclick="closeColorSelector()" style="margin-top: 15px;">Κλείσιμο</button>';
+        }
+
+        function getAvailableColors(bandIndex) {
+            const bandType = getBandClass(bandIndex);
+            
+            if (bandType === 'digit') {
+                return ['black', 'brown', 'red', 'orange', 'yellow', 'green', 'blue', 'violet', 'grey', 'white'];
+            } else if (bandType === 'multiplier') {
+                return ['black', 'brown', 'red', 'orange', 'yellow', 'green', 'blue', 'violet', 'grey', 'white', 'gold', 'silver'];
+            } else if (bandType === 'tolerance') {
+                return ['brown', 'red', 'green', 'blue', 'violet', 'grey', 'gold', 'silver'];
+            } else {
+                return ['brown', 'red', 'orange', 'yellow', 'blue', 'violet'];
+            }
+        }
+
+        function setBandColor(bandIndex, color) {
+            selectedBands[bandIndex] = color;
+            document.getElementById(`band-${bandIndex}`).className = `band ${color}`;
+            closeColorSelector();
+            calculateColorCode();
+        }
+
+        function closeColorSelector() {
+            const modal = document.getElementById('color-selector-modal');
+            const backdrop = document.getElementById('modal-backdrop');
+            if (modal) modal.remove();
+            if (backdrop) backdrop.remove();
+        }
+
+        function calculateColorCode() {
+            if (Object.keys(selectedBands).length < currentBandCount) {
+                document.getElementById('color-result').style.display = 'none';
+                return;
+            }
+            
+            let resistance = 0;
+            let tolerance = 5;
+            let tempCoeff = null;
+            
+            if (currentBandCount === 4) {
+                const digit1 = colorCodes[selectedBands[0]].value;
+                const digit2 = colorCodes[selectedBands[1]].value;
+                const multiplier = colorCodes[selectedBands[2]].multiplier;
+                tolerance = colorCodes[selectedBands[3]].tolerance || 5;
+                
+                resistance = (digit1 * 10 + digit2) * multiplier;
+            } else if (currentBandCount === 5) {
+                const digit1 = colorCodes[selectedBands[0]].value;
+                const digit2 = colorCodes[selectedBands[1]].value;
+                const digit3 = colorCodes[selectedBands[2]].value;
+                const multiplier = colorCodes[selectedBands[3]].multiplier;
+                tolerance = colorCodes[selectedBands[4]].tolerance || 5;
+                
+                resistance = (digit1 * 100 + digit2 * 10 + digit3) * multiplier;
+            } else {
+                const digit1 = colorCodes[selectedBands[0]].value;
+                const digit2 = colorCodes[selectedBands[1]].value;
+                const digit3 = colorCodes[selectedBands[2]].value;
+                const multiplier = colorCodes[selectedBands[3]].multiplier;
+                tolerance = colorCodes[selectedBands[4]].tolerance || 5;
+                tempCoeff = getTempCoefficient(selectedBands[5]);
+                
+                resistance = (digit1 * 100 + digit2 * 10 + digit3) * multiplier;
+            }
+            
+            displayColorCodeResult(resistance, tolerance, tempCoeff);
+            updateToleranceChart(resistance, tolerance);
+        }
+
+        function getTempCoefficient(color) {
+            const tempCoeffs = {
+                'brown': 100,
+                'red': 50,
+                'orange': 15,
+                'yellow': 25,
+                'blue': 10,
+                'violet': 5
+            };
+            return tempCoeffs[color] || null;
+        }
+
+        function displayColorCodeResult(resistance, tolerance, tempCoeff) {
+            const formatted = formatResistanceDetailed(resistance);
+            const toleranceValue = (resistance * tolerance / 100);
+            const minValue = formatResistanceDetailed(resistance - toleranceValue);
+            const maxValue = formatResistanceDetailed(resistance + toleranceValue);
+            
+            let html = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div class="formula" style="font-size: 24px; color: var(--success);">
+                        ${formatted.value} ${formatted.unit} ± ${tolerance}%
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <h4>📊 Ονομαστική Τιμή:</h4>
+                        <p>${formatted.value} ${formatted.unit}</p>
+                                        </div>
+                    <div>
+                        <h4>📉 Ελάχιστη Τιμή:</h4>
+                        <p>${minValue.value} ${minValue.unit}</p>
+                    </div>
+                    <div>
+                        <h4>📈 Μέγιστη Τιμή:</h4>
+                        <p>${maxValue.value} ${maxValue.unit}</p>
+                    </div>
+                </div>
+            `;
+            
+            if (tempCoeff) {
+                html += `
+                    <div style="margin-top: 15px; padding: 10px; background: var(--bg-primary); border-radius: 8px;">
+                        <h4>🌡️ Συντελεστής Θερμοκρασίας:</h4>
+                        <p>${tempCoeff} ppm/°C</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('color-result-content').innerHTML = html;
+            document.getElementById('color-result').style.display = 'block';
+        }
+
+        function updateToleranceChart(resistance, tolerance) {
+            const chartElement = document.getElementById('tolerance-chart');
+            const toleranceValue = resistance * tolerance / 100;
+            const minValue = resistance - toleranceValue;
+            const maxValue = resistance + toleranceValue;
+            
+            const html = `
+                <div style="display: flex; justify-content: space-around; align-items: end; height: 200px; padding: 40px 20px 40px 20px; position: relative;">
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 120px; background: #dc3545; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                ${formatResistance(minValue).value}${formatResistance(minValue).unit}
+                            </div>
+                        </div>
+                        <div class="bar-label">Ελάχιστη</div>
+                    </div>
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 160px; background: var(--accent); position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                ${formatResistance(resistance).value}${formatResistance(resistance).unit}
+                            </div>
+                        </div>
+                        <div class="bar-label">Ονομαστική</div>
+                    </div>
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 120px; background: #28a745; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                ${formatResistance(maxValue).value}${formatResistance(maxValue).unit}
+                            </div>
+                        </div>
+                        <div class="bar-label">Μέγιστη</div>
+                    </div>
+                </div>
+            `;
+            
+            chartElement.innerHTML = html;
+        }
+
+        // Initialize charts for examples and theory
+        // Αντικαταστήστε την υπάρχουσα συνάρτηση initializeExampleCharts με αυτή:
+function initializeExampleCharts() {
+    // Comparison chart - Περιμένουμε το element να είναι διαθέσιμο
+    setTimeout(() => {
+        const comparisonChart = document.getElementById('comparison-chart');
+        if (comparisonChart) {
+            const html = `
+                <div style="display: flex; justify-content: space-around; align-items: end; height: 200px; padding: 40px 20px 40px 20px; position: relative;">
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 60px; background: #28a745; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                66.67Ω
+                            </div>
+                        </div>
+                        <div class="bar-label">Παράλληλα</div>
+                    </div>
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 100px; background: #6c757d; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                100Ω
+                            </div>
+                        </div>
+                        <div class="bar-label">R₁</div>
+                    </div>
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 140px; background: #6c757d; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                200Ω
+                            </div>
+                        </div>
+                        <div class="bar-label">R₂</div>
+                    </div>
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 180px; background: #dc3545; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                300Ω
+                            </div>
+                        </div>
+                        <div class="bar-label">Σειρά</div>
+                    </div>
+                </div>
+            `;
+            comparisonChart.innerHTML = html;
+        }
+    }, 100);
+    
+    // Behavior chart - Περιμένουμε το element να είναι διαθέσιμο
+    setTimeout(() => {
+        const behaviorChart = document.getElementById('behavior-chart');
+        if (behaviorChart) {
+            const html = `
+                <div style="display: flex; justify-content: space-around; align-items: end; height: 200px; padding: 40px 20px 40px 20px; position: relative;">
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 100px; height: 180px; background: #dc3545; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--text-primary); white-space: nowrap;">
+                                Αύξηση R
+                            </div>
+                        </div>
+                        <div class="bar-label">Σειρά<br><small>Μεγαλύτερη Αντίσταση</small></div>
+                    </div>
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 100px; height: 80px; background: #28a745; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--text-primary); white-space: nowrap;">
+                                Μείωση R
+                            </div>
+                        </div>
+                        <div class="bar-label">Παράλληλα<br><small>Μικρότερη Αντίσταση</small></div>
+                    </div>
+                </div>
+            `;
+            behaviorChart.innerHTML = html;
+        }
+    }, 100);
+}
+
+// Επίσης, προσθέστε αυτή τη συνάρτηση για να διορθώσετε το tolerance chart:
+function initializeToleranceChart() {
+    // Δημιουργούμε ένα παράδειγμα γραφήματος ανοχής
+    setTimeout(() => {
+        const toleranceChart = document.getElementById('tolerance-chart');
+        if (toleranceChart && toleranceChart.innerHTML === '') {
+            // Παράδειγμα με 220Ω ± 5%
+            const resistance = 220;
+            const tolerance = 5;
+            const toleranceValue = resistance * tolerance / 100;
+            const minValue = resistance - toleranceValue;
+            const maxValue = resistance + toleranceValue;
+            
+            const html = `
+                <div style="display: flex; justify-content: space-around; align-items: end; height: 200px; padding: 40px 20px 40px 20px; position: relative;">
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 120px; background: #dc3545; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                ${minValue.toFixed(1)}Ω
+                            </div>
+                        </div>
+                        <div class="bar-label">Ελάχιστη<br><small>-${tolerance}%</small></div>
+                    </div>
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 160px; background: var(--accent); position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                ${resistance}Ω
+                            </div>
+                        </div>
+                        <div class="bar-label">Ονομαστική<br><small>Βάση</small></div>
+                    </div>
+                    <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                        <div class="bar" style="width: 80px; height: 120px; background: #28a745; position: relative;">
+                            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--text-primary); white-space: nowrap;">
+                                ${maxValue.toFixed(1)}Ω
+                            </div>
+                        </div>
+                        <div class="bar-label">Μέγιστη<br><small>+${tolerance}%</small></div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 15px; padding: 10px; background: var(--bg-tertiary); border-radius: 8px;">
+                    <p><strong>Παράδειγμα:</strong> Αντίσταση 220Ω με ανοχή ±5%</p>
+                    <p>Εύρος: ${minValue.toFixed(1)}Ω - ${maxValue.toFixed(1)}Ω</p>
+                </div>
+            `;
+            toleranceChart.innerHTML = html;
+        }
+    }, 200);
+}
+
+
+        // Initialize the application
+      function init() {
+    loadTheme();
+    createColorBands();
+    initializeExampleCharts();
+    initializeToleranceChart(); // Προσθήκη αυτής της γραμμής
+    
+    // Add some example resistors for demonstration
+    setTimeout(() => {
+        resistors = [100, 220, 330];
+        updateResistorList();
+        calculateResistance();
+    }, 1000);
+}
+
+        // Start the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
