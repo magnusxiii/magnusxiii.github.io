@@ -1,0 +1,2578 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Realistic Stellar Objects - Υπερ-Ρεαλιστικά Αστρικά Σώματα</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: radial-gradient(circle at center, #000814 0%, #000000 100%);
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+        
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.95), rgba(0, 15, 40, 0.9));
+            padding: 25px;
+            border-radius: 20px;
+            border: 3px solid rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4), inset 0 0 20px rgba(0, 100, 200, 0.1);
+            backdrop-filter: blur(15px);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+        }
+        
+        .control-title {
+            color: #00ffff;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 8px #00ffff;
+            font-size: 14px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #e0e0e0;
+        }
+        
+        input[type="range"] {
+            width: 180px;
+            margin-bottom: 6px;
+            accent-color: #00ffff;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .value-display {
+            color: #ffff00;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ffff00;
+            font-size: 11px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            margin: 4px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        .danger-btn {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+        }
+        
+        .special-btn {
+            background: linear-gradient(45deg, #ff6600, #ff3300);
+        }
+        
+        .cosmic-btn {
+            background: linear-gradient(45deg, #9966ff, #6633cc);
+        }
+        
+        #info {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, rgba(30, 0, 60, 0.95), rgba(15, 0, 40, 0.9));
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 12px;
+            max-width: 380px;
+            border: 2px solid rgba(255, 0, 255, 0.6);
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .stellar-info {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, rgba(40, 20, 0, 0.95), rgba(30, 15, 0, 0.9));
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 0, 0.6);
+            max-width: 280px;
+            font-size: 11px;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .performance-info {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            border: 1px solid #666;
+        }
+        
+        @media (max-width: 768px) {
+            #controls {
+                font-size: 10px;
+                padding: 18px;
+                max-height: 70vh;
+            }
+            
+            input[type="range"] {
+                width: 150px;
+            }
+            
+            button {
+                padding: 10px 14px;
+                font-size: 10px;
+            }
+            
+            .stellar-info {
+                right: 10px;
+                top: 10px;
+                max-width: 220px;
+                font-size: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #controls {
+                font-size: 9px;
+                padding: 15px;
+                max-height: 60vh;
+            }
+            
+            input[type="range"] {
+                width: 130px;
+            }
+            
+            #info {
+                font-size: 10px;
+                max-width: 280px;
+            }
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            font-size: 20px;
+            text-shadow: 0 0 15px #00ffff;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .quality-indicator {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="loading" id="loading">Φόρτωση Υπερ-Ρεαλιστικού Σύμπαντος...</div>
+        
+        <div id="controls" style="display: none;">
+            <div class="control-title">🌟 Προηγμένος Έλεγχος Αστρικών Σωμάτων</div>
+            
+            <div class="control-group">
+                <label>Ταχύτητα Χρόνου:</label>
+                <input type="range" id="timeSpeed" min="0.1" max="8" step="0.1" value="1">
+                <span class="value-display" id="timeValue">1.0x</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Ένταση Βαρυτικού Πεδίου:</label>
+                <input type="range" id="gravityField" min="0" max="5" step="0.1" value="1">
+                <span class="value-display" id="gravityValue">1.0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Ακτινοβολία Αστέρων:</label>
+                <input type="range" id="stellarRadiation" min="0.1" max="5" step="0.1" value="2">
+                <span class="value-display" id="radiationValue">2.0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Ποιότητα Εφέ:</label>
+                <input type="range" id="effectsQuality" min="1" max="5" step="1" value="3">
+                <span class="value-display" id="qualityValue">Μέτρια</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Ένταση Σωματιδίων:</label>
+                <input type="range" id="particleDensity" min="0.1" max="3" step="0.1" value="1.5">
+                <span class="value-display" id="particleValue">1.5</span>
+            </div>
+            
+            <div class="control-group">
+                <label>Θερμική Ακτινοβολία:</label>
+                <input type="range" id="thermalRadiation" min="0" max="3" step="0.1" value="1.2">
+                <span class="value-display" id="thermalValue">1.2</span>
+            </div>
+            
+            <div class="control-group">
+                <button onclick="toggleAnimation()">⏸️ Παύση/Συνέχεια</button>
+                <button onclick="resetView()">🔄 Επαναφορά</button>
+                <button onclick="toggleFullscreen()">🖥️ Πλήρης Οθόνη</button>
+            </div>
+            
+            <div class="control-group">
+                <button onclick="focusRedGiant()">🔴 Κόκκινος Γίγαντας</button>
+                <button onclick="focusBlueGiant()">🔵 Μπλε Γίγαντας</button>
+                <button onclick="focusWhiteDwarf()">⚪ Λευκός Νάνος</button>
+            </div>
+            
+            <div class="control-group">
+                <button class="danger-btn" onclick="focusBlackHole()">⚫ Μαύρη Τρύπα</button>
+                <button class="special-btn" onclick="createSupernova()">💥 Supernova</button>
+                <button class="cosmic-btn" onclick="createGammaRayBurst()">⚡ Gamma Ray Burst</button>
+            </div>
+            
+            <div class="control-group">
+                <button onclick="toggleAccretionDisk()">🌀 Δίσκος Προσαύξησης</button>
+                <button onclick="toggleStellarWinds()">💨 Αστρικοί Άνεμοι</button>
+                <button onclick="toggleMagneticFields()">🧲 Μαγνητικά Πεδία</button>
+            </div>
+            
+            <div class="control-group">
+                <button onclick="toggleRelativisticEffects()">⚡ Σχετικιστικά Εφέ</button>
+                <button onclick="toggleQuantumEffects()">🔬 Κβαντικά Εφέ</button>
+                <button onclick="toggleAdvancedPhysics()">🔬 Προηγμένη Φυσική</button>
+            </div>
+        </div>
+        
+        <div class="stellar-info" id="stellarInfo" style="display: none;">
+            <h3 id="objectName">Αστρικό Σώμα</h3>
+            <p><strong>Τύπος:</strong> <span id="objectType">-</span></p>
+            <p><strong>Μάζα:</strong> <span id="objectMass">-</span></p>
+            <p><strong>Θερμοκρασία:</strong> <span id="objectTemp">-</span></p>
+            <p><strong>Ηλικία:</strong> <span id="objectAge">-</span></p>
+            <p><strong>Απόσταση:</strong> <span id="objectDistance">-</span></p>
+            <p><strong>Φωτεινότητα:</strong> <span id="objectLuminosity">-</span></p>
+            <p><strong>Μεταλλικότητα:</strong> <span id="objectMetallicity">-</span></p>
+        </div>
+        
+        <div class="performance-info" id="performanceInfo" style="display: none;">
+            <p>FPS: <span id="fpsCounter">60</span></p>
+            <p>Σωματίδια: <span id="particleCount">0</span></p>
+            <p>Draw Calls: <span id="drawCalls">0</span></p>
+        </div>
+        
+        <div class="quality-indicator" id="qualityIndicator">
+            <div>Ποιότητα: <span id="currentQuality">Μέτρια</span></div>
+        </div>
+        
+        <div id="info" style="display: none;">
+            <h3>🌌 Υπερ-Ρεαλιστική Προσομοίωση Αστρικών Σωμάτων</h3>
+            <p><strong>Νέα Χαρακτηριστικά:</strong></p>
+            <p>• Προηγμένα particle systems με φυσική προσομοίωση</p>
+            <p>• Ρεαλιστικά θερμικά εφέ και ακτινοβολία</p>
+            <p>• Σχετικιστικά εφέ κοντά στη μαύρη τρύπα</p>
+            <p>• Αστρικοί άνεμοι και μαγνητικά πεδία</p>
+            <p>• Gamma ray bursts και κβαντικά εφέ</p>
+            <p><strong>Χειρισμός:</strong> Κλικ και σύρσιμο για περιστροφή, scroll για zoom</p>
+        </div>
+    </div>
+
+    <script>
+        // Παγκόσμιες μεταβλητές
+        let scene, camera, renderer, composer;
+        let redGiant, blueGiant, whiteDwarf, blackHole;
+        let accretionDisk, eventHorizon;
+        let particleSystems = [];
+        let stellarWinds = [];
+        let magneticFieldLines = [];
+        let animationId;
+        let isAnimating = true;
+        let showAccretionDisk = true;
+        let showStellarWinds = true;
+        let showMagneticFields = true;
+        let showRelativisticEffects = false;
+        let showQuantumEffects = false;
+        let advancedPhysics = false;
+        let currentFocus = null;
+        
+        // Παράμετροι προσομοίωσης
+        let timeSpeed = 1.0;
+        let gravityFieldStrength = 1.0;
+        let stellarRadiationLevel = 2.0;
+        let effectsQuality = 3;
+        let particleDensity = 1.5;
+        let thermalRadiation = 1.2;
+        
+        // Performance monitoring
+        let frameCount = 0;
+        let lastTime = performance.now();
+        let fps = 60;
+        
+        // Μεταβλητές ελέγχου κάμερας
+        let mouseX = 0, mouseY = 0;
+        let isMouseDown = false;
+        let cameraDistance = 80;
+        let cameraAngleX = 0;
+        let cameraAngleY = 0;
+        let cameraTarget = new THREE.Vector3(0, 0, 0);
+        
+        // Αστρικά δεδομένα με περισσότερες λεπτομέρειες
+        const stellarData = {
+            redGiant: {
+                name: "Betelgeuse (Κόκκινος Υπεργίγαντας)",
+                type: "M1-2 Ia-ab",
+                mass: "16.5-19 ηλιακές μάζες",
+                temp: "3,590 K",
+                age: "8-8.5 εκατ. έτη",
+                distance: "548 έτη φωτός",
+                luminosity: "126,000 L☉",
+                metallicity: "[Fe/H] = -0.05"
+            },
+            blueGiant: {
+                name: "Rigel (Μπλε Υπεργίγαντας)",
+                type: "B8 Ia",
+                mass: "21 ηλιακές μάζες",
+                temp: "12,100 K",
+                age: "8 εκατ. έτη",
+                distance: "860 έτη φωτός",
+                luminosity: "120,000 L☉",
+                metallicity: "[Fe/H] = -0.06"
+            },
+            whiteDwarf: {
+                name: "Sirius B (Λευκός Νάνος)",
+                type: "DA2",
+                mass: "0.978 ηλιακές μάζες",
+                temp: "25,200 K",
+                age: "228 εκατ. έτη",
+                distance: "8.6 έτη φωτός",
+                luminosity: "0.026 L☉",
+                metallicity: "[Fe/H] = 0.5"
+            },
+            blackHole: {
+                name: "Cygnus X-1",
+                type: "Stellar Black Hole",
+                mass: "21.2 ηλιακές μάζες",
+                temp: "6.2 × 10^-8 K (Hawking)",
+                age: "Αιώνια",
+                distance: "7,200 έτη φωτός",
+                luminosity: "2.6 × 10^39 erg/s (X-ray)",
+                metallicity: "N/A"
+            }
+        };
+        
+        function init() {
+            // Δημιουργία σκηνής
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000002);
+            scene.fog = new THREE.FogExp2(0x000011, 0.0008);
+            
+            // Δημιουργία κάμερας
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+            camera.position.set(0, 20, cameraDistance);
+            
+            // Δημιουργία renderer με προηγμένες ρυθμίσεις
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                alpha: true,
+                powerPreference: "high-performance",
+                precision: "highp"
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.5;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.physicallyCorrectLights = true;
+            document.getElementById('container').appendChild(renderer.domElement);
+            
+            // Δημιουργία προηγμένου φωτισμού
+            createAdvancedLighting();
+            
+            // Δημιουργία υπερ-ρεαλιστικού αστεριού φόντου
+            createUltraRealisticStarField();
+            
+            // Δημιουργία αστρικών σωμάτων με προηγμένα εφέ
+            createUltraRealisticRedGiant();
+            createUltraRealisticBlueGiant();
+            createUltraRealisticWhiteDwarf();
+            createUltraRealisticBlackHole();
+            
+            // Δημιουργία προηγμένων συστημάτων
+            createAdvancedAccretionDisk();
+            createStellarWindSystems();
+            createMagneticFieldSystems();
+            createAdvancedNebulae();
+            
+            // Event listeners
+            setupEventListeners();
+            
+            // Απόκρυψη loading και εμφάνιση UI
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('controls').style.display = 'block';
+                document.getElementById('info').style.display = 'block';
+                document.getElementById('stellarInfo').style.display = 'block';
+                document.getElementById('performanceInfo').style.display = 'block';
+                updateStellarInfo('redGiant');
+            }, 3000);
+            
+            // Έναρξη animation loop
+            animate();
+        }
+        
+        function createAdvancedLighting() {
+            // Ambient light με χρωματική θερμοκρασία
+            const ambientLight = new THREE.AmbientLight(0x0a0a2a, 0.15);
+            scene.add(ambientLight);
+            
+            // Hemisphere light για ρεαλιστικό φωτισμό
+            const hemisphereLight = new THREE.HemisphereLight(0x4444bb, 0x002244, 0.3);
+            scene.add(hemisphereLight);
+            
+            // Directional light που προσομοιώνει το φως από το κέντρο του γαλαξία
+            const directionalLight = new THREE.DirectionalLight(0x9999ff, 0.4);
+            directionalLight.position.set(100, 100, 100);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 4096;
+            directionalLight.shadow.mapSize.height = 4096;
+            directionalLight.shadow.camera.near = 0.1;
+            directionalLight.shadow.camera.far = 1000;
+            directionalLight.shadow.camera.left = -200;
+            directionalLight.shadow.camera.right = 200;
+            directionalLight.shadow.camera.top = 200;
+            directionalLight.shadow.camera.bottom = -200;
+            scene.add(directionalLight);
+        }
+        
+        function createUltraRealisticStarField() {
+            // Κύριο αστερόπλοιο με πολλαπλά επίπεδα
+            const layers = [
+                { count: 5000, distance: 1000, size: [0.5, 3], brightness: [0.3, 1] },
+                { count: 3000, distance: 1500, size: [0.3, 2], brightness: [0.2, 0.8] },
+                { count: 2000, distance: 2000, size: [0.2, 1.5], brightness: [0.1, 0.6] }
+            ];
+            
+            layers.forEach((layer, layerIndex) => {
+                const starGeometry = new THREE.BufferGeometry();
+                const positions = new Float32Array(layer.count * 3);
+                const colors = new Float32Array(layer.count * 3);
+                const sizes = new Float32Array(layer.count);
+                const phases = new Float32Array(layer.count);
+                
+                for (let i = 0; i < layer.count; i++) {
+                    // Θέσεις με σφαιρική κατανομή
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    const radius = layer.distance + (Math.random() - 0.5) * 200;
+                    
+                    positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                    positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    positions[i * 3 + 2] = radius * Math.cos(phi);
+                    
+                    // Ρεαλιστικά χρώματα αστέρων βάσει θερμοκρασίας
+                    const temp = Math.random();
+                    let r, g, b;
+                    
+                    if (temp < 0.05) {
+                        // O-type (μπλε)
+                        r = 0.6; g = 0.7; b = 1.0;
+                    } else if (temp < 0.15) {
+                        // B-type (μπλε-λευκό)
+                        r = 0.7; g = 0.8; b = 1.0;
+                    } else if (temp < 0.30) {
+                        // A-type (λευκό)
+                        r = 1.0; g = 1.0; b = 1.0;
+                    } else if (temp < 0.50) {
+                        // F-type (κίτρινο-λευκό)
+                        r = 1.0; g = 1.0; b = 0.8;
+                    } else if (temp < 0.70) {
+                        // G-type (κίτρινο)
+                        r = 1.0; g = 0.9; b = 0.7;
+                    } else if (temp < 0.85) {
+                        // K-type (πορτοκαλί)
+                        r = 1.0; g = 0.7; b = 0.4;
+                    } else {
+                        // M-type (κόκκινο)
+                        r = 1.0; g = 0.4; b = 0.2;
+                    }
+                    
+                    colors[i * 3] = r;
+                    colors[i * 3 + 1] = g;
+                    colors[i * 3 + 2] = b;
+                    
+                    sizes[i] = layer.size[0] + Math.random() * (layer.size[1] - layer.size[0]);
+                    phases[i] = Math.random() * Math.PI * 2;
+                }
+                
+                starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+                starGeometry.setAttribute('phase', new THREE.BufferAttribute(phases, 1));
+                
+                const starMaterial = new THREE.ShaderMaterial({
+                    uniforms: {
+                        time: { value: 0 },
+                        pixelRatio: { value: renderer.getPixelRatio() }
+                    },
+                    vertexShader: `
+                        attribute float size;
+                        attribute vec3 color;
+                        attribute float phase;
+                        varying vec3 vColor;
+                        varying float vAlpha;
+                        uniform float time;
+                        uniform float pixelRatio;
+                        
+                        void main() {
+                            vColor = color;
+                            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                            
+                            // Ρεαλιστικό twinkling
+                            float twinkle = sin(time * 2.0 + phase) * 0.3 + 0.7;
+                            float atmospheric = sin(time * 0.5 + phase * 2.0) * 0.1 + 0.9;
+                            
+                            vAlpha = twinkle * atmospheric;
+                            
+                            float finalSize = size * pixelRatio * (400.0 / -mvPosition.z) * twinkle;
+                            gl_PointSize = max(finalSize, 1.0);
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `,
+                    fragmentShader: `
+                        varying vec3 vColor;
+                        varying float vAlpha;
+                        
+                        void main() {
+                            float r = distance(gl_PointCoord, vec2(0.5));
+                            if (r > 0.5) discard;
+                            
+                            // Ρεαλιστικό diffraction pattern
+                            float intensity = 1.0 - smoothstep(0.0, 0.5, r);
+                            intensity = pow(intensity, 0.8);
+                            
+                            // Προσθήκη diffraction spikes για φωτεινά αστέρια
+                            vec2 coord = gl_PointCoord - 0.5;
+                            float spike = max(
+                                exp(-abs(coord.x) * 20.0),
+                                exp(-abs(coord.y) * 20.0)
+                            ) * 0.3;
+                            
+                            intensity += spike;
+                            
+                            gl_FragColor = vec4(vColor, intensity * vAlpha);
+                        }
+                    `,
+                    transparent: true,
+                    vertexColors: true,
+                    blending: THREE.AdditiveBlending
+                });
+                
+                const stars = new THREE.Points(starGeometry, starMaterial);
+                scene.add(stars);
+            });
+        }
+        
+        function createUltraRealisticRedGiant() {
+            const redGiantGroup = new THREE.Group();
+            
+            // Κύριο σώμα με προηγμένο shader
+            const geometry = new THREE.SphereGeometry(8, 64, 64);
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    temperature: { value: 3590 },
+                    turbulence: { value: 0.5 },
+                    radiationLevel: { value: stellarRadiationLevel }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    uniform float time;
+                    uniform float turbulence;
+                    
+                    // Simplex noise function
+                    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                    vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+                    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+                    
+                    float snoise(vec3 v) {
+                        const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+                        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+                        vec3 i = floor(v + dot(v, C.yyy));
+                        vec3 x0 = v - i + dot(i, C.xxx);
+                        vec3 g = step(x0.yzx, x0.xyz);
+                        vec3 l = 1.0 - g;
+                        vec3 i1 = min(g.xyz, l.zxy);
+                        vec3 i2 = max(g.xyz, l.zxy);
+                        vec3 x1 = x0 - i1 + C.xxx;
+                        vec3 x2 = x0 - i2 + C.yyy;
+                        vec3 x3 = x0 - D.yyy;
+                        i = mod289(i);
+                        vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                        float n_ = 0.142857142857;
+                        vec3 ns = n_ * D.wyz - D.xzx;
+                        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                        vec4 x_ = floor(j * ns.z);
+                        vec4 y_ = floor(j - 7.0 * x_);
+                        vec4 x = x_ *ns.x + ns.yyyy;
+                        vec4 y = y_ *ns.x + ns.yyyy;
+                        vec4 h = 1.0 - abs(x) - abs(y);
+                        vec4 b0 = vec4(x.xy, y.xy);
+                        vec4 b1 = vec4(x.zw, y.zw);
+                        vec4 s0 = floor(b0)*2.0 + 1.0;
+                        vec4 s1 = floor(b1)*2.0 + 1.0;
+                        vec4 sh = -step(h, vec4(0.0));
+                        vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+                        vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+                        vec3 p0 = vec3(a0.xy, h.x);
+                        vec3 p1 = vec3(a0.zw, h.y);
+                        vec3 p2 = vec3(a1.xy, h.z);
+                        vec3 p3 = vec3(a1.zw, h.w);
+                        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                        p0 *= norm.x;
+                        p1 *= norm.y;
+                        p2 *= norm.z;
+                        p3 *= norm.w;
+                        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                        m = m * m;
+                        return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+                    }
+                    
+                    void main() {
+                        vUv = uv;
+                        vPosition = position;
+                        
+                        // Προσθήκη turbulence για ρεαλιστική επιφάνεια
+                        vec3 noise = vec3(
+                            snoise(position * 0.5 + time * 0.1),
+                            snoise(position * 0.7 + time * 0.15),
+                            snoise(position * 0.9 + time * 0.12)
+                        ) * turbulence;
+                        
+                        vec3 newPosition = position + noise * 0.3;
+                        vNormal = normalize(normalMatrix * normalize(newPosition));
+                        
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float temperature;
+                    uniform float radiationLevel;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    
+                    // Blackbody radiation color calculation
+                    vec3 blackbodyColor(float temp) {
+                        float t = temp / 1000.0;
+                        vec3 color;
+                        
+                        if (t < 3.5) {
+                            color = vec3(1.0, 0.2 + t * 0.2, 0.0);
+                        } else if (t < 5.0) {
+                            color = vec3(1.0, 0.6 + (t - 3.5) * 0.2, 0.1 + (t - 3.5) * 0.3);
+                        } else {
+                            color = vec3(1.0, 0.8 + (t - 5.0) * 0.1, 0.4 + (t - 5.0) * 0.4);
+                        }
+                        
+                        return color;
+                    }
+                    
+                    float snoise(vec3 v) {
+                        // Simplified noise for fragment shader
+                        return sin(v.x * 10.0 + time) * sin(v.y * 12.0 + time * 1.1) * sin(v.z * 8.0 + time * 0.9) * 0.5 + 0.5;
+                    }
+                    
+                    void main() {
+                        vec3 baseColor = blackbodyColor(temperature);
+                        
+                        // Προσθήκη granulation patterns
+                        float granulation = snoise(vPosition * 5.0 + time * 0.2) * 0.3 + 0.7;
+                        
+                        // Convection cells
+                        float convection = snoise(vPosition * 2.0 + time * 0.1) * 0.2 + 0.8;
+                        
+                        // Fresnel effect για limb darkening
+                        float fresnel = 1.0 - abs(dot(vNormal, vec3(0, 0, 1)));
+                        float limbDarkening = 0.3 + 0.7 * pow(1.0 - fresnel, 2.0);
+                        
+                        vec3 finalColor = baseColor * granulation * convection * limbDarkening * radiationLevel;
+                        
+                        gl_FragColor = vec4(finalColor, 1.0);
+                    }
+                `,
+                transparent: false
+            });
+            
+            redGiant = new THREE.Mesh(geometry, material);
+            redGiant.position.set(-40, 0, 0);
+            redGiant.castShadow = true;
+            redGiantGroup.add(redGiant);
+            
+            // Προηγμένη ατμόσφαιρα με πολλαπλά στρώματα
+            createStellarAtmosphere(redGiant, {
+                innerRadius: 8.5,
+                outerRadius: 15,
+                color: new THREE.Color(0xff4444),
+                density: 0.3,
+                turbulence: 0.8
+            });
+            
+            // Κορώνα με ρεαλιστικά εφέ
+            createStellarCorona(redGiant, {
+                radius: 18,
+                color: new THREE.Color(0xff6666),
+                intensity: 1.5,
+                activity: 0.7
+            });
+            
+            // Προηγμένο φωτισμό
+            const redGiantLight = new THREE.PointLight(0xff4444, 3 * stellarRadiationLevel, 150);
+            redGiantLight.castShadow = true;
+            redGiantLight.shadow.mapSize.width = 2048;
+            redGiantLight.shadow.mapSize.height = 2048;
+            redGiant.add(redGiantLight);
+            
+            scene.add(redGiantGroup);
+        }
+        
+        function createStellarAtmosphere(star, params) {
+            const atmosphereGeometry = new THREE.SphereGeometry(params.outerRadius, 32, 32);
+            const atmosphereMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    innerRadius: { value: params.innerRadius },
+                    outerRadius: { value: params.outerRadius },
+                    color: { value: params.color },
+                    density: { value: params.density },
+                    turbulence: { value: params.turbulence }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    varying float vDistance;
+                    
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = position;
+                        vDistance = length(position);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float innerRadius;
+                    uniform float outerRadius;
+                    uniform vec3 color;
+                    uniform float density;
+                    uniform float turbulence;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    varying float vDistance;
+                    
+                    float noise(vec3 p) {
+                        return sin(p.x * 0.5 + time * 0.3) * sin(p.y * 0.7 + time * 0.4) * sin(p.z * 0.6 + time * 0.2);
+                    }
+                    
+                    void main() {
+                        float normalizedDistance = (vDistance - innerRadius) / (outerRadius - innerRadius);
+                        float atmosphericDensity = 1.0 - normalizedDistance;
+                        
+                        // Atmospheric turbulence
+                        float turbulenceEffect = noise(vPosition * 2.0) * turbulence * 0.5 + 0.5;
+                        
+                        // Fresnel για edge effects
+                        float fresnel = 1.0 - abs(dot(vNormal, vec3(0, 0, 1)));
+                        
+                        float opacity = atmosphericDensity * density * turbulenceEffect * fresnel;
+                        
+                        gl_FragColor = vec4(color, opacity);
+                    }
+                `,
+                transparent: true,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+            star.add(atmosphere);
+        }
+        
+        function createStellarCorona(star, params) {
+            const coronaGeometry = new THREE.SphereGeometry(params.radius, 32, 32);
+            const coronaMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    color: { value: params.color },
+                    intensity: { value: params.intensity },
+                    activity: { value: params.activity }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform vec3 color;
+                    uniform float intensity;
+                    uniform float activity;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    float noise(vec3 p) {
+                        return sin(p.x * 0.3 + time * 2.0) * sin(p.y * 0.4 + time * 1.8) * sin(p.z * 0.5 + time * 2.2);
+                    }
+                    
+                    void main() {
+                        float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0, 0, 1))), 3.0);
+                        
+                        // Coronal activity
+                        float coronalActivity = noise(vPosition * 0.5) * activity * 0.5 + 0.5;
+                        
+                        // Solar flares simulation
+                        float flares = max(0.0, sin(time * 5.0 + vPosition.x * 0.1) * 0.3 + 0.7);
+                        
+                        float finalIntensity = fresnel * intensity * coronalActivity * flares;
+                        
+                        gl_FragColor = vec4(color, finalIntensity * 0.4);
+                    }
+                `,
+                transparent: true,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const corona = new THREE.Mesh(coronaGeometry, coronaMaterial);
+            star.add(corona);
+        }
+        
+        function createUltraRealisticBlueGiant() {
+            const blueGiantGroup = new THREE.Group();
+            
+            // Κύριο σώμα με εξαιρετικά προηγμένο shader
+            const geometry = new THREE.SphereGeometry(6, 64, 64);
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    temperature: { value: 12100 },
+                    radiationLevel: { value: stellarRadiationLevel },
+                    stellarActivity: { value: 2.0 }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    uniform float time;
+                    
+                    float noise(vec3 p) {
+                        return sin(p.x * 8.0 + time * 0.5) * sin(p.y * 6.0 + time * 0.7) * sin(p.z * 10.0 + time * 0.3);
+                    }
+                    
+                    void main() {
+                        vUv = uv;
+                        vPosition = position;
+                        
+                        // Μικρότερη turbulence για μπλε γίγαντα (πιο σταθερός)
+                        vec3 displacement = normal * noise(position * 2.0) * 0.1;
+                        vec3 newPosition = position + displacement;
+                        
+                        vNormal = normalize(normalMatrix * normalize(newPosition));
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float temperature;
+                    uniform float radiationLevel;
+                    uniform float stellarActivity;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    
+                    vec3 blackbodyColor(float temp) {
+                        float t = temp / 1000.0;
+                        vec3 color;
+                        
+                        if (t > 10.0) {
+                            // Hot blue stars
+                            float blueness = min(1.0, (t - 10.0) / 20.0);
+                            color = vec3(0.6 + blueness * 0.2, 0.7 + blueness * 0.2, 1.0);
+                        } else {
+                            color = vec3(0.8, 0.9, 1.0);
+                        }
+                        
+                        return color;
+                    }
+                    
+                    float noise(vec3 p) {
+                        return sin(p.x * 15.0 + time * 2.0) * sin(p.y * 18.0 + time * 1.8) * sin(p.z * 12.0 + time * 2.5) * 0.5 + 0.5;
+                    }
+                    
+                    void main() {
+                        vec3 baseColor = blackbodyColor(temperature);
+                        
+                        // Έντονα UV radiation patterns
+                        float uvPattern = noise(vPosition * 8.0) * 0.4 + 0.6;
+                        
+                        // Stellar pulsations
+                        float pulsation = sin(time * 3.0 + vPosition.y * 5.0) * 0.1 + 0.9;
+                        
+                        // Fresnel για limb brightening (αντίθετο από κόκκινους)
+                        float fresnel = abs(dot(vNormal, vec3(0, 0, 1)));
+                        float limbBrightening = 0.7 + 0.3 * fresnel;
+                        
+                        vec3 finalColor = baseColor * uvPattern * pulsation * limbBrightening * radiationLevel * stellarActivity;
+                        
+                        gl_FragColor = vec4(finalColor, 1.0);
+                    }
+                `,
+                transparent: false
+            });
+            
+            blueGiant = new THREE.Mesh(geometry, material);
+            blueGiant.position.set(40, 0, 0);
+            blueGiant.castShadow = true;
+            blueGiantGroup.add(blueGiant);
+            
+            // Έντονη UV ακτινοβολία
+            createUVRadiationField(blueGiant);
+            
+            // Stellar wind visualization
+            createStellarWind(blueGiant, {
+                speed: 2000, // km/s
+                density: 1.5,
+                color: new THREE.Color(0x4488ff)
+            });
+            
+            // Εξαιρετικά έντονο φως
+            const blueGiantLight = new THREE.PointLight(0x4488ff, 4 * stellarRadiationLevel, 200);
+            blueGiantLight.castShadow = true;
+            blueGiantLight.shadow.mapSize.width = 2048;
+            blueGiantLight.shadow.mapSize.height = 2048;
+            blueGiant.add(blueGiantLight);
+            
+            scene.add(blueGiantGroup);
+        }
+        
+        function createUVRadiationField(star) {
+            const uvGeometry = new THREE.SphereGeometry(12, 32, 32);
+            const uvMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    intensity: { value: stellarRadiationLevel }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float intensity;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0, 0, 1))), 2.0);
+                        float pulse = sin(time * 8.0) * 0.3 + 0.7;
+                        
+                        // UV radiation visualization
+                        vec3 uvColor = vec3(0.3, 0.5, 1.0);
+                        float uvIntensity = fresnel * pulse * intensity * 0.6;
+                        
+                        gl_FragColor = vec4(uvColor, uvIntensity);
+                    }
+                `,
+                transparent: true,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const uvField = new THREE.Mesh(uvGeometry, uvMaterial);
+            star.add(uvField);
+        }
+        
+        function createStellarWind(star, params) {
+            const particleCount = Math.floor(2000 * particleDensity);
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const velocities = new Float32Array(particleCount * 3);
+            const ages = new Float32Array(particleCount);
+            const sizes = new Float32Array(particleCount);
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Αρχικές θέσεις κοντά στον αστέρα
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const radius = 7 + Math.random() * 2;
+                
+                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = radius * Math.cos(phi);
+                
+                // Ταχύτητες (ακτινικά προς τα έξω)
+                const speed = params.speed * 0.001 * (0.8 + Math.random() * 0.4);
+                velocities[i * 3] = positions[i * 3] / radius * speed;
+                velocities[i * 3 + 1] = positions[i * 3 + 1] / radius * speed;
+                velocities[i * 3 + 2] = positions[i * 3 + 2] / radius * speed;
+                
+                ages[i] = Math.random() * 100;
+                sizes[i] = 0.1 + Math.random() * 0.3;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+            geometry.setAttribute('age', new THREE.BufferAttribute(ages, 1));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    color: { value: params.color },
+                    density: { value: params.density }
+                },
+                vertexShader: `
+                    attribute vec3 velocity;
+                    attribute float age;
+                    attribute float size;
+                    varying float vAge;
+                    uniform float time;
+                    uniform float density;
+                    
+                    void main() {
+                        vAge = age;
+                        vec3 pos = position + velocity * time;
+                        
+                        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                        gl_PointSize = size * density * (300.0 / -mvPosition.z);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 color;
+                    varying float vAge;
+                    
+                    void main() {
+                        float r = distance(gl_PointCoord, vec2(0.5));
+                        if (r > 0.5) discard;
+                        
+                        float alpha = (1.0 - r * 2.0) * (1.0 - vAge * 0.01);
+                        gl_FragColor = vec4(color, alpha * 0.6);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const stellarWind = new THREE.Points(geometry, material);
+            star.add(stellarWind);
+            stellarWinds.push(stellarWind);
+        }
+        
+        function createUltraRealisticWhiteDwarf() {
+            const whiteDwarfGroup = new THREE.Group();
+            
+            // Κύριο σώμα με κρυσταλλική δομή
+            const geometry = new THREE.SphereGeometry(2, 64, 64);
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    temperature: { value: 25200 },
+                    crystallization: { value: 0.8 },
+                    radiationLevel: { value: stellarRadiationLevel }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    uniform float time;
+                    uniform float crystallization;
+                    
+                    void main() {
+                        vUv = uv;
+                        vPosition = position;
+                        
+                        // Κρυσταλλική δομή
+                        vec3 crystallinePos = position;
+                        float crystal = sin(position.x * 20.0) * sin(position.y * 20.0) * sin(position.z * 20.0);
+                        crystallinePos += normal * crystal * crystallization * 0.05;
+                        
+                        vNormal = normalize(normalMatrix * normal);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(crystallinePos, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float temperature;
+                    uniform float crystallization;
+                    uniform float radiationLevel;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    
+                    vec3 whiteDwarfColor(float temp) {
+                        // Πολύ θερμό λευκό με ελαφρά μπλε απόχρωση
+                        float t = temp / 10000.0;
+                        return vec3(0.9 + t * 0.1, 0.95 + t * 0.05, 1.0);
+                    }
+                    
+                    void main() {
+                        vec3 baseColor = whiteDwarfColor(temperature);
+                        
+                        // Κρυσταλλικά patterns
+                        float crystal = sin(vPosition.x * 30.0) * sin(vPosition.y * 30.0) * sin(vPosition.z * 30.0);
+                        float crystallineEffect = crystal * crystallization * 0.3 + 0.7;
+                        
+                        // Degenerate matter effects
+                        float degeneracy = sin(time * 10.0 + vPosition.x * 50.0) * 0.1 + 0.9;
+                        
+                        // Fresnel για metallic look
+                        float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0, 0, 1))), 0.5);
+                        float metallic = 0.8 + 0.2 * fresnel;
+                        
+                        vec3 finalColor = baseColor * crystallineEffect * degeneracy * metallic * radiationLevel;
+                        
+                        gl_FragColor = vec4(finalColor, 1.0);
+                    }
+                `,
+                transparent: false
+            });
+            
+            whiteDwarf = new THREE.Mesh(geometry, material);
+            whiteDwarf.position.set(0, 30, 0);
+            whiteDwarf.castShadow = true;
+            whiteDwarfGroup.add(whiteDwarf);
+            
+            // Κρυσταλλική εξωτερική δομή
+            createCrystallineStructure(whiteDwarf);
+            
+            // Degenerate matter effects
+            createDegenerateMatterField(whiteDwarf);
+            
+                       // Έντονο λευκό φως
+            const whiteDwarfLight = new THREE.PointLight(0xffffff, 2.5 * stellarRadiationLevel, 100);
+            whiteDwarfLight.castShadow = true;
+            whiteDwarfLight.shadow.mapSize.width = 1024;
+            whiteDwarfLight.shadow.mapSize.height = 1024;
+            whiteDwarf.add(whiteDwarfLight);
+            
+            scene.add(whiteDwarfGroup);
+        }
+        
+        function createCrystallineStructure(star) {
+            const crystalGeometry = new THREE.IcosahedronGeometry(2.3, 3);
+            const crystalMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    opacity: { value: 0.4 }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    uniform float time;
+                    
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = position;
+                        
+                        // Subtle rotation for crystalline effect
+                        vec3 rotatedPos = position;
+                        rotatedPos.x = position.x * cos(time * 0.1) - position.z * sin(time * 0.1);
+                        rotatedPos.z = position.x * sin(time * 0.1) + position.z * cos(time * 0.1);
+                        
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(rotatedPos, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float opacity;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0, 0, 1))), 2.0);
+                        vec3 crystalColor = vec3(0.8, 0.9, 1.0);
+                        
+                        // Prismatic effect
+                        float prism = sin(vPosition.x * 10.0 + time) * sin(vPosition.y * 12.0 + time) * 0.2 + 0.8;
+                        
+                        gl_FragColor = vec4(crystalColor * prism, fresnel * opacity);
+                    }
+                `,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            
+            const crystal = new THREE.Mesh(crystalGeometry, crystalMaterial);
+            star.add(crystal);
+        }
+        
+        function createDegenerateMatterField(star) {
+            const fieldGeometry = new THREE.SphereGeometry(3, 32, 32);
+            const fieldMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    density: { value: 2.0 }
+                },
+                vertexShader: `
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float density;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        // Quantum fluctuations
+                        float quantum = sin(vPosition.x * 100.0 + time * 20.0) * 
+                                      sin(vPosition.y * 80.0 + time * 15.0) * 
+                                      sin(vPosition.z * 120.0 + time * 25.0);
+                        
+                        float intensity = abs(quantum) * density * 0.1;
+                        vec3 quantumColor = vec3(0.9, 0.95, 1.0);
+                        
+                        gl_FragColor = vec4(quantumColor, intensity);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const field = new THREE.Mesh(fieldGeometry, fieldMaterial);
+            star.add(field);
+        }
+        
+        function createUltraRealisticBlackHole() {
+            const blackHoleGroup = new THREE.Group();
+            
+            // Event Horizon με Schwarzschild radius
+            const horizonGeometry = new THREE.SphereGeometry(4, 64, 64);
+            const horizonMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    mass: { value: 21.2 } // Solar masses
+                },
+                vertexShader: `
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    
+                    void main() {
+                        vPosition = position;
+                        vNormal = normalize(normalMatrix * normal);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float mass;
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    
+                    void main() {
+                        // Absolute black with subtle Hawking radiation
+                        float hawkingRadiation = sin(time * 50.0 + vPosition.x * 1000.0) * 
+                                               sin(time * 60.0 + vPosition.y * 1200.0) * 
+                                               sin(time * 40.0 + vPosition.z * 800.0);
+                        
+                        float radiation = abs(hawkingRadiation) * 0.001; // Extremely weak
+                        vec3 hawkingColor = vec3(0.1, 0.05, 0.2);
+                        
+                        gl_FragColor = vec4(hawkingColor * radiation, 1.0);
+                    }
+                `,
+                transparent: false
+            });
+            
+            blackHole = new THREE.Mesh(horizonGeometry, horizonMaterial);
+            blackHole.position.set(0, -30, 0);
+            blackHoleGroup.add(blackHole);
+            
+            // Photon Sphere με realistic light bending
+            createPhotonSphere(blackHole);
+            
+            // Gravitational lensing effect
+            createGravitationalLensing(blackHole);
+            
+            // Ergosphere για rotating black hole
+            createErgosphere(blackHole);
+            
+            scene.add(blackHoleGroup);
+        }
+        
+        function createPhotonSphere(blackHole) {
+            const photonGeometry = new THREE.RingGeometry(6, 6.5, 64);
+            const photonMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    rotationSpeed: { value: 0.99 } // Near light speed
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        vUv = uv;
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float rotationSpeed;
+                    varying vec2 vUv;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
+                        
+                        // Relativistic beaming effect
+                        float beaming = sin(angle * 12.0 + time * 15.0 * rotationSpeed) * 0.5 + 0.5;
+                        
+                        // Doppler shift simulation
+                        float doppler = sin(angle + time * 10.0) * 0.3 + 0.7;
+                        vec3 photonColor = vec3(1.0 * doppler, 0.8 * doppler, 0.4 * beaming);
+                        
+                        float intensity = beaming * 0.8;
+                        gl_FragColor = vec4(photonColor, intensity);
+                    }
+                `,
+                transparent: true,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const photonSphere = new THREE.Mesh(photonGeometry, photonMaterial);
+            photonSphere.rotation.x = Math.PI / 2;
+            blackHole.add(photonSphere);
+        }
+        
+        function createGravitationalLensing(blackHole) {
+            const lensingGeometry = new THREE.SphereGeometry(8, 32, 32);
+            const lensingMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    mass: { value: 21.2 }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float mass;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        // Gravitational lensing distortion
+                        float lensing = 1.0 / (1.0 + length(vPosition) * 0.1);
+                        
+                        // Space-time curvature visualization
+                        float curvature = sin(length(vPosition) * 2.0 - time * 5.0) * lensing;
+                        
+                        vec3 lensingColor = vec3(0.2, 0.1, 0.4);
+                        float intensity = abs(curvature) * 0.3;
+                        
+                        gl_FragColor = vec4(lensingColor, intensity);
+                    }
+                `,
+                transparent: true,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const lensing = new THREE.Mesh(lensingGeometry, lensingMaterial);
+            blackHole.add(lensing);
+        }
+        
+        function createErgosphere(blackHole) {
+            const ergoGeometry = new THREE.SphereGeometry(5.5, 32, 32);
+            const ergoMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    angularMomentum: { value: 0.8 }
+                },
+                vertexShader: `
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    uniform float time;
+                    uniform float angularMomentum;
+                    
+                    void main() {
+                        vPosition = position;
+                        vNormal = normalize(normalMatrix * normal);
+                        
+                        // Frame dragging effect
+                        vec3 draggedPos = position;
+                        float drag = angularMomentum * time * 0.1;
+                        draggedPos.x = position.x * cos(drag) - position.z * sin(drag);
+                        draggedPos.z = position.x * sin(drag) + position.z * cos(drag);
+                        
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(draggedPos, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float angularMomentum;
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    
+                    void main() {
+                        // Frame dragging visualization
+                        float dragging = sin(atan(vPosition.z, vPosition.x) * 4.0 + time * 2.0) * 0.5 + 0.5;
+                        
+                        vec3 ergoColor = vec3(0.5, 0.2, 0.8);
+                        float intensity = dragging * angularMomentum * 0.2;
+                        
+                        gl_FragColor = vec4(ergoColor, intensity);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const ergosphere = new THREE.Mesh(ergoGeometry, ergoMaterial);
+            blackHole.add(ergosphere);
+        }
+        
+        function createAdvancedAccretionDisk() {
+            const diskGeometry = new THREE.RingGeometry(8, 25, 128, 32);
+            const diskMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    innerRadius: { value: 8 },
+                    outerRadius: { value: 25 },
+                    temperature: { value: 1.0 },
+                    viscosity: { value: 0.1 },
+                    magneticField: { value: 1.0 }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    varying float vRadius;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        vUv = uv;
+                        vPosition = position;
+                        vRadius = length(position.xy);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float innerRadius;
+                    uniform float outerRadius;
+                    uniform float temperature;
+                    uniform float viscosity;
+                    uniform float magneticField;
+                    varying vec2 vUv;
+                    varying float vRadius;
+                    varying vec3 vPosition;
+                    
+                    vec3 blackbodyFromRadius(float r) {
+                        // Temperature decreases with radius (T ∝ r^-3/4)
+                        float temp = pow(innerRadius / r, 0.75) * 10000.0;
+                        
+                        if (temp > 20000.0) {
+                            return vec3(0.7, 0.8, 1.0); // Blue-white (very hot)
+                        } else if (temp > 10000.0) {
+                            return vec3(1.0, 0.9, 0.8); // White
+                        } else if (temp > 5000.0) {
+                            return vec3(1.0, 0.8, 0.6); // Yellow
+                        } else {
+                            return vec3(1.0, 0.5, 0.2); // Orange-red
+                        }
+                    }
+                    
+                    float turbulence(vec3 p) {
+                        return sin(p.x * 2.0 + time * 0.5) * 
+                               sin(p.y * 3.0 + time * 0.7) * 
+                               sin(p.z * 1.5 + time * 0.3);
+                    }
+                    
+                    void main() {
+                        float normalizedRadius = (vRadius - innerRadius) / (outerRadius - innerRadius);
+                        
+                        // Keplerian velocity (v ∝ r^-1/2)
+                        float keplerianVelocity = 1.0 / sqrt(vRadius / innerRadius);
+                        float angle = atan(vPosition.y, vPosition.x);
+                        
+                        // Spiral density waves
+                        float spiral = sin(angle * 3.0 - time * keplerianVelocity * 2.0 + vRadius * 0.2) * 0.5 + 0.5;
+                        
+                        // Magnetorotational instability
+                        float mri = turbulence(vPosition * 5.0) * magneticField * 0.3 + 0.7;
+                        
+                        // Viscous heating
+                        float heating = viscosity * keplerianVelocity * (1.0 - normalizedRadius);
+                        
+                        vec3 diskColor = blackbodyFromRadius(vRadius);
+                        float intensity = spiral * mri * heating * temperature;
+                        
+                        // Inner edge brightening
+                        if (normalizedRadius < 0.1) {
+                            intensity *= 3.0;
+                            diskColor = vec3(1.0, 0.9, 0.8);
+                        }
+                        
+                        // Opacity falloff
+                        float opacity = (1.0 - normalizedRadius) * intensity * 0.8;
+                        
+                        gl_FragColor = vec4(diskColor, opacity);
+                    }
+                `,
+                transparent: true,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            accretionDisk = new THREE.Mesh(diskGeometry, diskMaterial);
+            accretionDisk.position.copy(blackHole.position);
+            accretionDisk.rotation.x = Math.PI / 2;
+            scene.add(accretionDisk);
+        }
+        
+        function createStellarWindSystems() {
+            // Δημιουργία αστρικών ανέμων για όλα τα αστέρια
+            [redGiant, blueGiant].forEach(star => {
+                if (star) {
+                    const windParams = star === redGiant ? 
+                        { speed: 30, density: 2.0, color: new THREE.Color(0xff6666) } :
+                        { speed: 2000, density: 1.0, color: new THREE.Color(0x6666ff) };
+                    
+                    createAdvancedStellarWind(star, windParams);
+                }
+            });
+        }
+        
+        function createAdvancedStellarWind(star, params) {
+            const particleCount = Math.floor(3000 * particleDensity * effectsQuality / 3);
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const velocities = new Float32Array(particleCount * 3);
+            const ages = new Float32Array(particleCount);
+            const temperatures = new Float32Array(particleCount);
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Θέσεις με σφαιρική κατανομή
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const radius = (star === redGiant ? 9 : 7) + Math.random() * 3;
+                
+                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = radius * Math.cos(phi);
+                
+                // Ταχύτητες με realistic values
+                const speed = params.speed * 0.0001 * (0.5 + Math.random());
+                const direction = new THREE.Vector3(
+                    positions[i * 3],
+                    positions[i * 3 + 1],
+                    positions[i * 3 + 2]
+                ).normalize();
+                
+                velocities[i * 3] = direction.x * speed;
+                velocities[i * 3 + 1] = direction.y * speed;
+                velocities[i * 3 + 2] = direction.z * speed;
+                
+                ages[i] = Math.random() * 200;
+                temperatures[i] = 1000 + Math.random() * 5000;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+            geometry.setAttribute('age', new THREE.BufferAttribute(ages, 1));
+            geometry.setAttribute('temperature', new THREE.BufferAttribute(temperatures, 1));
+            
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    color: { value: params.color },
+                    density: { value: params.density },
+                    thermalLevel: { value: thermalRadiation }
+                },
+                vertexShader: `
+                    attribute vec3 velocity;
+                    attribute float age;
+                    attribute float temperature;
+                    varying float vAge;
+                    varying float vTemperature;
+                    uniform float time;
+                    uniform float density;
+                    
+                    void main() {
+                        vAge = age;
+                        vTemperature = temperature;
+                        
+                        vec3 pos = position + velocity * time;
+                        vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                        
+                        float size = (temperature / 3000.0) * density * (500.0 / -mvPosition.z);
+                        gl_PointSize = max(size, 1.0);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 color;
+                    uniform float thermalLevel;
+                    varying float vAge;
+                    varying float vTemperature;
+                    
+                    vec3 temperatureColor(float temp) {
+                        if (temp < 2000.0) {
+                            return vec3(1.0, 0.3, 0.1);
+                        } else if (temp < 4000.0) {
+                            return vec3(1.0, 0.7, 0.3);
+                        } else {
+                            return vec3(0.9, 0.9, 1.0);
+                        }
+                    }
+                    
+                    void main() {
+                        float r = distance(gl_PointCoord, vec2(0.5));
+                        if (r > 0.5) discard;
+                        
+                        vec3 thermalColor = temperatureColor(vTemperature);
+                        vec3 finalColor = mix(color.rgb, thermalColor, thermalLevel * 0.5);
+                        
+                        float alpha = (1.0 - r * 2.0) * (1.0 - vAge * 0.005) * 0.7;
+                        gl_FragColor = vec4(finalColor, alpha);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const wind = new THREE.Points(geometry, material);
+            star.add(wind);
+            stellarWinds.push(wind);
+        }
+        
+        function createMagneticFieldSystems() {
+            [redGiant, blueGiant, whiteDwarf].forEach(star => {
+                if (star) {
+                    createMagneticFieldLines(star);
+                }
+            });
+        }
+        
+        function createMagneticFieldLines(star) {
+            const fieldStrength = star === blueGiant ? 1000 : (star === whiteDwarf ? 10000 : 100); // Gauss
+            const lineCount = Math.floor(16 * effectsQuality / 3);
+            
+            for (let i = 0; i < lineCount; i++) {
+                const angle = (i / lineCount) * Math.PI * 2;
+                const fieldLine = createSingleMagneticFieldLine(star, angle, fieldStrength);
+                magneticFieldLines.push(fieldLine);
+                star.add(fieldLine);
+            }
+        }
+        
+        function createSingleMagneticFieldLine(star, angle, strength) {
+            const points = [];
+            const radius = star === whiteDwarf ? 3 : (star === redGiant ? 10 : 8);
+            
+            // Dipole field lines
+            for (let t = 0; t <= Math.PI; t += 0.05) {
+                const r = radius * Math.sin(t) * Math.sin(t);
+                const x = r * Math.cos(angle);
+                const y = radius * Math.cos(t);
+                const z = r * Math.sin(angle);
+                points.push(new THREE.Vector3(x, y, z));
+            }
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    strength: { value: strength },
+                    color: { value: new THREE.Color(star === redGiant ? 0xff00ff : 
+                                                   star === blueGiant ? 0x00ffff : 0xffff00) }
+                },
+                vertexShader: `
+                    varying float vPosition;
+                    uniform float time;
+                    
+                    void main() {
+                        vPosition = position.y;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float strength;
+                    uniform vec3 color;
+                    varying float vPosition;
+                    
+                    void main() {
+                        float pulse = sin(time * 3.0 + vPosition * 0.1) * 0.3 + 0.7;
+                        float intensity = (strength / 1000.0) * pulse * 0.6;
+                        
+                        gl_FragColor = vec4(color, intensity);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            return new THREE.Line(geometry, material);
+        }
+        
+        function createAdvancedNebulae() {
+            // Planetary nebula γύρω από τον λευκό νάνο
+            createPlanetaryNebula(whiteDwarf);
+            
+            // Supernova remnant
+            createSupernovaRemnant();
+        }
+        
+        function createPlanetaryNebula(star) {
+            const nebulaGeometry = new THREE.SphereGeometry(15, 32, 32);
+            const nebulaMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    expansion: { value: 1.0 },
+                    ionization: { value: 0.8 }
+                },
+                vertexShader: `
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    uniform float time;
+                    uniform float expansion;
+                    
+                    void main() {
+                        vPosition = position;
+                        vNormal = normal;
+                        
+                        // Expanding nebula
+                        vec3 expandedPos = position * (1.0 + expansion * time * 0.01);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(expandedPos, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float ionization;
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    
+                    float noise(vec3 p) {
+                        return sin(p.x * 0.5 + time * 0.2) * sin(p.y * 0.7 + time * 0.3) * sin(p.z * 0.6 + time * 0.25);
+                    }
+                    
+                    void main() {
+                        float density = noise(vPosition * 2.0) * 0.5 + 0.5;
+                        
+                        // Ionization zones
+                        float distance = length(vPosition);
+                        float ionizationLevel = ionization * (20.0 / distance);
+                        
+                        // Different emission lines
+                        vec3 hAlpha = vec3(1.0, 0.2, 0.2); // Hydrogen alpha
+                        vec3 oiii = vec3(0.2, 1.0, 0.3);   // Oxygen III
+                        vec3 heii = vec3(0.3, 0.3, 1.0);   // Helium II
+                        
+                        vec3 nebulaColor = mix(mix(hAlpha, oiii, ionizationLevel), heii, ionizationLevel * 0.5);
+                        
+                        float fresnel = 1.0 - abs(dot(vNormal, vec3(0, 0, 1)));
+                        float opacity = density * fresnel * 0.15;
+                        
+                        gl_FragColor = vec4(nebulaColor, opacity);
+                    }
+                `,
+                transparent: true,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+            nebula.position.copy(star.position);
+            scene.add(nebula);
+        }
+        
+        function createSupernovaRemnant() {
+            const remnantGeometry = new THREE.SphereGeometry(35, 32, 32);
+            const remnantMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    shockwave: { value: 1.0 }
+                },
+                vertexShader: `
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    
+                    void main() {
+                        vPosition = position;
+                        vNormal = normal;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float shockwave;
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    
+                    float noise(vec3 p) {
+                        return sin(p.x * 0.1 + time * 0.5) * sin(p.y * 0.15 + time * 0.3) * sin(p.z * 0.12 + time * 0.4);
+                    }
+                    
+                    void main() {
+                        float distance = length(vPosition);
+                        float shockFront = abs(sin(distance * 0.1 - time * 2.0)) * shockwave;
+                        
+                        vec3 shockColor = vec3(1.0, 0.4, 0.1);
+                        float turbulence = noise(vPosition) * 0.5 + 0.5;
+                        
+                        float fresnel = 1.0 - abs(dot(vNormal, vec3(0, 0, 1)));
+                        float opacity = shockFront * turbulence * fresnel * 0.1;
+                        
+                        gl_FragColor = vec4(shockColor, opacity);
+                    }
+                `,
+                transparent: true,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const remnant = new THREE.Mesh(remnantGeometry, remnantMaterial);
+            remnant.position.set(60, 0, -40);
+            scene.add(remnant);
+        }
+        
+        function setupEventListeners() {
+            // Χειρισμός ποντικιού
+            renderer.domElement.addEventListener('mousedown', onMouseDown);
+            renderer.domElement.addEventListener('mousemove', onMouseMove);
+            renderer.domElement.addEventListener('mouseup', onMouseUp);
+            renderer.domElement.addEventListener('wheel', onMouseWheel);
+            
+            // Χειρισμός αφής
+            renderer.domElement.addEventListener('touchstart', onTouchStart);
+            renderer.domElement.addEventListener('touchmove', onTouchMove);
+            renderer.domElement.addEventListener('touchend', onTouchEnd);
+            
+            // Χειρισμός παραθύρου
+            window.addEventListener('resize', onWindowResize);
+            
+            // Controls με βελτιωμένη λειτουργικότητα
+            setupAdvancedControls();
+            
+            // Πληκτρολόγιο
+            document.addEventListener('keydown', onKeyDown);
+        }
+        
+        function setupAdvancedControls() {
+            document.getElementById('timeSpeed').addEventListener('input', function(e) {
+                timeSpeed = parseFloat(e.target.value);
+                document.getElementById('timeValue').textContent = timeSpeed.toFixed(1) + 'x';
+            });
+            
+            document.getElementById('gravityField').addEventListener('input', function(e) {
+                gravityFieldStrength = parseFloat(e.target.value);
+                document.getElementById('gravityValue').textContent = gravityFieldStrength.toFixed(1);
+                updateGravityEffects();
+            });
+            
+            document.getElementById('stellarRadiation').addEventListener('input', function(e) {
+                stellarRadiationLevel = parseFloat(e.target.value);
+                document.getElementById('radiationValue').textContent = stellarRadiationLevel.toFixed(1);
+                updateRadiationEffects();
+            });
+            
+            document.getElementById('effectsQuality').addEventListener('input', function(e) {
+                effectsQuality = parseInt(e.target.value);
+                const qualityNames = ['Χαμηλή', 'Μέτρια', 'Καλή', 'Υψηλή', 'Εξαιρετική'];
+                document.getElementById('qualityValue').textContent = qualityNames[effectsQuality - 1];
+                document.getElementById('currentQuality').textContent = qualityNames[effectsQuality - 1];
+                updateEffectsQuality();
+            });
+            
+            document.getElementById('particleDensity').addEventListener('input', function(e) {
+                particleDensity = parseFloat(e.target.value);
+                document.getElementById('particleValue').textContent = particleDensity.toFixed(1);
+                updateParticleSystems();
+            });
+            
+            document.getElementById('thermalRadiation').addEventListener('input', function(e) {
+                thermalRadiation = parseFloat(e.target.value);
+                document.getElementById('thermalValue').textContent = thermalRadiation.toFixed(1);
+                updateThermalEffects();
+            });
+        }
+        
+        function updateGravityEffects() {
+            // Ενημέρωση βαρυτικών εφέ
+            if (accretionDisk && accretionDisk.material.uniforms) {
+                accretionDisk.material.uniforms.viscosity.value = 0.1 * gravityFieldStrength;
+            }
+        }
+        
+        function updateRadiationEffects() {
+            // Ενημέρωση όλων των stellar materials
+            [redGiant, blueGiant, whiteDwarf].forEach(star => {
+                if (star && star.material && star.material.uniforms) {
+                    star.material.uniforms.radiationLevel.value = stellarRadiationLevel;
+                }
+            });
+        }
+        
+        function updateEffectsQuality() {
+            // Ενημέρωση ποιότητας εφέ (θα χρειαστεί restart για πλήρη εφαρμογή)
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, effectsQuality / 2));
+        }
+        
+        function updateParticleSystems() {
+            // Ενημέρωση πυκνότητας σωματιδίων
+            stellarWinds.forEach(wind => {
+                if (wind.material && wind.material.uniforms) {
+                    wind.material.uniforms.density.value = particleDensity;
+                }
+            });
+        }
+        
+        function updateThermalEffects() {
+            // Ενημέρωση θερμικών εφέ
+            stellarWinds.forEach(wind => {
+                if (wind.material && wind.material.uniforms) {
+                    wind.material.uniforms.thermalLevel.value = thermalRadiation;
+                }
+            });
+        }
+        
+        function onMouseDown(event) {
+            isMouseDown = true;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        }
+        
+        function onMouseMove(event) {
+            if (!isMouseDown) return;
+            
+            const deltaX = event.clientX - mouseX;
+            const deltaY = event.clientY - mouseY;
+            
+            cameraAngleY += deltaX * 0.008;
+            cameraAngleX += deltaY * 0.008;
+            
+            cameraAngleX = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleX));
+            
+            updateCameraPosition();
+            
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        }
+        
+        function onMouseUp() {
+            isMouseDown = false;
+        }
+        
+        function onMouseWheel(event) {
+            cameraDistance += event.deltaY * 0.05;
+            cameraDistance = Math.max(10, Math.min(300, cameraDistance));
+            updateCameraPosition();
+        }
+        
+        function onTouchStart(event) {
+            if (event.touches.length === 1) {
+                mouseX = event.touches[0].clientX;
+                mouseY = event.touches[0].clientY;
+                isMouseDown = true;
+            }
+        }
+        
+        function onTouchMove(event) {
+            if (event.touches.length === 1 && isMouseDown) {
+                const deltaX = event.touches[0].clientX - mouseX;
+                const deltaY = event.touches[0].clientY - mouseY;
+                
+                cameraAngleY += deltaX * 0.008;
+                cameraAngleX += deltaY * 0.008;
+                
+                cameraAngleX = Math.max(-Math.PI/2, Math.min(Math.PI/2, cameraAngleX));
+                
+                updateCameraPosition();
+                
+                mouseX = event.touches[0].clientX;
+                mouseY = event.touches[0].clientY;
+            }
+            event.preventDefault();
+        }
+        
+        function onTouchEnd() {
+            isMouseDown = false;
+        }
+        
+        function onKeyDown(event) {
+            switch(event.code) {
+                case 'Space':
+                    toggleAnimation();
+                    event.preventDefault();
+                    break;
+                case 'KeyF':
+                    toggleFullscreen();
+                    break;
+                case 'Digit1':
+                    focusRedGiant();
+                    break;
+                case 'Digit2':
+                    focusBlueGiant();
+                    break;
+                case 'Digit3':
+                    focusWhiteDwarf();
+                    break;
+                case 'Digit4':
+                    focusBlackHole();
+                    break;
+                case 'KeyQ':
+                    effectsQuality = Math.min(5, effectsQuality + 1);
+                    updateEffectsQuality();
+                    break;
+                case 'KeyW':
+                    effectsQuality = Math.max(1, effectsQuality - 1);
+                    updateEffectsQuality();
+                    break;
+            }
+        }
+        
+        function updateCameraPosition() {
+            const x = cameraDistance * Math.sin(cameraAngleY) * Math.cos(cameraAngleX);
+            const y = cameraDistance * Math.sin(cameraAngleX);
+            const z = cameraDistance * Math.cos(cameraAngleY) * Math.cos(cameraAngleX);
+            
+            camera.position.set(
+                cameraTarget.x + x,
+                cameraTarget.y + y,
+                cameraTarget.z + z
+            );
+            camera.lookAt(cameraTarget);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function animate() {
+            if (isAnimating) {
+                animationId = requestAnimationFrame(animate);
+                
+                const time = Date.now() * 0.001;
+                
+                // Performance monitoring
+                frameCount++;
+                const currentTime = performance.now();
+                if (currentTime - lastTime >= 1000) {
+                    fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                    document.getElementById('fpsCounter').textContent = fps;
+                    frameCount = 0;
+                    lastTime = currentTime;
+                }
+                
+                // Ενημέρωση όλων των shader uniforms
+                updateShaderUniforms(time);
+                
+                // Περιστροφή αστέρων
+                updateStellarRotations(time);
+                
+                // Ενημέρωση particle systems
+                updateParticleSystemsAnimation(time);
+                
+                // Ενημέρωση μαγνητικών πεδίων
+                updateMagneticFields(time);
+                
+                // Ενημέρωση δίσκου προσαύξησης
+                updateAccretionDisk(time);
+            }
+            
+            renderer.render(scene, camera);
+            
+            if (!isAnimating) {
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+        
+        function updateShaderUniforms(time) {
+            // Ενημέρωση όλων των shader uniforms
+            scene.traverse((object) => {
+                if (object.material && object.material.uniforms) {
+                    if (object.material.uniforms.time) {
+                        object.material.uniforms.time.value = time * timeSpeed;
+                    }
+                }
+            });
+        }
+        
+        function updateStellarRotations(time) {
+            if (redGiant) {
+                redGiant.rotation.y += 0.003 * timeSpeed;
+            }
+            
+            if (blueGiant) {
+                blueGiant.rotation.y += 0.008 * timeSpeed;
+            }
+            
+            if (whiteDwarf) {
+                whiteDwarf.rotation.y += 0.015 * timeSpeed;
+                // Precession
+                whiteDwarf.rotation.x = Math.sin(time * 0.1) * 0.1;
+            }
+            
+            if (blackHole) {
+                // Frame dragging effect
+                blackHole.rotation.y += 0.02 * timeSpeed;
+            }
+        }
+        
+        function updateParticleSystemsAnimation(time) {
+            stellarWinds.forEach((wind, index) => {
+                if (wind.geometry && wind.geometry.attributes.position) {
+                    const positions = wind.geometry.attributes.position.array;
+                    const velocities = wind.geometry.attributes.velocity.array;
+                    const ages = wind.geometry.attributes.age.array;
+                    
+                    for (let i = 0; i < positions.length; i += 3) {
+                        // Ενημέρωση θέσεων
+                        positions[i] += velocities[i] * timeSpeed;
+                        positions[i + 1] += velocities[i + 1] * timeSpeed;
+                        positions[i + 2] += velocities[i + 2] * timeSpeed;
+                        
+                        // Ενημέρωση ηλικιών
+                        ages[i / 3] += timeSpeed;
+                        
+                        // Reset particles που έχουν φύγει πολύ μακριά
+                        const distance = Math.sqrt(
+                            positions[i] * positions[i] +
+                            positions[i + 1] * positions[i + 1] +
+                            positions[i + 2] * positions[i + 2]
+                        );
+                        
+                        if (distance > 100 || ages[i / 3] > 300) {
+                            // Reset particle
+                            const theta = Math.random() * Math.PI * 2;
+                            const phi = Math.acos(2 * Math.random() - 1);
+                            const radius = 8 + Math.random() * 2;
+                            
+                            positions[i] = radius * Math.sin(phi) * Math.cos(theta);
+                            positions[i + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                            positions[i + 2] = radius * Math.cos(phi);
+                            
+                            ages[i / 3] = 0;
+                        }
+                    }
+                    
+                    wind.geometry.attributes.position.needsUpdate = true;
+                    wind.geometry.attributes.age.needsUpdate = true;
+                }
+            });
+        }
+        
+        function updateMagneticFields(time) {
+            magneticFieldLines.forEach(line => {
+                if (line.material && line.material.uniforms) {
+                    line.material.uniforms.time.value = time * timeSpeed;
+                }
+            });
+        }
+        
+        function updateAccretionDisk(time) {
+            if (accretionDisk) {
+                accretionDisk.rotation.z += 0.01 * timeSpeed;
+                
+                if (accretionDisk.material.uniforms) {
+                    accretionDisk.material.uniforms.time.value = time * timeSpeed;
+                    accretionDisk.material.uniforms.temperature.value = stellarRadiationLevel;
+                    accretionDisk.material.uniforms.magneticField.value = gravityFieldStrength;
+                }
+            }
+        }
+        
+        function focusRedGiant() {
+            cameraTarget.copy(redGiant.position);
+            cameraDistance = 35;
+            updateCameraPosition();
+            updateStellarInfo('redGiant');
+            currentFocus = 'redGiant';
+        }
+        
+        function focusBlueGiant() {
+            cameraTarget.copy(blueGiant.position);
+            cameraDistance = 30;
+            updateCameraPosition();
+            updateStellarInfo('blueGiant');
+            currentFocus = 'blueGiant';
+        }
+        
+        function focusWhiteDwarf() {
+            cameraTarget.copy(whiteDwarf.position);
+            cameraDistance = 20;
+            updateCameraPosition();
+            updateStellarInfo('whiteDwarf');
+            currentFocus = 'whiteDwarf';
+        }
+        
+        function focusBlackHole() {
+            cameraTarget.copy(blackHole.position);
+            cameraDistance = 40;
+            updateCameraPosition();
+            updateStellarInfo('blackHole');
+            currentFocus = 'blackHole';
+        }
+        
+        function updateStellarInfo(objectType) {
+            const data = stellarData[objectType];
+            document.getElementById('objectName').textContent = data.name;
+            document.getElementById('objectType').textContent = data.type;
+            document.getElementById('objectMass').textContent = data.mass;
+            document.getElementById('objectTemp').textContent = data.temp;
+            document.getElementById('objectAge').textContent = data.age;
+            document.getElementById('objectDistance').textContent = data.distance;
+            document.getElementById('objectLuminosity').textContent = data.luminosity;
+            document.getElementById('objectMetallicity').textContent = data.metallicity;
+        }
+        
+        function createSupernova() {
+            if (!blueGiant) return;
+            
+            // Δημιουργία realistic supernova explosion
+            const explosionGeometry = new THREE.SphereGeometry(1, 32, 32);
+            const explosionMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    explosionRadius: { value: 1 },
+                    shockwaveSpeed: { value: 30000 }, // km/s
+                    energy: { value: 1e44 } // ergs
+                },
+                vertexShader: `
+                    uniform float explosionRadius;
+                    uniform float time;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        vNormal = normal;
+                        vPosition = position;
+                        vec3 newPosition = position * explosionRadius;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float energy;
+                    varying vec3 vNormal;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        float intensity = 1.0 - time * 0.05;
+                        
+                        // Supernova color evolution
+                        vec3 color;
+                        if (time < 5.0) {
+                            color = vec3(1.0, 1.0, 0.8); // Initial flash
+                        } else if (time < 15.0) {
+                            color = vec3(1.0, 0.8, 0.4); // Cooling
+                        } else {
+                            color = vec3(1.0, 0.4, 0.2); // Nebular phase
+                        }
+                        
+                        float fresnel = 1.0 - abs(dot(vNormal, vec3(0, 0, 1)));
+                        gl_FragColor = vec4(color, intensity * fresnel);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const explosion = new THREE.Mesh(explosionGeometry, explosionMaterial);
+            explosion.position.copy(blueGiant.position);
+            scene.add(explosion);
+            
+            // Κινούμενη έκρηξη με realistic physics
+            let explosionTime = 0;
+            const explosionAnimation = () => {
+                explosionTime += 0.1;
+                explosion.material.uniforms.time.value = explosionTime;
+                explosion.material.uniforms.explosionRadius.value = 1 + explosionTime * 2;
+                
+                if (explosionTime < 50) {
+                    requestAnimationFrame(explosionAnimation);
+                } else {
+                    scene.remove(explosion);
+                    // Δημιουργία neutron star ή black hole
+                    createSupernovaRemnantObject(blueGiant.position);
+                }
+            };
+            explosionAnimation();
+        }
+        
+        function createSupernovaRemnantObject(position) {
+            // 90% πιθανότητα για neutron star, 10% για black hole
+            if (Math.random() < 0.9) {
+                createNeutronStar(position);
+            } else {
+                createStellarBlackHole(position);
+            }
+        }
+        
+        function createNeutronStar(position) {
+            const neutronStarGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const neutronStarMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    magneticField: { value: 1e12 }, // Gauss
+                    rotationPeriod: { value: 0.033 } // 33ms
+                },
+                vertexShader: `
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    
+                    void main() {
+                        vPosition = position;
+                        vNormal = normalize(normalMatrix * normal);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float magneticField;
+                    uniform float rotationPeriod;
+                    varying vec3 vPosition;
+                    varying vec3 vNormal;
+                    
+                    void main() {
+                        // Neutron star surface
+                        float pulse = sin(time / rotationPeriod * 2.0 * 3.14159) * 0.5 + 0.5;
+                        vec3 neutronColor = vec3(0.9, 0.9, 1.0);
+                        
+                        // Magnetic field effects
+                        float magnetic = magneticField / 1e12;
+                        vec3 magneticGlow = vec3(0.5, 0.8, 1.0) * magnetic * 0.1;
+                        
+                        gl_FragColor = vec4(neutronColor + magneticGlow, 1.0);
+                    }
+                `,
+                transparent: false
+            });
+            
+            const neutronStar = new THREE.Mesh(neutronStarGeometry, neutronStarMaterial);
+            neutronStar.position.copy(position);
+            scene.add(neutronStar);
+        }
+        
+        function createStellarBlackHole(position) {
+            // Δημιουργία νέας μαύρης τρύπας
+            const newBlackHole = blackHole.clone();
+            newBlackHole.position.copy(position);
+            scene.add(newBlackHole);
+        }
+        
+        function createGammaRayBurst() {
+            if (!blueGiant) return;
+            
+            // Δημιουργία GRB jets
+            const jetGeometry = new THREE.CylinderGeometry(0.1, 2, 50, 8);
+            const jetMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    energy: { value: 1e54 }, // ergs
+                    lorentzFactor: { value: 300 }
+                },
+                vertexShader: `
+                    varying vec3 vPosition;
+                    uniform float time;
+                    
+                    void main() {
+                        vPosition = position;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float energy;
+                    uniform float lorentzFactor;
+                    varying vec3 vPosition;
+                    
+                    void main() {
+                        float intensity = energy / 1e54;
+                        vec3 gammaColor = vec3(0.8, 0.9, 1.0);
+                        
+                        // Relativistic beaming
+                        float beaming = lorentzFactor / 300.0;
+                        float pulse = sin(time * 20.0) * 0.5 + 0.5;
+                        
+                        gl_FragColor = vec4(gammaColor * intensity * beaming, pulse * 0.8);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            // Δύο αντίθετα jets
+            const jet1 = new THREE.Mesh(jetGeometry, jetMaterial);
+            const jet2 = new THREE.Mesh(jetGeometry, jetMaterial);
+            
+            jet1.position.copy(blueGiant.position);
+            jet2.position.copy(blueGiant.position);
+            jet2.rotation.z = Math.PI;
+            
+            scene.add(jet1);
+            scene.add(jet2);
+            
+            // Animation
+            setTimeout(() => {
+                scene.remove(jet1);
+                scene.remove(jet2);
+            }, 10000);
+        }
+        
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            if (isAnimating) {
+                animate();
+            }
+        }
+        
+        function resetView() {
+            cameraDistance = 80;
+            cameraAngleX = 0;
+            cameraAngleY = 0;
+            cameraTarget.set(0, 0, 0);
+            updateCameraPosition();
+            updateStellarInfo('redGiant');
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        function toggleAccretionDisk() {
+            showAccretionDisk = !showAccretionDisk;
+            if (accretionDisk) {
+                accretionDisk.visible = showAccretionDisk;
+            }
+        }
+        
+        function toggleStellarWinds() {
+            showStellarWinds = !showStellarWinds;
+            stellarWinds.forEach(wind => {
+                wind.visible = showStellarWinds;
+            });
+        }
+        
+        function toggleMagneticFields() {
+            showMagneticFields = !showMagneticFields;
+            magneticFieldLines.forEach(line => {
+                line.visible = showMagneticFields;
+            });
+        }
+        
+        function toggleRelativisticEffects() {
+            showRelativisticEffects = !showRelativisticEffects;
+            // Ενεργοποίηση/απενεργοποίηση σχετικιστικών εφέ
+        }
+        
+        function toggleQuantumEffects() {
+            showQuantumEffects = !showQuantumEffects;
+            // Ενεργοποίηση/απενεργοποίηση κβαντικών εφέ
+        }
+        
+        function toggleAdvancedPhysics() {
+            advancedPhysics = !advancedPhysics;
+            // Ενεργοποίηση προηγμένης φυσικής προσομοίωσης
+        }
+        
+        // Εκκίνηση της εφαρμογής
+        init();
+    </script>
+</body>
+</html>
