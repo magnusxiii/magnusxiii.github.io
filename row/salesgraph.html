@@ -1,0 +1,2464 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογιστής Κέρδους Ανά Κιτ - Προχωρημένη Ανάλυση</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #00d4ff;
+            --success-color: #00ff88;
+            --warning-color: #ffaa00;
+            --danger-color: #ff4444;
+            --border-color: #444444;
+            --shadow: 0 8px 32px rgba(0, 212, 255, 0.1);
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .theme-btn {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-color);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .main-content {
+            display: grid;
+            gap: 30px;
+        }
+
+        section {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ingredient-form, .cost-form, .sales-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        .add-btn, .calculate-btn {
+            background: var(--gradient);
+            border: none;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover, .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .ingredients-list, .costs-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .ingredient-item, .cost-item {
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-btn {
+            background: var(--danger-color);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .result-card.profit {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05));
+        }
+
+        .result-card.total {
+            border-color: var(--accent-color);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05));
+        }
+
+        .result-card.warning {
+            border-color: var(--warning-color);
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.1), rgba(255, 170, 0, 0.05));
+        }
+
+        .result-card h3 {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .result-card span {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+        }
+
+        .chart-wrapper {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            height: 450px;
+        }
+
+        .chart-wrapper.large {
+            grid-column: span 2;
+            height: 500px;
+        }
+
+        .analysis-section {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .analysis-item {
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn.csv {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .export-btn.pdf {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .export-btn.excel {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        #resultsSection {
+            display: none;
+        }
+
+        .scenario-analysis {
+            margin-top: 20px;
+        }
+
+        .scenario-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .scenario-btn {
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border: 2px solid var(--accent-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scenario-btn:hover, .scenario-btn.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .ingredient-form, .cost-form, .sales-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper.large {
+                grid-column: span 1;
+            }
+            
+            .export-buttons {
+                flex-direction: column;
+            }
+        }
+        .export-btn.excel-charts {
+    background: #2e7d32;
+    color: white;
+}
+
+.export-btn.pdf-charts {
+    background: #d32f2f;
+    color: white;
+}
+
+.export-btn.excel-charts:hover,
+.export-btn.pdf-charts:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Υπολογιστής Κέρδους Ανά Κιτ - Προχωρημένη Ανάλυση</h1>
+            <button id="themeToggle" class="theme-btn">🌙 Light Mode</button>
+        </header>
+
+        <div class="main-content">
+            <!-- Εισαγωγή Συστατικών -->
+            <section class="input-section">
+                <h2>📦 Συστατικά Κιτ</h2>
+                <div class="ingredient-form">
+                    <input type="text" id="description" placeholder="Περιγραφή συστατικού">
+                    <input type="number" id="batchPrice" placeholder="Τιμή Παρτίδας (€)" step="0.01">
+                    <input type="number" id="quantity" placeholder="Ποσότητα στην παρτίδα" step="0.01">
+                    <input type="number" id="usage" placeholder="Χρήση στο Κιτ" step="0.01">
+                    <button id="addIngredient" class="add-btn">➕ Προσθήκη</button>
+                </div>
+                
+                <div class="ingredients-list" id="ingredientsList"></div>
+            </section>
+
+            <!-- Επιπλέον Κόστη -->
+            <section class="additional-costs">
+                <h2>💸 Επιπλέον Κόστη</h2>
+                <div class="cost-form">
+                    <input type="text" id="additionalDesc" placeholder="Περιγραφή κόστους">
+                    <input type="number" id="additionalCost" placeholder="Κόστος (€)" step="0.01">
+                    <button id="addCost" class="add-btn">➕ Προσθήκη</button>
+                </div>
+                <div class="costs-list" id="costsList"></div>
+            </section>
+
+            <!-- Πωλήσεις -->
+            <section class="sales-section">
+                <h2>💵 Στοιχεία Πώλησης</h2>
+                <div class="sales-form">
+                    <input type="number" id="salePrice" placeholder="Τιμή Πώλησης Κιτ (€)" step="0.01">
+                    <input type="number" id="batchCount" placeholder="Πλήθος Παρτίδας" step="1" value="1">
+                    <button id="calculate" class="calculate-btn">🧮 Υπολογισμός</button>
+                </div>
+            </section>
+
+            <!-- Αποτελέσματα -->
+            <section class="results-section" id="resultsSection">
+                <h2>📊 Αποτελέσματα</h2>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>Σύνολο Κόστους Ανά Κιτ</h3>
+                        <span id="totalCost">0.00 €</span>
+                    </div>
+                    <div class="result-card">
+                        <h3>Τιμή Πώλησης Ανά Κιτ</h3>
+                        <span id="salePriceResult">0.00 €</span>
+                    </div>
+                    <div class="result-card profit">
+                        <h3>Καθαρό Κέρδος Ανά Κιτ</h3>
+                        <span id="netProfit">0.00 €</span>
+                    </div>
+                    <div class="result-card">
+                        <h3>Ποσοστό Κέρδους επί Κόστους</h3>
+                        <span id="profitOnCost">0.00%</span>
+                    </div>
+                    <div class="result-card">
+                        <h3>Ποσοστό Κέρδους επί Πώλησης</h3>
+                        <span id="profitOnSale">0.00%</span>
+                    </div>
+                    <div class="result-card">
+                        <h3>50% του Κέρδους Ανά Κιτ</h3>
+                        <span id="halfProfit">0.00 €</span>
+                    </div>
+                    <div class="result-card total">
+                        <h3>Σύνολο Κέρδους (Παρτίδα)</h3>
+                        <span id="totalProfit">0.00 €</span>
+                    </div>
+                    <div class="result-card warning">
+                        <h3>Σημείο Ισοσκέλισης</h3>
+                        <span id="breakEven">0.00 €</span>
+                    </div>
+                    <div class="result-card">
+                        <h3>ROI (Return on Investment)</h3>
+                        <span id="roi">0.00%</span>
+                    </div>
+                    <div class="result-card">
+                        <h3>Κόστος Ανά Μονάδα</h3>
+                        <span id="unitCost">0.00 €</span>
+                    </div>
+                </div>
+
+                <!-- Προχωρημένη Ανάλυση -->
+                <div class="analysis-section">
+                    <h3>🔍 Προχωρημένη Ανάλυση</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <h4>💡 Συστάσεις Τιμολόγησης</h4>
+                            <p id="pricingRecommendation">Υπολογίστε πρώτα για να δείτε συστάσεις</p>
+                        </div>
+                        <div class="analysis-item">
+                            <h4>⚠️ Ανάλυση Κινδύνου</h4>
+                            <p id="riskAnalysis">Υπολογίστε πρώτα για να δείτε ανάλυση κινδύνου</p>
+                        </div>
+                        <div class="analysis-item">
+                            <h4>📈 Δυναμικό Βελτίωσης</h4>
+                            <p id="improvementPotential">Υπολογίστε πρώτα για να δείτε δυναμικό βελτίωσης</p>
+                        </div>
+                        <div class="analysis-item">
+                            <h4>🎯 Ανταγωνιστικότητα</h4>
+                            <p id="competitiveness">Υπολογίστε πρώτα για να δείτε ανάλυση ανταγωνιστικότητας</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Γραφήματα -->
+            <section class="charts-section">
+                <h2>📈 Προχωρημένη Ανάλυση Γραφημάτων</h2>
+                
+                <!-- Σενάρια Ανάλυσης -->
+                <div class="scenario-analysis">
+                    <h3>🎲 Ανάλυση Σεναρίων</h3>
+                    <div class="scenario-controls">
+                        <button class="scenario-btn active" data-scenario="current">Τρέχον Σενάριο</button>
+                        <button class="scenario-btn" data-scenario="optimistic">Αισιόδοξο (+20%)</button>
+                        <button class="scenario-btn" data-scenario="pessimistic">Απαισιόδοξο (-20%)</button>
+                        <button class="scenario-btn" data-scenario="competitive">Ανταγωνιστικό (-10%)</button>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="doughnutChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="scatterChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper large">
+                        <canvas id="combinedChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="waterfallChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="sensitivityChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Εξαγωγή Δεδομένων -->
+          <!-- Ενημερώστε το export section -->
+<section class="export-section">
+    <h2>📤 Εξαγωγή Δεδομένων</h2>
+    <div class="export-buttons">
+        <button id="exportCSV" class="export-btn csv">📄 Εξαγωγή CSV</button>
+        <button id="exportPDF" class="export-btn pdf">📋 Εξαγωγή PDF</button>
+        <button id="exportExcel" class="export-btn excel">📊 Εξαγωγή Excel</button>
+        <button id="exportExcelCharts" class="export-btn excel-charts">📊 Excel με Γραφήματα</button>
+        <button id="exportPDFCharts" class="export-btn pdf-charts">📋 PDF με Γραφήματα</button>
+    </div>
+</section>
+
+        </div>
+    </div>
+
+    <script>
+        class ProfitCalculator {
+            constructor() {
+                this.ingredients = [];
+                this.additionalCosts = [];
+                this.charts = {};
+                this.currentScenario = 'current';
+                this.calculationResults = null;
+                this.initializeEventListeners();
+                this.initializeCharts();
+            }
+
+            initializeEventListeners() {
+                // Theme toggle
+                document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+                
+                // Add ingredient
+                document.getElementById('addIngredient').addEventListener('click', () => this.addIngredient());
+                
+                // Add additional cost
+                document.getElementById('addCost').addEventListener('click', () => this.addAdditionalCost());
+                
+                // Calculate
+                document.getElementById('calculate').addEventListener('click', () => this.calculate());
+                
+                // Export functions
+                document.getElementById('exportCSV').addEventListener('click', () => this.exportCSV());
+                document.getElementById('exportPDF').addEventListener('click', () => this.exportPDF());
+                document.getElementById('exportExcel').addEventListener('click', () => this.exportExcel());
+                
+                // Scenario buttons
+                document.querySelectorAll('.scenario-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.changeScenario(e.target.dataset.scenario));
+                });
+                
+                // Enter key support
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const activeElement = document.activeElement;
+                        if (activeElement.closest('.ingredient-form')) {
+                            this.addIngredient();
+                        } else if (activeElement.closest('.cost-form')) {
+                            this.addAdditionalCost();
+                        } else if (activeElement.closest('.sales-form')) {
+                            this.calculate();
+                        }
+                    }
+                });
+                // Στην initializeEventListeners μέθοδο, αντικαταστήστε τις γραμμές:
+document.getElementById('exportExcelCharts').addEventListener('click', () => this.exportExcelWithCharts());
+document.getElementById('exportPDFCharts').addEventListener('click', () => this.exportPDFWithCharts());
+
+            }
+
+            toggleTheme() {
+                document.body.classList.toggle('light-mode');
+                const themeBtn = document.getElementById('themeToggle');
+                const isLight = document.body.classList.contains('light-mode');
+                themeBtn.textContent = isLight ? '🌙 Dark Mode' : '☀️ Light Mode';
+                
+                // Update chart colors
+                this.updateChartTheme();
+            }
+
+            updateChartTheme() {
+                const textColor = document.body.classList.contains('light-mode') ? '#2d3748' : '#ffffff';
+                const gridColor = document.body.classList.contains('light-mode') ? '#e2e8f0' : '#444444';
+                
+                Object.values(this.charts).forEach(chart => {
+                    if (chart.options.plugins && chart.options.plugins.title) {
+                        chart.options.plugins.title.color = textColor;
+                    }
+                    if (chart.options.plugins && chart.options.plugins.legend) {
+                        chart.options.plugins.legend.labels.color = textColor;
+                    }
+                    if (chart.options.scales) {
+                        Object.values(chart.options.scales).forEach(scale => {
+                            if (scale.ticks) scale.ticks.color = textColor;
+                            if (scale.grid) scale.grid.color = gridColor;
+                        });
+                    }
+                    chart.update();
+                });
+            }
+
+            addIngredient() {
+                const description = document.getElementById('description').value.trim();
+                const batchPrice = parseFloat(document.getElementById('batchPrice').value);
+                const quantity = parseFloat(document.getElementById('quantity').value);
+                const usage = parseFloat(document.getElementById('usage').value);
+
+                if (!description || isNaN(batchPrice) || isNaN(quantity) || isNaN(usage) || batchPrice <= 0 || quantity <= 0 || usage <= 0) {
+                    alert('Παρακαλώ συμπληρώστε όλα τα πεδία με έγκυρες τιμές!');
+                    return;
+                }
+
+                // Ακριβείς υπολογισμοί με στρογγυλοποίηση
+                const costPerUnit = Math.round((batchPrice / quantity) * 10000) / 10000; // 4 δεκαδικά
+                const totalCost = Math.round((costPerUnit * usage) * 100) / 100; // 2 δεκαδικά
+
+                const ingredient = {
+                    id: Date.now(),
+                    description,
+                    batchPrice: Math.round(batchPrice * 100) / 100,
+                    quantity: Math.round(quantity * 100) / 100,
+                    usage: Math.round(usage * 100) / 100,
+                    costPerUnit,
+                    totalCost
+                };
+
+                this.ingredients.push(ingredient);
+                this.renderIngredients();
+                this.clearIngredientForm();
+            }
+
+            addAdditionalCost() {
+                const description = document.getElementById('additionalDesc').value.trim();
+                const cost = parseFloat(document.getElementById('additionalCost').value);
+
+                if (!description || isNaN(cost) || cost <= 0) {
+                    alert('Παρακαλώ συμπληρώστε όλα τα πεδία με έγκυρες τιμές!');
+                    return;
+                }
+
+                const additionalCost = {
+                    id: Date.now(),
+                    description,
+                    cost: Math.round(cost * 100) / 100
+                };
+
+                this.additionalCosts.push(additionalCost);
+                this.renderAdditionalCosts();
+                this.clearCostForm();
+            }
+
+            renderIngredients() {
+                const container = document.getElementById('ingredientsList');
+                container.innerHTML = this.ingredients.map(ingredient => `
+                    <div class="ingredient-item">
+                        <div>
+                            <strong>${ingredient.description}</strong><br>
+                            <small>Τιμή παρτίδας: ${ingredient.batchPrice.toFixed(2)}€ | 
+                            Ποσότητα: ${ingredient.quantity} | 
+                            Χρήση: ${ingredient.usage} | 
+                            Κόστος/μονάδα: ${ingredient.costPerUnit.toFixed(4)}€ |
+                            Συνολικό κόστος: ${ingredient.totalCost.toFixed(2)}€</small>
+                        </div>
+                        <button class="remove-btn" onclick="calculator.removeIngredient(${ingredient.id})">🗑️</button>
+                    </div>
+                `).join('');
+            }
+
+            renderAdditionalCosts() {
+                const container = document.getElementById('costsList');
+                container.innerHTML = this.additionalCosts.map(cost => `
+                    <div class="cost-item">
+                        <div>
+                            <strong>${cost.description}</strong><br>
+                            <small>Κόστος: ${cost.cost.toFixed(2)}€</small>
+                        </div>
+                        <button class="remove-btn" onclick="calculator.removeAdditionalCost(${cost.id})">🗑️</button>
+                    </div>
+                `).join('');
+            }
+
+            removeIngredient(id) {
+                this.ingredients = this.ingredients.filter(ingredient => ingredient.id !== id);
+                this.renderIngredients();
+            }
+
+            removeAdditionalCost(id) {
+                this.additionalCosts = this.additionalCosts.filter(cost => cost.id !== id);
+                this.renderAdditionalCosts();
+            }
+
+            clearIngredientForm() {
+                document.getElementById('description').value = '';
+                document.getElementById('batchPrice').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('usage').value = '';
+            }
+
+            clearCostForm() {
+                document.getElementById('additionalDesc').value = '';
+                document.getElementById('additionalCost').value = '';
+            }
+
+            calculate() {
+                const salePrice = parseFloat(document.getElementById('salePrice').value);
+                const batchCount = parseInt(document.getElementById('batchCount').value) || 1;
+
+                if (isNaN(salePrice) || salePrice <= 0) {
+                    alert('Παρακαλώ εισάγετε έγκυρη τιμή πώλησης!');
+                    return;
+                }
+
+                // Ακριβείς υπολογισμοί με σωστή στρογγυλοποίηση
+                const ingredientsCost = this.ingredients.reduce((sum, ingredient) => sum + ingredient.totalCost, 0);
+                const additionalCostTotal = this.additionalCosts.reduce((sum, cost) => sum + cost.cost, 0);
+                const totalCost = Math.round((ingredientsCost + additionalCostTotal) * 100) / 100;
+                const netProfit = Math.round((salePrice - totalCost) * 100) / 100;
+                const profitOnCost = totalCost > 0 ? Math.round((netProfit / totalCost) * 10000) / 100 : 0;
+                const profitOnSale = salePrice > 0 ? Math.round((netProfit / salePrice) * 10000) / 100 : 0;
+                const halfProfit = Math.round((netProfit / 2) * 100) / 100;
+                const totalProfitBatch = Math.round((netProfit * batchCount) * 100) / 100;
+                
+                // Επιπλέον υπολογισμοί
+                const breakEven = Math.round(totalCost * 100) / 100; // Σημείο ισοσκέλισης
+                const roi = totalCost > 0 ? Math.round((netProfit / totalCost) * 10000) / 100 : 0; // ROI
+                const unitCost = Math.round(totalCost * 100) / 100; // Κόστος ανά μονάδα
+
+                // Αποθήκευση αποτελεσμάτων
+                this.calculationResults = {
+                    salePrice,
+                    batchCount,
+                    ingredientsCost,
+                    additionalCostTotal,
+                    totalCost,
+                    netProfit,
+                    profitOnCost,
+                    profitOnSale,
+                    halfProfit,
+                    totalProfitBatch,
+                    breakEven,
+                    roi,
+                    unitCost
+                };
+
+                // Ενημέρωση UI
+                this.updateResults();
+                this.updateAnalysis();
+                this.updateAllCharts();
+
+                // Εμφάνιση αποτελεσμάτων
+                document.getElementById('resultsSection').style.display = 'block';
+            }
+
+            updateResults() {
+                const results = this.calculationResults;
+                
+                document.getElementById('totalCost').textContent = `${results.totalCost.toFixed(2)} €`;
+                document.getElementById('salePriceResult').textContent = `${results.salePrice.toFixed(2)} €`;
+                document.getElementById('netProfit').textContent = `${results.netProfit.toFixed(2)} €`;
+                document.getElementById('profitOnCost').textContent = `${results.profitOnCost.toFixed(2)}%`;
+                document.getElementById('profitOnSale').textContent = `${results.profitOnSale.toFixed(2)}%`;
+                document.getElementById('halfProfit').textContent = `${results.halfProfit.toFixed(2)} €`;
+                document.getElementById('totalProfit').textContent = `${results.totalProfitBatch.toFixed(2)} €`;
+                document.getElementById('breakEven').textContent = `${results.breakEven.toFixed(2)} €`;
+                document.getElementById('roi').textContent = `${results.roi.toFixed(2)}%`;
+                document.getElementById('unitCost').textContent = `${results.unitCost.toFixed(2)} €`;
+            }
+
+            updateAnalysis() {
+                const results = this.calculationResults;
+                
+                // Συστάσεις Τιμολόγησης
+                let pricingText = '';
+                if (results.profitOnCost < 20) {
+                    pricingText = '⚠️ Χαμηλό περιθώριο κέρδους. Συνιστάται αύξηση τιμής ή μείωση κόστους.';
+                } else if (results.profitOnCost > 50) {
+                    pricingText = '✅ Εξαιρετικό περιθώριο κέρδους. Ανταγωνιστική θέση.';
+                } else {
+                    pricingText = '✅ Υγιές περιθώριο κέρδους. Καλή ισορροπία τιμής-κόστους.';
+                }
+                document.getElementById('pricingRecommendation').textContent = pricingText;
+
+                // Ανάλυση Κινδύνου
+                let riskText = '';
+                const riskScore = results.profitOnCost;
+                if (riskScore < 10) {
+                    riskText = '🔴 Υψηλός κίνδυνος. Μικρό περιθώριο για αυξήσεις κόστους.';
+                } else if (riskScore < 30) {
+                    riskText = '🟡 Μέτριος κίνδυνος. Προσοχή σε αυξήσεις κόστους.';
+                } else {
+                    riskText = '🟢 Χαμηλός κίνδυνος. Καλό περιθώριο ασφαλείας.';
+                }
+                document.getElementById('riskAnalysis').textContent = riskText;
+
+                // Δυναμικό Βελτίωσης
+                const mostExpensive = this.ingredients.reduce((max, ingredient) => 
+                    ingredient.totalCost > max.totalCost ? ingredient : max, 
+                    this.ingredients[0] || { description: 'Κανένα', totalCost: 0 }
+                );
+                const improvementText = `🎯 Μεγαλύτερο κόστος: ${mostExpensive.description} (${mostExpensive.totalCost.toFixed(2)}€). Εστιάστε εδώ για μείωση κόστους.`;
+                document.getElementById('improvementPotential').textContent = improvementText;
+
+                // Ανταγωνιστικότητα
+                let competitivenessText = '';
+                if (results.profitOnSale > 25) {
+                    competitivenessText = '💪 Πολύ ανταγωνιστικό προϊόν με υψηλή κερδοφορία.';
+                } else if (results.profitOnSale > 15) {
+                    competitivenessText = '👍 Ανταγωνιστικό προϊόν με καλή κερδοφορία.';
+                } else {
+                    competitivenessText = '⚡ Χρειάζεται βελτίωση για καλύτερη ανταγωνιστικότητα.';
+                }
+                document.getElementById('competitiveness').textContent = competitivenessText;
+            }
+
+            changeScenario(scenario) {
+                this.currentScenario = scenario;
+                
+                // Update active button
+                document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`[data-scenario="${scenario}"]`).classList.add('active');
+                
+                // Update charts with scenario
+                if (this.calculationResults) {
+                    this.updateAllCharts();
+                }
+            }
+
+            getScenarioMultiplier() {
+                switch (this.currentScenario) {
+                    case 'optimistic': return 1.2;
+                    case 'pessimistic': return 0.8;
+                    case 'competitive': return 0.9;
+                    default: return 1.0;
+                }
+            }
+
+            initializeCharts() {
+                const textColor = '#ffffff';
+                const gridColor = '#444444';
+
+                // Pie Chart - Κατανομή Κόστους
+                const pieCtx = document.getElementById('pieChart').getContext('2d');
+                this.charts.pie = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Κόστος Συστατικών', 'Επιπλέον Κόστη', 'Κέρδος'],
+                        datasets: [{
+                            data: [1, 1, 1],
+                            backgroundColor: ['#ff6384', '#36a2eb', '#4bc0c0'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Κατανομή Κόστους & Κέρδους',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: {
+                                labels: { color: textColor }
+                            }
+                        }
+                    }
+                });
+
+                // Bar Chart - Σύγκριση
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                this.charts.bar = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Κόστος', 'Πώληση', 'Κέρδος'],
+                        datasets: [{
+                            label: 'Ποσά (€)',
+                            data: [0, 0, 0],
+                            backgroundColor: ['#ff6384', '#36a2eb', '#4bc0c0'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Σύγκριση Κόστους - Πώλησης - Κέρδους',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            },
+                            x: {
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            }
+                        }
+                    }
+                });
+
+                // Line Chart - Προβολή Κέρδους
+                const lineCtx = document.getElementById('lineChart').getContext('2d');
+                this.charts.line = new Chart(lineCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Μήνας 1', 'Μήνας 2', 'Μήνας 3', 'Μήνας 4', 'Μήνας 5', 'Μήνας 6'],
+                        datasets: [{
+                            label: 'Κέρδος (€)',
+                            data: [0, 0, 0, 0, 0, 0],
+                            borderColor: '#4bc0c0',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Προβολή Κέρδους (6 Μήνες)',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            },
+                            x: {
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            }
+                        }
+                    }
+                });
+
+                // Doughnut Chart - Ανάλυση Συστατικών
+                const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+                this.charts.doughnut = new Chart(doughnutCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Συστατικό 1'],
+                        datasets: [{
+                            data: [100],
+                            backgroundColor: ['#ff9f40', '#ff6384', '#36a2eb', '#4bc0c0', '#9966ff'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Ανάλυση Κόστους Συστατικών',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: { labels: { color: textColor } }
+                        }
+                    }
+                });
+
+                // Radar Chart - Ανάλυση Επιδόσεων
+                const radarCtx = document.getElementById('radarChart').getContext('2d');
+                this.charts.radar = new Chart(radarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Κερδοφορία', 'Ανταγωνιστικότητα', 'Ποιότητα', 'Κόστος', 'ROI'],
+                        datasets: [{
+                            label: 'Επίδοση Προϊόντος',
+                            data: [50, 50, 50, 50, 50],
+                            borderColor: '#4bc0c0',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            pointBackgroundColor: '#4bc0c0'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Ανάλυση Επιδόσεων Προϊόντος',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { color: textColor },
+                                grid: { color: gridColor },
+                                pointLabels: { color: textColor }
+                            }
+                        }
+                    }
+                });
+
+                // Scatter Chart - Ανάλυση Κόστους vs Κέρδους
+                const scatterCtx = document.getElementById('scatterChart').getContext('2d');
+                this.charts.scatter = new Chart(scatterCtx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Κόστος vs Κέρδος',
+                            data: [{x: 0, y: 0}],
+                            backgroundColor: '#ff6384',
+                            borderColor: '#ff6384'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Ανάλυση Κόστους vs Κέρδους',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Κόστος (€)',
+                                    color: textColor
+                                },
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Κέρδος (€)',
+                                    color: textColor
+                                },
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            }
+                        }
+                    }
+                });
+
+                // Combined Chart - Σενάρια
+                const combinedCtx = document.getElementById('combinedChart').getContext('2d');
+                this.charts.combined = new Chart(combinedCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Τρέχον', 'Αισιόδοξο', 'Απαισιόδοξο', 'Ανταγωνιστικό'],
+                        datasets: [{
+                            type: 'bar',
+                            label: 'Κόστος (€)',
+                            data: [0, 0, 0, 0],
+                            backgroundColor: '#ff6384',
+                            yAxisID: 'y'
+                        }, {
+                            type: 'line',
+                            label: 'Κέρδος (€)',
+                            data: [0, 0, 0, 0],
+                            borderColor: '#4bc0c0',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            yAxisID: 'y'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Σύγκριση Σεναρίων',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                position: 'left',
+                                beginAtZero: true,
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            },
+                            x: {
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            }
+                        }
+                    }
+                });
+
+                // Waterfall Chart (simulated with bar chart)
+                const waterfallCtx = document.getElementById('waterfallChart').getContext('2d');
+                this.charts.waterfall = new Chart(waterfallCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Αρχικό Κόστος', 'Συστατικά', 'Επιπλέον Κόστη', 'Τελικό Κόστος'],
+                        datasets: [{
+                            label: 'Ανάλυση Κόστους',
+                            data: [0, 0, 0, 0],
+                            backgroundColor: ['#36a2eb', '#ff6384', '#ff9f40', '#4bc0c0']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Waterfall Ανάλυση Κόστους',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            },
+                            x: {
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            }
+                        }
+                    }
+                });
+
+                // Sensitivity Chart
+                const sensitivityCtx = document.getElementById('sensitivityChart').getContext('2d');
+                this.charts.sensitivity = new Chart(sensitivityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['-20%', '-10%', '0%', '+10%', '+20%'],
+                        datasets: [{
+                            label: 'Μεταβολή Κέρδους',
+                            data: [0, 0, 0, 0, 0],
+                            borderColor: '#ff6384',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Ανάλυση Ευαισθησίας Τιμής',
+                                color: textColor,
+                                font: { size: 16 }
+                            },
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Κέρδος (€)',
+                                    color: textColor
+                                },
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Μεταβολή Τιμής',
+                                    color: textColor
+                                },
+                                ticks: { color: textColor },
+                                grid: { color: gridColor }
+                            }
+                        }
+                    }
+                });
+            }
+
+            updateAllCharts() {
+                if (!this.calculationResults) return;
+
+                const results = this.calculationResults;
+                const multiplier = this.getScenarioMultiplier();
+
+                // Update Pie Chart
+                this.charts.pie.data.datasets[0].data = [
+                    results.ingredientsCost,
+                    results.additionalCostTotal,
+                    Math.max(results.netProfit * multiplier, 0)
+                ];
+                this.charts.pie.update();
+
+                // Update Bar Chart
+                this.charts.bar.data.datasets[0].data = [
+                    results.totalCost,
+                    results.salePrice * multiplier,
+                    results.netProfit * multiplier
+                ];
+                this.charts.bar.update();
+
+                // Update Line Chart
+                const monthlyProfit = Array(6).fill(results.netProfit * multiplier);
+                this.charts.line.data.datasets[0].data = monthlyProfit;
+                this.charts.line.update();
+
+                // Update Doughnut Chart - Ingredients breakdown
+                if (this.ingredients.length > 0) {
+                    this.charts.doughnut.data.labels = this.ingredients.map(ing => ing.description);
+                    this.charts.doughnut.data.datasets[0].data = this.ingredients.map(ing => ing.totalCost);
+                    this.charts.doughnut.update();
+                }
+
+                // Update Radar Chart
+                const profitScore = Math.min(results.profitOnCost * 2, 100);
+                const competitiveScore = results.profitOnSale > 20 ? 80 : results.profitOnSale * 4;
+                const qualityScore = 75; // Assumed
+                const costScore = results.totalCost < 10 ? 90 : Math.max(20, 100 - results.totalCost * 5);
+                const roiScore = Math.min(results.roi * 2, 100);
+
+                this.charts.radar.data.datasets[0].data = [
+                    profitScore, competitiveScore, qualityScore, costScore, roiScore
+                ];
+                this.charts.radar.update();
+
+                // Update Scatter Chart
+                this.charts.scatter.data.datasets[0].data = [{
+                    x: results.totalCost,
+                    y: results.netProfit * multiplier
+                }];
+                this.charts.scatter.update();
+
+                // Update Combined Chart
+                this.charts.combined.data.datasets[0].data = [
+                    results.totalCost,
+                    results.totalCost,
+                    results.totalCost,
+                    results.totalCost
+                ];
+                this.charts.combined.data.datasets[1].data = [
+                    results.netProfit,
+                    results.netProfit * 1.2,
+                    results.netProfit * 0.8,
+                    results.netProfit * 0.9
+                ];
+                this.charts.combined.update();
+
+                // Update Waterfall Chart
+                this.charts.waterfall.data.datasets[0].data = [
+                    0,
+                    results.ingredientsCost,
+                    results.additionalCostTotal,
+                    results.totalCost
+                ];
+                this.charts.waterfall.update();
+
+                // Update Sensitivity Chart
+                const baseProfit = results.netProfit;
+                const sensitivityData = [
+                    baseProfit * 0.8 - results.totalCost * 0.2,
+                    baseProfit * 0.9 - results.totalCost * 0.1,
+                    baseProfit,
+                    baseProfit * 1.1 + results.totalCost * 0.1,
+                    baseProfit * 1.2 + results.totalCost * 0.2
+                ];
+                this.charts.sensitivity.data.datasets[0].data = sensitivityData;
+                this.charts.sensitivity.update();
+            }
+
+            exportCSV() {
+                const data = this.prepareExportData();
+                const csv = this.convertToCSV(data);
+                this.downloadFile(csv, 'profit-analysis.csv', 'text/csv;charset=utf-8;');
+            }
+
+            // Αντικαταστήστε την υπάρχουσα exportPDF μέθοδο με αυτή:
+exportPDF() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Χρήση font που υποστηρίζει ελληνικά
+        doc.setFont('helvetica');
+        doc.setFontSize(18);
+        
+        // Μετατροπή ελληνικών χαρακτήρων σε Latin-1
+        const greekToLatin = (text) => {
+            const greekMap = {
+                'Α': 'A', 'Β': 'B', 'Γ': 'G', 'Δ': 'D', 'Ε': 'E', 'Ζ': 'Z', 'Η': 'H', 'Θ': 'TH',
+                'Ι': 'I', 'Κ': 'K', 'Λ': 'L', 'Μ': 'M', 'Ν': 'N', 'Ξ': 'X', 'Ο': 'O', 'Π': 'P',
+                'Ρ': 'R', 'Σ': 'S', 'Τ': 'T', 'Υ': 'Y', 'Φ': 'F', 'Χ': 'CH', 'Ψ': 'PS', 'Ω': 'O',
+                'α': 'a', 'β': 'b', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'ζ': 'z', 'η': 'h', 'θ': 'th',
+                'ι': 'i', 'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ξ': 'x', 'ο': 'o', 'π': 'p',
+                'ρ': 'r', 'σ': 's', 'ς': 's', 'τ': 't', 'υ': 'y', 'φ': 'f', 'χ': 'ch', 'ψ': 'ps', 'ω': 'o',
+                'ά': 'a', 'έ': 'e', 'ή': 'h', 'ί': 'i', 'ό': 'o', 'ύ': 'y', 'ώ': 'o',
+                'Ά': 'A', 'Έ': 'E', 'Ή': 'H', 'Ί': 'I', 'Ό': 'O', 'Ύ': 'Y', 'Ώ': 'O'
+            };
+            
+            return text.replace(/[Α-Ωα-ωάέήίόύώΆΈΉΊΌΎΏ]/g, match => greekMap[match] || match);
+        };
+        
+        // Τίτλος
+        doc.text(greekToLatin('Ypologistis Kerdous Ana Kit'), 20, 20);
+        doc.text(greekToLatin('Prochorimenī Analysi'), 20, 30);
+        
+        let yPos = 50;
+        
+        // Συστατικά
+        doc.setFontSize(14);
+        doc.text(greekToLatin('Systatika:'), 20, yPos);
+        yPos += 10;
+        
+        doc.setFontSize(10);
+        this.ingredients.forEach(ingredient => {
+            const text = `• ${greekToLatin(ingredient.description)}: ${ingredient.totalCost.toFixed(2)} EUR`;
+            doc.text(text, 25, yPos);
+            yPos += 6;
+        });
+        
+        // Επιπλέον κόστη
+        yPos += 5;
+        doc.setFontSize(14);
+        doc.text(greekToLatin('Epipleon Kosti:'), 20, yPos);
+        yPos += 10;
+        
+        doc.setFontSize(10);
+        this.additionalCosts.forEach(cost => {
+            const text = `• ${greekToLatin(cost.description)}: ${cost.cost.toFixed(2)} EUR`;
+            doc.text(text, 25, yPos);
+            yPos += 6;
+        });
+        
+        // Αποτελέσματα
+        yPos += 10;
+        doc.setFontSize(14);
+        doc.text(greekToLatin('Apotelesmata Analysi:'), 20, yPos);
+        yPos += 10;
+        
+        const results = [
+            `Synolo Kostous: ${document.getElementById('totalCost').textContent}`,
+            `Timi Polisis: ${document.getElementById('salePriceResult').textContent}`,
+            `Katharo Kerdos: ${document.getElementById('netProfit').textContent}`,
+            `Pososto Kerdous epi Kostous: ${document.getElementById('profitOnCost').textContent}`,
+            `Pososto Kerdous epi Polisis: ${document.getElementById('profitOnSale').textContent}`,
+            `ROI: ${document.getElementById('roi').textContent}`,
+            `Simeio Isoskelisis: ${document.getElementById('breakEven').textContent}`
+        ];
+        
+        doc.setFontSize(10);
+        results.forEach(result => {
+            doc.text(`• ${greekToLatin(result)}`, 25, yPos);
+            yPos += 6;
+        });
+        
+        // Προσθήκη γραφημάτων
+        yPos += 15;
+        if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
+        doc.setFontSize(14);
+        doc.text(greekToLatin('Grafimata:'), 20, yPos);
+        yPos += 10;
+        
+        // Εξαγωγή γραφημάτων
+        const chartPromises = [];
+        
+        // Pie Chart
+        const pieCanvas = document.getElementById('pieChart');
+        if (pieCanvas) {
+            const pieImgData = pieCanvas.toDataURL('image/png', 1.0);
+            doc.addImage(pieImgData, 'PNG', 20, yPos, 80, 60);
+            yPos += 70;
+        }
+        
+        // Bar Chart
+        if (yPos > 200) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
+        const barCanvas = document.getElementById('barChart');
+        if (barCanvas) {
+            const barImgData = barCanvas.toDataURL('image/png', 1.0);
+            doc.addImage(barImgData, 'PNG', 20, yPos, 80, 60);
+            yPos += 70;
+        }
+        
+        // Line Chart
+        if (yPos > 200) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
+        const lineCanvas = document.getElementById('lineChart');
+        if (lineCanvas) {
+            const lineImgData = lineCanvas.toDataURL('image/png', 1.0);
+            doc.addImage(lineImgData, 'PNG', 20, yPos, 80, 60);
+        }
+        
+        // Ημερομηνία
+        doc.addPage();
+        doc.setFontSize(8);
+        doc.text(`Dimiourgithe: ${new Date().toLocaleDateString('el-GR')}`, 20, 20);
+        
+        doc.save('profit-analysis-advanced.pdf');
+        this.showNotification('PDF εξήχθη επιτυχώς!', 'success');
+        
+    } catch (error) {
+        console.error('PDF Export Error:', error);
+        this.showNotification('Σφάλμα κατά την εξαγωγή PDF: ' + error.message, 'error');
+    }
+}
+
+// Νέα μέθοδος για εξαγωγή Excel με γραφήματα
+exportExcelWithCharts() {
+    try {
+        const data = this.prepareExportData();
+        
+        // Προσθήκη αποτελεσμάτων
+        if (this.calculationResults) {
+            data.push({
+                'Τύπος': 'Αποτέλεσμα',
+                'Α/Α': '',
+                'Περιγραφή': 'Σύνολο Κόστους',
+                'Τιμή Παρτίδας (€)': '',
+                'Ποσότητα Παρτίδας': '',
+                'Χρήση στο Κιτ': '',
+                'Κόστος/Μονάδα (€)': '',
+                'Συνολικό Κόστος (€)': this.calculationResults.totalCost.toFixed(2),
+                'Ποσοστό Κόστους (%)': '100.00'
+            });
+            
+            data.push({
+                'Τύπος': 'Αποτέλεσμα',
+                'Α/Α': '',
+                'Περιγραφή': 'Καθαρό Κέρδος',
+                'Τιμή Παρτίδας (€)': '',
+                'Ποσότητα Παρτίδας': '',
+                'Χρήση στο Κιτ': '',
+                'Κόστος/Μονάδα (€)': '',
+                'Συνολικό Κόστος (€)': this.calculationResults.netProfit.toFixed(2),
+                'Ποσοστό Κόστους (%)': ''
+            });
+            
+            data.push({
+                'Τύπος': 'Αποτέλεσμα',
+                'Α/Α': '',
+                'Περιγραφή': 'ROI',
+                'Τιμή Παρτίδας (€)': '',
+                'Ποσότητα Παρτίδας': '',
+                'Χρήση στο Κιτ': '',
+                'Κόστος/Μονάδα (€)': '',
+                'Συνολικό Κόστος (€)': this.calculationResults.roi.toFixed(2) + '%',
+                'Ποσοστό Κόστους (%)': ''
+            });
+        }
+        
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Ανάλυση Κέρδους');
+        
+        // Δημιουργία φύλλου με σενάρια
+        if (this.calculationResults) {
+            const scenarioData = [
+                {
+                    'Σενάριο': 'Τρέχον',
+                    'Τιμή Πώλησης (€)': this.calculationResults.salePrice.toFixed(2),
+                    'Κόστος (€)': this.calculationResults.totalCost.toFixed(2),
+                    'Κέρδος (€)': this.calculationResults.netProfit.toFixed(2),
+                    'ROI (%)': this.calculationResults.roi.toFixed(2),
+                    'Ποσοστό Κέρδους επί Κόστους (%)': this.calculationResults.profitOnCost.toFixed(2)
+                },
+                {
+                    'Σενάριο': 'Αισιόδοξο (+20%)',
+                    'Τιμή Πώλησης (€)': (this.calculationResults.salePrice * 1.2).toFixed(2),
+                    'Κόστος (€)': this.calculationResults.totalCost.toFixed(2),
+                    'Κέρδος (€)': ((this.calculationResults.salePrice * 1.2) - this.calculationResults.totalCost).toFixed(2),
+                    'ROI (%)': (((this.calculationResults.salePrice * 1.2) - this.calculationResults.totalCost) / this.calculationResults.totalCost * 100).toFixed(2),
+                    'Ποσοστό Κέρδους επί Κόστους (%)': (((this.calculationResults.salePrice * 1.2) - this.calculationResults.totalCost) / this.calculationResults.totalCost * 100).toFixed(2)
+                },
+                {
+                    'Σενάριο': 'Απαισιόδοξο (-20%)',
+                    'Τιμή Πώλησης (€)': (this.calculationResults.salePrice * 0.8).toFixed(2),
+                    'Κόστος (€)': this.calculationResults.totalCost.toFixed(2),
+                    'Κέρδος (€)': ((this.calculationResults.salePrice * 0.8) - this.calculationResults.totalCost).toFixed(2),
+                    'ROI (%)': (((this.calculationResults.salePrice * 0.8) - this.calculationResults.totalCost) / this.calculationResults.totalCost * 100).toFixed(2),
+                    'Ποσοστό Κέρδους επί Κόστους (%)': (((this.calculationResults.salePrice * 0.8) - this.calculationResults.totalCost) / this.calculationResults.totalCost * 100).toFixed(2)
+                }
+            ];
+            
+            const scenarioWs = XLSX.utils.json_to_sheet(scenarioData);
+            XLSX.utils.book_append_sheet(wb, scenarioWs, 'Σενάρια');
+        }
+        
+        // Δημιουργία φύλλου με δεδομένα γραφημάτων
+        const chartData = [];
+        
+        // Δεδομένα Pie Chart
+        if (this.calculationResults) {
+            chartData.push({
+                'Τύπος Γραφήματος': 'Pie Chart',
+                'Κατηγορία': 'Κόστος Συστατικών',
+                'Αξία (€)': this.calculationResults.ingredientsCost.toFixed(2),
+                'Ποσοστό (%)': ((this.calculationResults.ingredientsCost / (this.calculationResults.ingredientsCost + this.calculationResults.additionalCostTotal + Math.max(this.calculationResults.netProfit, 0))) * 100).toFixed(2)
+            });
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Pie Chart',
+                'Κατηγορία': 'Επιπλέον Κόστη',
+                'Αξία (€)': this.calculationResults.additionalCostTotal.toFixed(2),
+                'Ποσοστό (%)': ((this.calculationResults.additionalCostTotal / (this.calculationResults.ingredientsCost + this.calculationResults.additionalCostTotal + Math.max(this.calculationResults.netProfit, 0))) * 100).toFixed(2)
+            });
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Pie Chart',
+                'Κατηγορία': 'Κέρδος',
+                'Αξία (€)': Math.max(this.calculationResults.netProfit, 0).toFixed(2),
+                'Ποσοστό (%)': ((Math.max(this.calculationResults.netProfit, 0) / (this.calculationResults.ingredientsCost + this.calculationResults.additionalCostTotal + Math.max(this.calculationResults.netProfit, 0))) * 100).toFixed(2)
+            });
+            
+            // Δεδομένα Bar Chart
+            chartData.push({
+                'Τύπος Γραφήματος': 'Bar Chart',
+                'Κατηγορία': 'Κόστος',
+                'Αξία (€)': this.calculationResults.totalCost.toFixed(2),
+                'Ποσοστό (%)': ''
+            });
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Bar Chart',
+                'Κατηγορία': 'Πώληση',
+                'Αξία (€)': this.calculationResults.salePrice.toFixed(2),
+                'Ποσοστό (%)': ''
+            });
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Bar Chart',
+                'Κατηγορία': 'Κέρδος',
+                'Αξία (€)': this.calculationResults.netProfit.toFixed(2),
+                'Ποσοστό (%)': ''
+            });
+        }
+        
+        const chartWs = XLSX.utils.json_to_sheet(chartData);
+        XLSX.utils.book_append_sheet(wb, chartWs, 'Δεδομένα Γραφημάτων');
+        
+        XLSX.writeFile(wb, 'profit-analysis-with-charts.xlsx');
+        this.showNotification('Excel με γραφήματα εξήχθη επιτυχώς!', 'success');
+        
+    } catch (error) {
+        console.error('Excel Export Error:', error);
+        this.showNotification('Σφάλμα κατά την εξαγωγή Excel: ' + error.message, 'error');
+    }
+}
+
+// Αντικαταστήστε την exportPDFWithCharts μέθοδο με αυτή:
+async exportPDFWithCharts() {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        const greekToLatin = (text) => {
+            const greekMap = {
+                'Α': 'A', 'Β': 'B', 'Γ': 'G', 'Δ': 'D', 'Ε': 'E', 'Ζ': 'Z', 'Η': 'H', 'Θ': 'TH',
+                'Ι': 'I', 'Κ': 'K', 'Λ': 'L', 'Μ': 'M', 'Ν': 'N', 'Ξ': 'X', 'Ο': 'O', 'Π': 'P',
+                'Ρ': 'R', 'Σ': 'S', 'Τ': 'T', 'Υ': 'Y', 'Φ': 'F', 'Χ': 'CH', 'Ψ': 'PS', 'Ω': 'O',
+                'α': 'a', 'β': 'b', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'ζ': 'z', 'η': 'h', 'θ': 'th',
+                'ι': 'i', 'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ξ': 'x', 'ο': 'o', 'π': 'p',
+                'ρ': 'r', 'σ': 's', 'ς': 's', 'τ': 't', 'υ': 'y', 'φ': 'f', 'χ': 'ch', 'ψ': 'ps', 'ω': 'o',
+                'ά': 'a', 'έ': 'e', 'ή': 'h', 'ί': 'i', 'ό': 'o', 'ύ': 'y', 'ώ': 'o',
+                'Ά': 'A', 'Έ': 'E', 'Ή': 'H', 'Ί': 'I', 'Ό': 'O', 'Ύ': 'Y', 'Ώ': 'O'
+            };
+            return text.replace(/[Α-Ωα-ωάέήίόύώΆΈΉΊΌΎΏ]/g, match => greekMap[match] || match);
+        };
+
+        // Λίστα γραφημάτων με τίτλους
+        const charts = [
+            { id: 'pieChart', title: 'Katanomi Kostous & Kerdous' },
+            { id: 'barChart', title: 'Sygkrisi Kostous - Polisis - Kerdous' },
+            { id: 'lineChart', title: 'Provoli Kerdous' },
+            { id: 'doughnutChart', title: 'Analysi Systatikon' },
+            { id: 'radarChart', title: 'Analysi Epidoseon' },
+            { id: 'combinedChart', title: 'Sygkrisi Senario' }
+        ];
+
+        // Σελίδα 1: Τίτλος και Αποτελέσματα
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.text(greekToLatin('Ypologistis Kerdous Ana Kit'), 20, 20);
+        doc.text(greekToLatin('Anafora me Grafimata'), 20, 30);
+        
+        let yPos = 50;
+        
+        // Βασικά αποτελέσματα
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        
+        if (this.calculationResults) {
+            const results = [
+                `Synolo Kostous: ${this.calculationResults.totalCost.toFixed(2)} EUR`,
+                `Timi Polisis: ${this.calculationResults.salePrice.toFixed(2)} EUR`,
+                `Katharo Kerdos: ${this.calculationResults.netProfit.toFixed(2)} EUR`,
+                `ROI: ${this.calculationResults.roi.toFixed(2)}%`,
+                `Pososto Kerdous: ${this.calculationResults.profitOnCost.toFixed(2)}%`
+            ];
+            
+            results.forEach(result => {
+                doc.text(greekToLatin(result), 20, yPos);
+                yPos += 8;
+            });
+        }
+
+        // Εξαγωγή κάθε γραφήματος σε ξεχωριστή σελίδα
+        for (let i = 0; i < charts.length; i++) {
+            const chart = charts[i];
+            const canvas = document.getElementById(chart.id);
+            
+            if (canvas) {
+                // Νέα σελίδα για κάθε γράφημα
+                doc.addPage();
+                
+                // Τίτλος γραφήματος
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(16);
+                doc.text(greekToLatin(chart.title), 20, 20);
+                
+                try {
+                    // Περιμένουμε να ολοκληρωθεί το rendering
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Δημιουργία εικόνας με λευκό background
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = canvas.height;
+                    
+                    // Λευκό background
+                    tempCtx.fillStyle = '#ffffff';
+                    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    
+                    // Σχεδίαση του γραφήματος πάνω στο λευκό background
+                    tempCtx.drawImage(canvas, 0, 0);
+                    
+                    // Μετατροπή σε base64
+                    const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                    
+                    // Προσθήκη στο PDF με σωστές διαστάσεις
+                    const imgWidth = 240; // A4 landscape width - margins
+                    const imgHeight = 150; // Proportional height
+                    
+                    doc.addImage(imgData, 'PNG', 20, 30, imgWidth, imgHeight);
+                    
+                } catch (error) {
+                    console.error(`Σφάλμα εξαγωγής γραφήματος ${chart.id}:`, error);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(12);
+                    doc.text(greekToLatin('Sfalma kata tin eksagogi tou grafimatos'), 20, 50);
+                }
+            }
+        }
+        
+        // Τελική σελίδα με ημερομηνία
+        doc.addPage();
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(10);
+        doc.text(`Dimiourgithe: ${new Date().toLocaleDateString('el-GR')}`, 20, 20);
+        doc.text(greekToLatin('Ypologistis Kerdous Ana Kit - Prochorimenī Ekdosi'), 20, 35);
+        
+        doc.save('profit-analysis-charts-fixed.pdf');
+        this.showNotification('PDF με γραφήματα εξήχθη επιτυχώς!', 'success');
+        
+    } catch (error) {
+        console.error('PDF Charts Export Error:', error);
+        this.showNotification('Σφάλμα κατά την εξαγωγή PDF: ' + error.message, 'error');
+    }
+}
+
+// Νέα βελτιωμένη μέθοδος για Excel με εικόνες γραφημάτων
+async exportExcelWithCharts() {
+    try {
+        this.showNotification('Προετοιμασία εξαγωγής Excel...', 'info');
+        
+        const data = this.prepareExportData();
+        
+        // Προσθήκη αποτελεσμάτων
+        if (this.calculationResults) {
+            data.push({
+                'Τύπος': 'Αποτέλεσμα',
+                'Α/Α': '',
+                'Περιγραφή': 'Σύνολο Κόστους',
+                'Τιμή Παρτίδας (€)': '',
+                'Ποσότητα Παρτίδας': '',
+                'Χρήση στο Κιτ': '',
+                'Κόστος/Μονάδα (€)': '',
+                'Συνολικό Κόστος (€)': this.calculationResults.totalCost.toFixed(2),
+                'Ποσοστό Κόστους (%)': '100.00'
+            });
+            
+            data.push({
+                'Τύπος': 'Αποτέλεσμα',
+                'Α/Α': '',
+                'Περιγραφή': 'Καθαρό Κέρδος',
+                'Τιμή Παρτίδας (€)': '',
+                'Ποσότητα Παρτίδας': '',
+                'Χρήση στο Κιτ': '',
+                'Κόστος/Μονάδα (€)': '',
+                'Συνολικό Κόστος (€)': this.calculationResults.netProfit.toFixed(2),
+                'Ποσοστό Κόστους (%)': ''
+            });
+        }
+        
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Ανάλυση Κέρδους');
+        
+        // Φύλλο με σενάρια
+        if (this.calculationResults) {
+            const scenarioData = [
+                {
+                    'Σενάριο': 'Τρέχον',
+                    'Τιμή Πώλησης (€)': this.calculationResults.salePrice.toFixed(2),
+                    'Κόστος (€)': this.calculationResults.totalCost.toFixed(2),
+                    'Κέρδος (€)': this.calculationResults.netProfit.toFixed(2),
+                    'ROI (%)': this.calculationResults.roi.toFixed(2),
+                    'Ποσοστό Κέρδους (%)': this.calculationResults.profitOnCost.toFixed(2)
+                },
+                {
+                    'Σενάριο': 'Αισιόδοξο (+20%)',
+                    'Τιμή Πώλησης (€)': (this.calculationResults.salePrice * 1.2).toFixed(2),
+                    'Κόστος (€)': this.calculationResults.totalCost.toFixed(2),
+                    'Κέρδος (€)': ((this.calculationResults.salePrice * 1.2) - this.calculationResults.totalCost).toFixed(2),
+                    'ROI (%)': (((this.calculationResults.salePrice * 1.2) - this.calculationResults.totalCost) / this.calculationResults.totalCost * 100).toFixed(2),
+                    'Ποσοστό Κέρδους (%)': (((this.calculationResults.salePrice * 1.2) - this.calculationResults.totalCost) / this.calculationResults.totalCost * 100).toFixed(2)
+                },
+                {
+                    'Σενάριο': 'Απαισιόδοξο (-20%)',
+                    'Τιμή Πώλησης (€)': (this.calculationResults.salePrice * 0.8).toFixed(2),
+                    'Κόστος (€)': this.calculationResults.totalCost.toFixed(2),
+                    'Κέρδος (€)': ((this.calculationResults.salePrice * 0.8) - this.calculationResults.totalCost).toFixed(2),
+                    'ROI (%)': (((this.calculationResults.salePrice * 0.8) - this.calculationResults.totalCost) / this.calculationResults.totalCost * 100).toFixed(2),
+                    'Ποσοστό Κέρδους (%)': (((this.calculationResults.salePrice * 0.8) - this.calculationResults.totalCost) / this.calculationResults.totalCost * 100).toFixed(2)
+                }
+            ];
+            
+            const scenarioWs = XLSX.utils.json_to_sheet(scenarioData);
+            XLSX.utils.book_append_sheet(wb, scenarioWs, 'Σενάρια');
+        }
+        
+        // Φύλλο με δεδομένα γραφημάτων (όχι εικόνες)
+        const chartData = [];
+        
+        if (this.calculationResults) {
+            // Pie Chart Data
+            const pieTotal = this.calculationResults.ingredientsCost + this.calculationResults.additionalCostTotal + Math.max(this.calculationResults.netProfit, 0);
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Κατανομή Κόστους',
+                'Κατηγορία': 'Κόστος Συστατικών',
+                'Αξία (€)': this.calculationResults.ingredientsCost.toFixed(2),
+                'Ποσοστό (%)': ((this.calculationResults.ingredientsCost / pieTotal) * 100).toFixed(2)
+            });
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Κατανομή Κόστους',
+                'Κατηγορία': 'Επιπλέον Κόστη',
+                'Αξία (€)': this.calculationResults.additionalCostTotal.toFixed(2),
+                'Ποσοστό (%)': ((this.calculationResults.additionalCostTotal / pieTotal) * 100).toFixed(2)
+            });
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Κατανομή Κόστους',
+                'Κατηγορία': 'Κέρδος',
+                'Αξία (€)': Math.max(this.calculationResults.netProfit, 0).toFixed(2),
+                'Ποσοστό (%)': ((Math.max(this.calculationResults.netProfit, 0) / pieTotal) * 100).toFixed(2)
+            });
+            
+            // Bar Chart Data
+            chartData.push({
+                'Τύπος Γραφήματος': 'Σύγκριση',
+                'Κατηγορία': 'Συνολικό Κόστος',
+                'Αξία (€)': this.calculationResults.totalCost.toFixed(2),
+                'Ποσοστό (%)': '100'
+            });
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Σύγκριση',
+                'Κατηγορία': 'Τιμή Πώλησης',
+                'Αξία (€)': this.calculationResults.salePrice.toFixed(2),
+                'Ποσοστό (%)': ((this.calculationResults.salePrice / this.calculationResults.totalCost) * 100).toFixed(2)
+            });
+            
+            chartData.push({
+                'Τύπος Γραφήματος': 'Σύγκριση',
+                'Κατηγορία': 'Καθαρό Κέρδος',
+                'Αξία (€)': this.calculationResults.netProfit.toFixed(2),
+                'Ποσοστό (%)': this.calculationResults.profitOnCost.toFixed(2)
+            });
+            
+            // Λεπτομερή στοιχεία συστατικών
+            this.ingredients.forEach((ingredient, index) => {
+                chartData.push({
+                    'Τύπος Γραφήματος': 'Ανάλυση Συστατικών',
+                    'Κατηγορία': ingredient.description,
+                    'Αξία (€)': ingredient.totalCost.toFixed(2),
+                    'Ποσοστό (%)': ((ingredient.totalCost / this.calculationResults.totalCost) * 100).toFixed(2)
+                });
+            });
+        }
+        
+        const chartWs = XLSX.utils.json_to_sheet(chartData);
+        XLSX.utils.book_append_sheet(wb, chartWs, 'Δεδομένα Γραφημάτων');
+        
+        // Φύλλο με οδηγίες για δημιουργία γραφημάτων
+        const instructionsData = [
+            {
+                'Οδηγίες': 'Για να δημιουργήσετε γραφήματα στο Excel:',
+                'Βήμα': '1. Επιλέξτε τα δεδομένα από το φύλλο "Δεδομένα Γραφημάτων"'
+            },
+            {
+                'Οδηγίες': '',
+                'Βήμα': '2. Πηγαίνετε στο Insert > Charts'
+            },
+            {
+                'Οδηγίες': '',
+                'Βήμα': '3. Επιλέξτε τον τύπο γραφήματος (Pie, Column, Line)'
+            },
+            {
+                'Οδηγίες': '',
+                'Βήμα': '4. Προσαρμόστε τους τίτλους και τη μορφοποίηση'
+            },
+            {
+                'Οδηγίες': 'Προτεινόμενα γραφήματα:',
+                'Βήμα': 'Pie Chart για "Κατανομή Κόστους"'
+            },
+            {
+                'Οδηγίες': '',
+                'Βήμα': 'Column Chart για "Σύγκριση"'
+            },
+            {
+                'Οδηγίες': '',
+                'Βήμα': 'Doughnut Chart για "Ανάλυση Συστατικών"'
+            }
+        ];
+        
+        const instructionsWs = XLSX.utils.json_to_sheet(instructionsData);
+        XLSX.utils.book_append_sheet(wb, instructionsWs, 'Οδηγίες Γραφημάτων');
+        
+        XLSX.writeFile(wb, 'profit-analysis-complete.xlsx');
+        this.showNotification('Excel με πλήρη δεδομένα εξήχθη επιτυχώς!', 'success');
+        
+    } catch (error) {
+        console.error('Excel Export Error:', error);
+        this.showNotification('Σφάλμα κατά την εξαγωγή Excel: ' + error.message, 'error');
+    }
+}
+
+// Προσθήκη helper μεθόδου για καλύτερη εξαγωγή εικόνων
+async captureChartAsImage(chartId) {
+    return new Promise((resolve) => {
+        const canvas = document.getElementById(chartId);
+        if (!canvas) {
+            resolve(null);
+            return;
+        }
+        
+        // Περιμένουμε λίγο για να ολοκληρωθεί το rendering
+        setTimeout(() => {
+            try {
+                // Δημιουργία νέου canvas με λευκό background
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                
+                // Λευκό background
+                tempCtx.fillStyle = '#ffffff';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Σχεδίαση του γραφήματος
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                // Επιστροφή base64 εικόνας
+                const imgData = tempCanvas.toDataURL('image/png', 1.0);
+                resolve(imgData);
+            } catch (error) {
+                console.error('Σφάλμα capture γραφήματος:', error);
+                resolve(null);
+            }
+        }, 300);
+    });
+}
+
+
+
+            exportExcel() {
+                try {
+                    const data = this.prepareExportData();
+                    
+                    // Προσθήκη αποτελεσμάτων
+                    if (this.calculationResults) {
+                        data.push({
+                            'Τύπος': 'Αποτέλεσμα',
+                            'Περιγραφή': 'Σύνολο Κόστους',
+                            'Τιμή Παρτίδας': '',
+                            'Ποσότητα': '',
+                            'Χρήση': '',
+                            'Κόστος': this.calculationResults.totalCost.toFixed(2)
+                        });
+                        
+                        data.push({
+                            'Τύπος': 'Αποτέλεσμα',
+                            'Περιγραφή': 'Καθαρό Κέρδος',
+                            'Τιμή Παρτίδας': '',
+                            'Ποσότητα': '',
+                            'Χρήση': '',
+                            'Κόστος': this.calculationResults.netProfit.toFixed(2)
+                        });
+                        
+                        data.push({
+                            'Τύπος': 'Αποτέλεσμα',
+                            'Περιγραφή': 'Ποσοστό Κέρδους επί Κόστους',
+                            'Τιμή Παρτίδας': '',
+                            'Ποσότητα': '',
+                            'Χρήση': '',
+                            'Κόστος': this.calculationResults.profitOnCost.toFixed(2) + '%'
+                        });
+                        
+                        data.push({
+                            'Τύπος': 'Αποτέλεσμα',
+                            'Περιγραφή': 'ROI',
+                            'Τιμή Παρτίδας': '',
+                            'Ποσότητα': '',
+                            'Χρήση': '',
+                            'Κόστος': this.calculationResults.roi.toFixed(2) + '%'
+                        });
+                    }
+                    
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    
+                    // Προσθήκη στυλ στο Excel
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Προχωρημένη Ανάλυση Κέρδους');
+                    
+                    // Δημιουργία δεύτερου φύλλου με σενάρια
+                    if (this.calculationResults) {
+                        const scenarioData = [
+                            {
+                                'Σενάριο': 'Τρέχον',
+                                'Τιμή Πώλησης': this.calculationResults.salePrice.toFixed(2),
+                                'Κόστος': this.calculationResults.totalCost.toFixed(2),
+                                'Κέρδος': this.calculationResults.netProfit.toFixed(2),
+                                'ROI': this.calculationResults.roi.toFixed(2) + '%'
+                            },
+                            {
+                                'Σενάριο': 'Αισιόδοξο (+20%)',
+                                'Τιμή Πώλησης': (this.calculationResults.salePrice * 1.2).toFixed(2),
+                                'Κόστος': this.calculationResults.totalCost.toFixed(2),
+                                'Κέρδος': (this.calculationResults.netProfit * 1.2).toFixed(2),
+                                'ROI': (this.calculationResults.roi * 1.2).toFixed(2) + '%'
+                            },
+                            {
+                                'Σενάριο': 'Απαισιόδοξο (-20%)',
+                                'Τιμή Πώλησης': (this.calculationResults.salePrice * 0.8).toFixed(2),
+                                'Κόστος': this.calculationResults.totalCost.toFixed(2),
+                                'Κέρδος': (this.calculationResults.netProfit * 0.8).toFixed(2),
+                                'ROI': (this.calculationResults.roi * 0.8).toFixed(2) + '%'
+                            },
+                            {
+                                'Σενάριο': 'Ανταγωνιστικό (-10%)',
+                                'Τιμή Πώλησης': (this.calculationResults.salePrice * 0.9).toFixed(2),
+                                'Κόστος': this.calculationResults.totalCost.toFixed(2),
+                                'Κέρδος': (this.calculationResults.netProfit * 0.9).toFixed(2),
+                                'ROI': (this.calculationResults.roi * 0.9).toFixed(2) + '%'
+                            }
+                        ];
+                        
+                        const scenarioWs = XLSX.utils.json_to_sheet(scenarioData);
+                        XLSX.utils.book_append_sheet(wb, scenarioWs, 'Ανάλυση Σεναρίων');
+                    }
+                    
+                    XLSX.writeFile(wb, 'profit-analysis-advanced.xlsx');
+                } catch (error) {
+                    alert('Σφάλμα κατά την εξαγωγή Excel: ' + error.message);
+                }
+            }
+
+            prepareExportData() {
+                const data = [];
+                
+                // Συστατικά με λεπτομερή στοιχεία
+                this.ingredients.forEach((ingredient, index) => {
+                    data.push({
+                        'Τύπος': 'Συστατικό',
+                        'Α/Α': index + 1,
+                        'Περιγραφή': ingredient.description,
+                        'Τιμή Παρτίδας (€)': ingredient.batchPrice.toFixed(2),
+                        'Ποσότητα Παρτίδας': ingredient.quantity,
+                        'Χρήση στο Κιτ': ingredient.usage,
+                        'Κόστος/Μονάδα (€)': ingredient.costPerUnit.toFixed(4),
+                        'Συνολικό Κόστος (€)': ingredient.totalCost.toFixed(2),
+                        'Ποσοστό Κόστους (%)': this.calculationResults ? 
+                            ((ingredient.totalCost / this.calculationResults.totalCost) * 100).toFixed(2) : '0'
+                    });
+                });
+                
+                // Επιπλέον κόστη
+                this.additionalCosts.forEach((cost, index) => {
+                    data.push({
+                        'Τύπος': 'Επιπλέον Κόστος',
+                        'Α/Α': index + 1,
+                        'Περιγραφή': cost.description,
+                        'Τιμή Παρτίδας (€)': '',
+                        'Ποσότητα Παρτίδας': '',
+                        'Χρήση στο Κιτ': '',
+                        'Κόστος/Μονάδα (€)': '',
+                        'Συνολικό Κόστος (€)': cost.cost.toFixed(2),
+                        'Ποσοστό Κόστους (%)': this.calculationResults ? 
+                            ((cost.cost / this.calculationResults.totalCost) * 100).toFixed(2) : '0'
+                    });
+                });
+                
+                return data;
+            }
+
+            convertToCSV(data) {
+                if (data.length === 0) return '';
+                
+                const headers = Object.keys(data[0]);
+                const csvContent = [
+                    headers.join(','),
+                    ...data.map(row => headers.map(header => {
+                        const value = row[header] || '';
+                        return `"${value.toString().replace(/"/g, '""')}"`;
+                    }).join(','))
+                ].join('\n');
+                
+                return '\ufeff' + csvContent; // Add BOM for proper UTF-8 encoding
+            }
+
+            downloadFile(content, filename, contentType) {
+                const blob = new Blob([content], { type: contentType });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+
+            // Νέες μέθοδοι για προχωρημένη ανάλυση
+            calculateBreakEvenPoint() {
+                if (!this.calculationResults) return 0;
+                return this.calculationResults.totalCost;
+            }
+
+            calculateMarginOfSafety() {
+                if (!this.calculationResults) return 0;
+                const breakEven = this.calculateBreakEvenPoint();
+                return this.calculationResults.salePrice - breakEven;
+            }
+
+            calculatePriceElasticity(priceChange) {
+                if (!this.calculationResults) return 0;
+                const originalProfit = this.calculationResults.netProfit;
+                const newPrice = this.calculationResults.salePrice * (1 + priceChange);
+                const newProfit = newPrice - this.calculationResults.totalCost;
+                return ((newProfit - originalProfit) / originalProfit) / priceChange;
+            }
+
+            generateRecommendations() {
+                if (!this.calculationResults) return [];
+                
+                const recommendations = [];
+                const results = this.calculationResults;
+                
+                // Ανάλυση κερδοφορίας
+                if (results.profitOnCost < 15) {
+                    recommendations.push({
+                        type: 'warning',
+                        title: 'Χαμηλή Κερδοφορία',
+                        message: 'Το περιθώριο κέρδους είναι κάτω από 15%. Συνιστάται αύξηση τιμής ή μείωση κόστους.',
+                        priority: 'high'
+                    });
+                }
+                
+                if (results.profitOnCost > 50) {
+                    recommendations.push({
+                        type: 'success',
+                        title: 'Εξαιρετική Κερδοφορία',
+                        message: 'Πολύ υψηλό περιθώριο κέρδους. Μπορείτε να μειώσετε την τιμή για καλύτερη ανταγωνιστικότητα.',
+                        priority: 'medium'
+                    });
+                }
+                
+                // Ανάλυση κόστους συστατικών
+                if (this.ingredients.length > 0) {
+                    const mostExpensive = this.ingredients.reduce((max, ingredient) => 
+                        ingredient.totalCost > max.totalCost ? ingredient : max
+                    );
+                    
+                    if (mostExpensive.totalCost > results.totalCost * 0.3) {
+                        recommendations.push({
+                            type: 'info',
+                            title: 'Βελτιστοποίηση Κόστους',
+                            message: `Το συστατικό "${mostExpensive.description}" αντιπροσωπεύει το ${((mostExpensive.totalCost / results.totalCost) * 100).toFixed(1)}% του κόστους. Εξετάστε εναλλακτικές.`,
+                            priority: 'medium'
+                        });
+                    }
+                }
+                
+                // ROI ανάλυση
+                if (results.roi < 20) {
+                    recommendations.push({
+                        type: 'warning',
+                        title: 'Χαμηλό ROI',
+                        message: 'Το ROI είναι κάτω από 20%. Εξετάστε τη βιωσιμότητα του προϊόντος.',
+                        priority: 'high'
+                    });
+                }
+                
+                return recommendations;
+            }
+
+            displayRecommendations() {
+                const recommendations = this.generateRecommendations();
+                
+                // Δημιουργία HTML για συστάσεις
+                const recommendationsHTML = recommendations.map(rec => `
+                    <div class="recommendation ${rec.type} ${rec.priority}">
+                        <h4>${rec.title}</h4>
+                        <p>${rec.message}</p>
+                    </div>
+                `).join('');
+                
+                // Προσθήκη στο DOM αν δεν υπάρχει ήδη
+                let recommendationsContainer = document.getElementById('recommendationsContainer');
+                if (!recommendationsContainer) {
+                    recommendationsContainer = document.createElement('div');
+                    recommendationsContainer.id = 'recommendationsContainer';
+                    recommendationsContainer.className = 'recommendations-section';
+                    recommendationsContainer.innerHTML = `
+                        <h3>🎯 Συστάσεις Βελτίωσης</h3>
+                        <div class="recommendations-list"></div>
+                    `;
+                    
+                    const analysisSection = document.querySelector('.analysis-section');
+                    if (analysisSection) {
+                        analysisSection.appendChild(recommendationsContainer);
+                    }
+                }
+                
+                const recommendationsList = recommendationsContainer.querySelector('.recommendations-list');
+                if (recommendationsList) {
+                    recommendationsList.innerHTML = recommendationsHTML;
+                }
+            }
+
+            // Μέθοδος για real-time validation
+            validateInputs() {
+                const inputs = document.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        const value = parseFloat(e.target.value);
+                        if (isNaN(value) || value < 0) {
+                            e.target.style.borderColor = '#ff4444';
+                            e.target.title = 'Παρακαλώ εισάγετε έγκυρη θετική τιμή';
+                        } else {
+                            e.target.style.borderColor = '';
+                            e.target.title = '';
+                        }
+                    });
+                });
+            }
+
+            // Μέθοδος για αυτόματη αποθήκευση
+            setupAutoSave() {
+                const autoSaveData = () => {
+                    const data = {
+                        ingredients: this.ingredients,
+                        additionalCosts: this.additionalCosts,
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem('profitCalculatorData', JSON.stringify(data));
+                };
+
+                // Αυτόματη αποθήκευση κάθε 30 δευτερόλεπτα
+                setInterval(autoSaveData, 30000);
+                
+                // Αποθήκευση κατά την έξοδο
+                window.addEventListener('beforeunload', autoSaveData);
+            }
+
+            // Μέθοδος για φόρτωση δεδομένων
+            loadSavedData() {
+                try {
+                    const savedData = localStorage.getItem('profitCalculatorData');
+                    if (savedData) {
+                        const data = JSON.parse(savedData);
+                        
+                        // Έλεγχος αν τα δεδομένα είναι πρόσφατα (μέσα στις τελευταίες 24 ώρες)
+                        const savedTime = new Date(data.timestamp);
+                        const now = new Date();
+                        const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
+                        
+                        if (hoursDiff < 24) {
+                            this.ingredients = data.ingredients || [];
+                            this.additionalCosts = data.additionalCosts || [];
+                            this.renderIngredients();
+                            this.renderAdditionalCosts();
+                            
+                            // Εμφάνιση μηνύματος
+                            this.showNotification('Φορτώθηκαν αποθηκευμένα δεδομένα', 'success');
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Σφάλμα κατά τη φόρτωση δεδομένων:', error);
+                }
+            }
+
+            // Μέθοδος για εμφάνιση ειδοποιήσεων
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.remove()">×</button>
+                `;
+                
+                // Στυλ για ειδοποιήσεις
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: var(--bg-card);
+                    border: 2px solid var(--accent-color);
+                    color: var(--text-primary);
+                    padding: 15px 20px;
+                    border-radius: 10px;
+                    box-shadow: var(--shadow);
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    max-width: 300px;
+                    animation: slideIn 0.3s ease;
+                `;
+                
+                if (type === 'success') {
+                    notification.style.borderColor = '#00ff88';
+                } else if (type === 'warning') {
+                    notification.style.borderColor = '#ffaa00';
+                } else if (type === 'error') {
+                    notification.style.borderColor = '#ff4444';
+                }
+                
+                document.body.appendChild(notification);
+                
+                // Αυτόματη αφαίρεση μετά από 5 δευτερόλεπτα
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+
+            // Μέθοδος για εξαγωγή σε JSON
+            exportJSON() {
+                const data = {
+                    metadata: {
+                        version: '2.0',
+                        created: new Date().toISOString(),
+                        title: 'Ανάλυση Κέρδους Ανά Κιτ'
+                    },
+                    ingredients: this.ingredients,
+                    additionalCosts: this.additionalCosts,
+                    results: this.calculationResults,
+                    scenarios: this.generateScenarioData()
+                };
+                
+                const jsonString = JSON.stringify(data, null, 2);
+                this.downloadFile(jsonString, 'profit-analysis.json', 'application/json');
+            }
+
+            generateScenarioData() {
+                if (!this.calculationResults) return [];
+                
+                return [
+                    {
+                        name: 'Τρέχον',
+                        multiplier: 1.0,
+                        profit: this.calculationResults.netProfit,
+                        roi: this.calculationResults.roi
+                    },
+                    {
+                        name: 'Αισιόδοξο',
+                        multiplier: 1.2,
+                        profit: this.calculationResults.netProfit * 1.2,
+                        roi: this.calculationResults.roi * 1.2
+                    },
+                    {
+                        name: 'Απαισιόδοξο',
+                        multiplier: 0.8,
+                        profit: this.calculationResults.netProfit * 0.8,
+                        roi: this.calculationResults.roi * 0.8
+                    },
+                    {
+                        name: 'Ανταγωνιστικό',
+                        multiplier: 0.9,
+                        profit: this.calculationResults.netProfit * 0.9,
+                        roi: this.calculationResults.roi * 0.9
+                    }
+                ];
+            }
+
+            // Αρχικοποίηση όλων των λειτουργιών
+            initialize() {
+                this.validateInputs();
+                this.setupAutoSave();
+                this.loadSavedData();
+                
+                // Προσθήκη κουμπιού για JSON export
+                const exportButtons = document.querySelector('.export-buttons');
+                if (exportButtons) {
+                    const jsonBtn = document.createElement('button');
+                    jsonBtn.className = 'export-btn json';
+                    jsonBtn.style.background = '#9966ff';
+                    jsonBtn.style.color = 'white';
+                    jsonBtn.innerHTML = '📋 Εξαγωγή JSON';
+                    jsonBtn.addEventListener('click', () => this.exportJSON());
+                    exportButtons.appendChild(jsonBtn);
+                }
+                
+                console.log('Υπολογιστής Κέρδους Ανά Κιτ - Προχωρημένη Έκδοση αρχικοποιήθηκε επιτυχώς!');
+            }
+        }
+
+        // Αρχικοποίηση της εφαρμογής
+        let calculator;
+        document.addEventListener('DOMContentLoaded', function() {
+            calculator = new ProfitCalculator();
+            calculator.initialize();
+            
+            // Προσθήκη CSS για animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                
+                .recommendation {
+                    margin: 10px 0;
+                    padding: 15px;
+                    border-radius: 8px;
+                    border-left: 4px solid;
+                }
+                
+                .recommendation.success {
+                    background: rgba(0, 255, 136, 0.1);
+                    border-left-color: #00ff88;
+                }
+                
+                .recommendation.warning {
+                    background: rgba(255, 170, 0, 0.1);
+                    border-left-color: #ffaa00;
+                }
+                
+                .recommendation.info {
+                    background: rgba(0, 212, 255, 0.1);
+                    border-left-color: #00d4ff;
+                }
+                
+                .recommendation h4 {
+                    margin: 0 0 5px 0;
+                    font-size: 1.1rem;
+                }
+                
+                .recommendation p {
+                    margin: 0;
+                    font-size: 0.9rem;
+                    opacity: 0.9;
+                }
+                
+                .recommendations-section {
+                    margin-top: 20px;
+                }
+                
+                .export-btn.json:hover {
+                    transform: translateY(-2px);
+                    box-shadow: var(--shadow);
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
