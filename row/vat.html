@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Προηγμένο Σύστημα Λογιστικής με Βελτιωμένο Export</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-secondary: rgba(255, 255, 255, 0.95);
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --bg-accent: #f8f9fa;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --text-light: #34495e;
+            --border-color: #ecf0f1;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.2);
+            --gradient-button: linear-gradient(135deg, #3498db, #2980b9);
+            --gradient-success: linear-gradient(135deg, #27ae60, #2ecc71);
+            --gradient-danger: linear-gradient(135deg, #e74c3c, #c0392b);
+            --gradient-warning: linear-gradient(135deg, #f39c12, #e67e22);
+            --gradient-info: linear-gradient(135deg, #9b59b6, #8e44ad);
+            --gradient-export: linear-gradient(135deg, #ff6b6b, #feca57);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            --bg-secondary: rgba(30, 30, 50, 0.95);
+            --bg-card: rgba(40, 40, 60, 0.9);
+            --bg-accent: #2c2c54;
+            --text-primary: #e8eaf0;
+            --text-secondary: #a0a0a0;
+            --text-light: #b8bcc8;
+            --border-color: #40407a;
+            --shadow-light: rgba(0, 0, 0, 0.3);
+            --shadow-medium: rgba(0, 0, 0, 0.5);
+            --gradient-button: linear-gradient(135deg, #4a69bd, #3c5aa6);
+            --gradient-success: linear-gradient(135deg, #00d2d3, #54a0ff);
+            --gradient-danger: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            --gradient-warning: linear-gradient(135deg, #feca57, #ff9ff3);
+            --gradient-info: linear-gradient(135deg, #a55eea, #778beb);
+            --gradient-export: linear-gradient(135deg, #ff9a9e, #fecfef);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px var(--shadow-medium);
+            margin-bottom: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -50%; }
+            100% { left: 50%; }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--gradient-info);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-3px) rotate(180deg);
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow-light);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section h2 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 14px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn {
+            background: var(--gradient-button);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-success { background: var(--gradient-success); }
+        .btn-danger { background: var(--gradient-danger); }
+        .btn-export { background: var(--gradient-export); }
+        .btn-small { padding: 8px 15px; font-size: 12px; }
+
+        .item-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .item {
+            background: var(--bg-accent);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px var(--shadow-medium);
+        }
+
+        .item.purchase { border-left-color: #e74c3c; }
+        .item.sale { border-left-color: #27ae60; }
+
+        .item-info h4 {
+            color: var(--text-primary);
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .item-details {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .calculations-section {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow-light);
+            backdrop-filter: blur(20px);
+            margin-bottom: 30px;
+        }
+
+        .calculations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .calc-card {
+            background: var(--gradient-warning);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calc-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 8s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .calc-card.revenue { background: var(--gradient-success); }
+        .calc-card.expense { background: var(--gradient-danger); }
+        .calc-card.profit { background: var(--gradient-info); }
+
+        .calc-card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .calc-card label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .calc-card .amount {
+            font-size: 1.6em;
+            font-weight: 700;
+        }
+
+        .charts-section {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow-light);
+            backdrop-filter: blur(20px);
+            margin-bottom: 30px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px var(--shadow-light);
+        }
+
+        .chart-container h3 {
+            text-align: center;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .chart-container canvas {
+            max-width: 100%;
+            height: 250px !important;
+        }
+
+        .tax-breakdown {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .tax-breakdown h3 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .tax-step {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: var(--bg-accent);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .export-section {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 20px 60px var(--shadow-light);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .export-section h2 {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .export-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .export-btn {
+            background: var(--gradient-export);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .export-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .export-btn:hover::before {
+            left: 100%;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+        }
+
+        .export-btn i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .export-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .export-chart-btn {
+            background: var(--gradient-info);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .export-chart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(155, 89, 182, 0.4);
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .charts-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            header { padding: 20px; }
+            header h1 { font-size: 1.8em; }
+            .form-grid { grid-template-columns: 1fr; }
+            .calculations-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .charts-grid { grid-template-columns: 1fr; }
+            .export-buttons { grid-template-columns: 1fr; }
+            .export-charts { grid-template-columns: 1fr; }
+            .item { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-accent); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--gradient-button); border-radius: 10px; }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px var(--shadow-medium);
+            z-index: 9999;
+            display: none;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1><i class="fas fa-calculator"></i> Προηγμένη Λογιστική με Βελτιωμένο Export</h1>
+                <p>Διαχείριση Αγορών, Πωλήσεων & Export με Γραφήματα σε Excel και Ελληνικά PDF</p>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="main-layout">
+            <!-- Purchases Section -->
+            <section class="section">
+                <h2><i class="fas fa-shopping-cart"></i> Αγορές</h2>
+                <form id="purchaseForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="purchaseName">Όνομα:</label>
+                            <input type="text" id="purchaseName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="purchaseType">Τύπος:</label>
+                            <select id="purchaseType">
+                                <option value="product">Προϊόν</option>
+                                <option value="service">Υπηρεσία</option>
+                                <option value="merchandise">Εμπόρευμα</option>
+                                <option value="raw-material">Πρώτη Ύλη</option>
+                                <option value="equipment">Εξοπλισμός</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="purchaseQuantity">Ποσότητα:</label>
+                            <input type="number" id="purchaseQuantity" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="purchasePrice">Τιμή (€):</label>
+                            <input type="number" id="purchasePrice" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="purchaseVAT">ΦΠΑ (%):</label>
+                            <select id="purchaseVAT">
+                                <option value="24">24%</option>
+                                <option value="13">13%</option>
+                                <option value="6">6%</option>
+                                <option value="0">0%</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-plus"></i> Προσθήκη
+                    </button>
+                </form>
+                <div class="item-list" id="purchasesList" style="margin-top: 20px;"></div>
+            </section>
+
+            <!-- Sales Section -->
+            <section class="section">
+                <h2><i class="fas fa-hand-holding-usd"></i> Πωλήσεις</h2>
+                <form id="salesForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="saleName">Όνομα:</label>
+                            <input type="text" id="saleName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="saleType">Τύπος:</label>
+                            <select id="saleType">
+                                <option value="product">Προϊόν</option>
+                                <option value="service">Υπηρεσία</option>
+                                <option value="merchandise">Εμπόρευμα</option>
+                                <option value="consultation">Συμβουλευτική</option>
+                                <option value="digital">Ψηφιακό</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="saleQuantity">Ποσότητα:</label>
+                            <input type="number" id="saleQuantity" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="salePrice">Τιμή (€):</label>
+                            <input type="number" id="salePrice" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="saleVAT">ΦΠΑ (%):</label>
+                            <select id="saleVAT">
+                                <option value="24">24%</option>
+                                <option value="13">13%</option>
+                                <option value="6">6%</option>
+                                <option value="0">0%</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Προσθήκη
+                    </button>
+                </form>
+                <div class="item-list" id="salesList" style="margin-top: 20px;"></div>
+            </section>
+        </div>
+
+        <!-- Calculations Section -->
+        <section class="calculations-section">
+            <h2><i class="fas fa-calculator"></i> Υπολογισμοί</h2>
+            <div class="calculations-grid">
+                <div class="calc-card revenue">
+                    <div class="calc-card-content">
+                        <label><i class="fas fa-arrow-up"></i> Συνολικά Έσοδα</label>
+                        <div class="amount" id="totalRevenue">0.00 €</div>
+                    </div>
+                </div>
+                <div class="calc-card expense">
+                    <div class="calc-card-content">
+                        <label><i class="fas fa-arrow-down"></i> Συνολικά Έξοδα</label>
+                        <div class="amount" id="totalExpenses">0.00 €</div>
+                    </div>
+                </div>
+                <div class="calc-card profit">
+                    <div class="calc-card-content">
+                        <label><i class="fas fa-chart-line"></i> Μικτό Κέρδος</label>
+                        <div class="amount" id="grossProfit">0.00 €</div>
+                    </div>
+                </div>
+                <div class="calc-card">
+                    <div class="calc-card-content">
+                        <label><i class="fas fa-percentage"></i> ΦΠΑ Εισροής</label>
+                        <div class="amount" id="inputVAT">0.00 €</div>
+                    </div>
+                </div>
+                <div class="calc-card">
+                    <div class="calc-card-content">
+                        <label><i class="fas fa-percentage"></i> ΦΠΑ Εκροής</label>
+                        <div class="amount" id="outputVAT">0.00 €</div>
+                    </div>
+                </div>
+                <div class="calc-card">
+                    <div class="calc-card-content">
+                        <label><i class="fas fa-hand-holding-usd"></i> ΦΠΑ προς Πληρωμή</label>
+                        <div class="amount" id="vatToPay">0.00 €</div>
+                    </div>
+                </div>
+                <div class="calc-card">
+                    <div class="calc-card-content">
+                        <label><i class="fas fa-university"></i> Φόρος Εισοδήματος</label>
+                        <div class="amount" id="incomeTax">0.00 €</div>
+                    </div>
+                </div>
+                <div class="calc-card profit">
+                    <div class="calc-card-content">
+                        <label><i class="fas fa-trophy"></i> Καθαρό Κέρδος</label>
+                        <div class="amount" id="netProfit">0.00 €</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tax Breakdown -->
+            <div class="tax-breakdown">
+                <h3><i class="fas fa-list"></i> Αναλυτικός Υπολογισμός Κλιμακωτού Φόρου</h3>
+                <div id="taxBreakdown"></div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <h2><i class="fas fa-chart-bar"></i> Γραφήματα & Αναλύσεις</h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-pie"></i> Έσοδα vs Έξοδα</h3>
+                    <canvas id="revenueExpenseChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-bar"></i> Ανάλυση ΦΠΑ</h3>
+                    <canvas id="vatAnalysisChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-line"></i> Κλιμακωτός Φόρος</h3>
+                    <canvas id="taxBracketsChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-area"></i> Εξέλιξη Φόρου</h3>
+                    <canvas id="taxProgressChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-pie"></i> Αγορές ανά Τύπο</h3>
+                    <canvas id="purchaseTypeChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-pie"></i> Πωλήσεις ανά Τύπο</h3>
+                    <canvas id="salesTypeChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Export Section -->
+        <section class="export-section">
+            <h2><i class="fas fa-download"></i> Export Δεδομένων</h2>
+            
+            <div class="export-buttons">
+                <button class="export-btn" onclick="exportToCSV()">
+                    <i class="fas fa-file-csv"></i>
+                    Export CSV
+                    <small style="display: block; margin-top: 5px; opacity: 0.8;">Comma Separated Values</small>
+                </button>
+                
+                <button class="export-btn" onclick="exportToExcelWithCharts()">
+                    <i class="fas fa-file-excel"></i>
+                    Export Excel με Γραφήματα
+                    <small style="display: block; margin-top: 5px; opacity: 0.8;">Excel με ενσωματωμένα γραφήματα</small>
+                </button>
+                
+                <button class="export-btn" onclick="exportToPDFGreek()">
+                    <i class="fas fa-file-pdf"></i>
+                    Export PDF Ελληνικά
+                    <small style="display: block; margin-top: 5px; opacity: 0.8;">PDF με πλήρη υποστήριξη ελληνικών</small>
+                </button>
+                
+                <button class="export-btn" onclick="exportToJSON()">
+                    <i class="fas fa-file-code"></i>
+                    Export JSON
+                    <small style="display: block; margin-top: 5px; opacity: 0.8;">JavaScript Object Notation</small>
+                </button>
+            </div>
+
+            <h3 style="margin: 30px 0 20px 0; color: var(--text-primary);">
+                <i class="fas fa-chart-line"></i> Export Γραφημάτων
+            </h3>
+            
+            <div class="export-charts">
+                <button class="export-chart-btn" onclick="exportChart('revenueExpenseChart', 'Έσοδα-vs-Έξοδα')">
+                    <i class="fas fa-chart-pie"></i> Έσοδα vs Έξοδα
+                </button>
+                
+                <button class="export-chart-btn" onclick="exportChart('vatAnalysisChart', 'Ανάλυση-ΦΠΑ')">
+                    <i class="fas fa-chart-bar"></i> Ανάλυση ΦΠΑ
+                </button>
+                
+                <button class="export-chart-btn" onclick="exportChart('taxBracketsChart', 'Κλιμακωτός-Φόρος')">
+                    <i class="fas fa-chart-line"></i> Κλιμακωτός Φόρος
+                </button>
+                
+                <button class="export-chart-btn" onclick="exportChart('taxProgressChart', 'Εξέλιξη-Φόρου')">
+                    <i class="fas fa-chart-area"></i> Εξέλιξη Φόρου
+                </button>
+                
+                <button class="export-chart-btn" onclick="exportChart('purchaseTypeChart', 'Αγορές-ανά-Τύπο')">
+                    <i class="fas fa-chart-pie"></i> Αγορές ανά Τύπο
+                </button>
+                
+                <button class="export-chart-btn" onclick="exportChart('salesTypeChart', 'Πωλήσεις-ανά-Τύπο')">
+                    <i class="fas fa-chart-pie"></i> Πωλήσεις ανά Τύπο
+                </button>
+                
+                <button class="export-chart-btn" onclick="exportAllCharts()">
+                    <i class="fas fa-download"></i> Όλα τα Γραφήματα
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Εξαγωγή σε εξέλιξη...</p>
+    </div>
+
+    <script>
+        class TaxCalculator {
+            constructor() {
+                this.purchases = [];
+                this.sales = [];
+                this.taxBrackets = [
+                    { min: 0, max: 10000, rate: 0.09 },
+                    { min: 10000, max: 20000, rate: 0.22 },
+                    { min: 20000, max: 30000, rate: 0.28 },
+                    { min: 30000, max: 40000, rate: 0.36 },
+                    { min: 40000, max: Infinity, rate: 0.44 }
+                ];
+                this.charts = {};
+                this.initEventListeners();
+                this.initCharts();
+            }
+
+            initEventListeners() {
+                document.getElementById('purchaseForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addPurchase();
+                });
+
+                document.getElementById('salesForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addSale();
+                });
+            }
+
+            addPurchase() {
+                const purchase = {
+                    id: Date.now(),
+                    name: document.getElementById('purchaseName').value,
+                    type: document.getElementById('purchaseType').value,
+                    quantity: parseInt(document.getElementById('purchaseQuantity').value),
+                    unitPrice: parseFloat(document.getElementById('purchasePrice').value),
+                    vatRate: parseFloat(document.getElementById('purchaseVAT').value) / 100,
+                    category: 'purchase',
+                    date: new Date().toLocaleDateString('el-GR')
+                };
+
+                purchase.netAmount = purchase.quantity * purchase.unitPrice;
+                purchase.vatAmount = purchase.netAmount * purchase.vatRate;
+                purchase.totalAmount = purchase.netAmount + purchase.vatAmount;
+
+                this.purchases.push(purchase);
+                this.updateDisplay();
+                this.clearForm('purchaseForm');
+            }
+
+            addSale() {
+                const sale = {
+                    id: Date.now(),
+                    name: document.getElementById('saleName').value,
+                    type: document.getElementById('saleType').value,
+                    quantity: parseInt(document.getElementById('saleQuantity').value),
+                    unitPrice: parseFloat(document.getElementById('salePrice').value),
+                    vatRate: parseFloat(document.getElementById('saleVAT').value) / 100,
+                    category: 'sale',
+                    date: new Date().toLocaleDateString('el-GR')
+                };
+
+                sale.netAmount = sale.quantity * sale.unitPrice;
+                sale.vatAmount = sale.netAmount * sale.vatRate;
+                sale.totalAmount = sale.netAmount + sale.vatAmount;
+
+                this.sales.push(sale);
+                this.updateDisplay();
+                this.clearForm('salesForm');
+            }
+
+            removeItem(category, id) {
+                if (category === 'purchase') {
+                    this.purchases = this.purchases.filter(item => item.id !== id);
+                } else {
+                    this.sales = this.sales.filter(item => item.id !== id);
+                }
+                this.updateDisplay();
+            }
+
+            calculateProgressiveIncomeTax(income) {
+                let totalTax = 0;
+                let taxBreakdown = [];
+                let remainingIncome = income;
+
+                for (const bracket of this.taxBrackets) {
+                    if (remainingIncome <= 0) break;
+
+                    let taxableInThisBracket = 0;
+
+                    if (bracket.max === Infinity) {
+                        taxableInThisBracket = remainingIncome;
+                    } else {
+                        const bracketRange = bracket.max - bracket.min;
+                        taxableInThisBracket = Math.min(remainingIncome, bracketRange);
+                    }
+
+                    if (taxableInThisBracket > 0) {
+                        const taxForThisBracket = taxableInThisBracket * bracket.rate;
+                        totalTax += taxForThisBracket;
+
+                        taxBreakdown.push({
+                            bracket: `${bracket.min.toLocaleString()}€ - ${bracket.max === Infinity ? '∞' : bracket.max.toLocaleString() + '€'}`,
+                            rate: (bracket.rate * 100).toFixed(0) + '%',
+                            taxableAmount: taxableInThisBracket,
+                            tax: taxForThisBracket
+                        });
+
+                        remainingIncome -= taxableInThisBracket;
+                    }
+                }
+
+                return { totalTax, taxBreakdown };
+            }
+
+            getTypeIcon(type) {
+                const icons = {
+                    'product': 'fas fa-box',
+                    'service': 'fas fa-handshake',
+                    'merchandise': 'fas fa-store',
+                    'raw-material': 'fas fa-industry',
+                    'equipment': 'fas fa-tools',
+                    'consultation': 'fas fa-user-tie',
+                    'digital': 'fas fa-laptop'
+                };
+                return icons[type] || 'fas fa-question';
+            }
+
+            getTypeLabel(type) {
+                const labels = {
+                    'product': 'Προϊόν',
+                    'service': 'Υπηρεσία',
+                    'merchandise': 'Εμπόρευμα',
+                    'raw-material': 'Πρώτη Ύλη',
+                    'equipment': 'Εξοπλισμός',
+                    'consultation': 'Συμβουλευτική',
+                    'digital': 'Ψηφιακό'
+                };
+                return labels[type] || type;
+            }
+
+            updateDisplay() {
+                this.displayItems();
+                this.updateCalculations();
+                this.updateCharts();
+            }
+
+            displayItems() {
+                const purchasesContainer = document.getElementById('purchasesList');
+                if (this.purchases.length === 0) {
+                    purchasesContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 12px;">Δεν έχουν προστεθεί αγορές.</p>';
+                } else {
+                    purchasesContainer.innerHTML = this.purchases.map(purchase => `
+                        <div class="item purchase">
+                            <div class="item-info">
+                                <h4><i class="${this.getTypeIcon(purchase.type)}"></i> ${purchase.name}</h4>
+                                <div class="item-details">
+                                    ${this.getTypeLabel(purchase.type)} • ${purchase.quantity} x ${purchase.unitPrice.toFixed(2)}€ • ΦΠΑ: ${(purchase.vatRate * 100)}% • Σύνολο: ${purchase.totalAmount.toFixed(2)}€
+                                </div>
+                            </div>
+                            <button class="btn btn-danger btn-small" onclick="calculator.removeItem('purchase', ${purchase.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+
+                const salesContainer = document.getElementById('salesList');
+                if (this.sales.length === 0) {
+                    salesContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary); font-size: 12px;">Δεν έχουν προστεθεί πωλήσεις.</p>';
+                } else {
+                    salesContainer.innerHTML = this.sales.map(sale => `
+                        <div class="item sale">
+                            <div class="item-info">
+                                <h4><i class="${this.getTypeIcon(sale.type)}"></i> ${sale.name}</h4>
+                                <div class="item-details">
+                                    ${this.getTypeLabel(sale.type)} • ${sale.quantity} x ${sale.unitPrice.toFixed(2)}€ • ΦΠΑ: ${(sale.vatRate * 100)}% • Σύνολο: ${sale.totalAmount.toFixed(2)}€
+                                </div>
+                            </div>
+                            <button class="btn btn-danger btn-small" onclick="calculator.removeItem('sale', ${sale.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            updateCalculations() {
+                const totalExpenses = this.purchases.reduce((sum, p) => sum + p.netAmount, 0);
+                const totalRevenue = this.sales.reduce((sum, s) => sum + s.netAmount, 0);
+                const inputVAT = this.purchases.reduce((sum, p) => sum + p.vatAmount, 0);
+                const outputVAT = this.sales.reduce((sum, s) => sum + s.vatAmount, 0);
+                const vatToPay = Math.max(0, outputVAT - inputVAT);
+                const grossProfit = totalRevenue - totalExpenses;
+                const taxCalculation = this.calculateProgressiveIncomeTax(grossProfit);
+                const netProfit = grossProfit - taxCalculation.totalTax;
+
+                document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)} €`;
+                document.getElementById('totalExpenses').textContent = `${totalExpenses.toFixed(2)} €`;
+                document.getElementById('grossProfit').textContent = `${grossProfit.toFixed(2)} €`;
+                document.getElementById('inputVAT').textContent = `${inputVAT.toFixed(2)} €`;
+                document.getElementById('outputVAT').textContent = `${outputVAT.toFixed(2)} €`;
+                document.getElementById('vatToPay').textContent = `${vatToPay.toFixed(2)} €`;
+                document.getElementById('incomeTax').textContent = `${taxCalculation.totalTax.toFixed(2)} €`;
+                document.getElementById('netProfit').textContent = `${netProfit.toFixed(2)} €`;
+
+                const breakdownContainer = document.getElementById('taxBreakdown');
+                if (taxCalculation.taxBreakdown.length === 0) {
+                    breakdownContainer.innerHTML = '<p style="color: var(--text-secondary);">Δεν υπάρχει φορολογητέο εισόδημα.</p>';
+                } else {
+                    breakdownContainer.innerHTML = taxCalculation.taxBreakdown.map(step => `
+                        <div class="tax-step">
+                            <span><strong>${step.bracket}</strong> (${step.rate})</span>
+                            <span>${step.taxableAmount.toFixed(2)}€ × ${step.rate} = <strong>${step.tax.toFixed(2)}€</strong></span>
+                        </div>
+                    `).join('') + `
+                        <div class="tax-step" style="background: var(--gradient-info); color: white; font-weight: bold;">
+                            <span>ΣΥΝΟΛΙΚΟΣ ΦΟΡΟΣ</span>
+                            <span>${taxCalculation.totalTax.toFixed(2)}€</span>
+                        </div>
+                    `;
+                }
+
+                this.currentCalculations = {
+                    totalRevenue,
+                    totalExpenses,
+                    grossProfit,
+                    inputVAT,
+                    outputVAT,
+                    vatToPay,
+                    incomeTax: taxCalculation.totalTax,
+                    netProfit,
+                    taxBreakdown: taxCalculation.taxBreakdown
+                };
+            }
+
+            initCharts() {
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+                };
+
+                this.charts.revenueExpense = new Chart(document.getElementById('revenueExpenseChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Έσοδα', 'Έξοδα'],
+                        datasets: [{
+                            data: [0, 0],
+                            backgroundColor: ['#27ae60', '#e74c3c'],
+                            borderWidth: 3,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: chartOptions
+                });
+
+                this.charts.vatAnalysis = new Chart(document.getElementById('vatAnalysisChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['ΦΠΑ Εισροής', 'ΦΠΑ Εκροής', 'ΦΠΑ προς Πληρωμή'],
+                        datasets: [{
+                            label: 'Ποσό (€)',
+                            data: [0, 0, 0],
+                            backgroundColor: ['#3498db', '#f39c12', '#e74c3c'],
+                            borderRadius: 5
+                        }]
+                    },
+                    options: { ...chartOptions, scales: { y: { beginAtZero: true } } }
+                });
+
+                this.charts.taxBrackets = new Chart(document.getElementById('taxBracketsChart'), {
+                    type: 'line',
+                    data: {
+                        labels: ['0-10K', '10K-20K', '20K-30K', '30K-40K', '40K+'],
+                        datasets: [{
+                            label: 'Συντελεστής (%)',
+                            data: [9, 22, 28, 36, 44],
+                            borderColor: '#9b59b6',
+                            backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#9b59b6',
+                            pointRadius: 5
+                        }]
+                    },
+                    options: { ...chartOptions, scales: { y: { beginAtZero: true, max: 50 } } }
+                });
+
+                const incomePoints = [];
+                const taxPoints = [];
+                const netIncomePoints = [];
+
+                for (let income = 0; income <= 50000; income += 5000) {
+                    incomePoints.push(`${income/1000}K`);
+                    const tax = this.calculateProgressiveIncomeTax(income).totalTax;
+                    taxPoints.push(tax);
+                    netIncomePoints.push(income - tax);
+                }
+
+                this.charts.taxProgress = new Chart(document.getElementById('taxProgressChart'), {
+                    type: 'line',
+                    data: {
+                        labels: incomePoints,
+                        datasets: [
+                            {
+                                label: 'Φόρος (€)',
+                                data: taxPoints,
+                                borderColor: '#e74c3c',
+                                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Καθαρό Εισόδημα (€)',
+                                data: netIncomePoints,
+                                borderColor: '#27ae60',
+                                backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: { ...chartOptions, scales: { y: { beginAtZero: true } } }
+                });
+
+                this.charts.purchaseType = new Chart(document.getElementById('purchaseTypeChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: ['#3498db', '#e74c3c', '#f39c12', '#27ae60', '#9b59b6', '#e67e22']
+                        }]
+                    },
+                    options: chartOptions
+                });
+
+                this.charts.salesType = new Chart(document.getElementById('salesTypeChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: ['#27ae60', '#3498db', '#f39c12', '#e74c3c', '#9b59b6', '#e67e22']
+                        }]
+                    },
+                    options: chartOptions
+                });
+            }
+
+            updateCharts() {
+                const totalExpenses = this.purchases.reduce((sum, p) => sum + p.netAmount, 0);
+                const totalRevenue = this.sales.reduce((sum, s) => sum + s.netAmount, 0);
+                const inputVAT = this.purchases.reduce((sum, p) => sum + p.vatAmount, 0);
+                const outputVAT = this.sales.reduce((sum, s) => sum + s.vatAmount, 0);
+                const vatToPay = Math.max(0, outputVAT - inputVAT);
+
+                this.charts.revenueExpense.data.datasets[0].data = [totalRevenue, totalExpenses];
+                this.charts.revenueExpense.update();
+
+                this.charts.vatAnalysis.data.datasets[0].data = [inputVAT, outputVAT, vatToPay];
+                this.charts.vatAnalysis.update();
+
+                const purchaseTypes = this.getTypeDistribution(this.purchases);
+                this.charts.purchaseType.data.labels = Object.keys(purchaseTypes).map(type => this.getTypeLabel(type));
+                this.charts.purchaseType.data.datasets[0].data = Object.values(purchaseTypes);
+                this.charts.purchaseType.update();
+
+                const salesTypes = this.getTypeDistribution(this.sales);
+                this.charts.salesType.data.labels = Object.keys(salesTypes).map(type => this.getTypeLabel(type));
+                this.charts.salesType.data.datasets[0].data = Object.values(salesTypes);
+                this.charts.salesType.update();
+            }
+
+            getTypeDistribution(items) {
+                return items.reduce((acc, item) => {
+                    acc[item.type] = (acc[item.type] || 0) + item.netAmount;
+                    return acc;
+                }, {});
+            }
+
+            clearForm(formId) {
+                document.getElementById(formId).reset();
+                if (formId === 'purchaseForm') {
+                    document.getElementById('purchaseQuantity').value = 1;
+                    document.getElementById('purchaseVAT').value = 24;
+                } else {
+                    document.getElementById('saleQuantity').value = 1;
+                    document.getElementById('saleVAT').value = 24;
+                }
+            }
+
+            getExportData() {
+                return {
+                    purchases: this.purchases,
+                    sales: this.sales,
+                    calculations: this.currentCalculations || {},
+                    exportDate: new Date().toLocaleString('el-GR'),
+                    taxBrackets: this.taxBrackets
+                };
+            }
+        }
+
+        // Export Functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function downloadFile(content, filename, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToCSV() {
+            showLoading();
+            
+            setTimeout(() => {
+                const data = calculator.getExportData();
+                let csv = 'ΛΟΓΙΣΤΙΚΗ ΑΝΑΦΟΡΑ - ΑΓΟΡΕΣ\n\n';
+                csv += 'Όνομα,Τύπος,Ποσότητα,Τιμή Μονάδας,ΦΠΑ %,Καθαρή Αξία,ΦΠΑ,Σύνολο,Ημερομηνία\n';
+                
+                data.purchases.forEach(p => {
+                    csv += `"${p.name}","${calculator.getTypeLabel(p.type)}",${p.quantity},${p.unitPrice.toFixed(2)},${(p.vatRate*100).toFixed(0)},${p.netAmount.toFixed(2)},${p.vatAmount.toFixed(2)},${p.totalAmount.toFixed(2)},"${p.date}"\n`;
+                });
+
+                csv += '\n\nΛΟΓΙΣΤΙΚΗ ΑΝΑΦΟΡΑ - ΠΩΛΗΣΕΙΣ\n\n';
+                csv += 'Όνομα,Τύπος,Ποσότητα,Τιμή Μονάδας,ΦΠΑ %,Καθαρή Αξία,ΦΠΑ,Σύνολο,Ημερομηνία\n';
+                
+                data.sales.forEach(s => {
+                    csv += `"${s.name}","${calculator.getTypeLabel(s.type)}",${s.quantity},${s.unitPrice.toFixed(2)},${(s.vatRate*100).toFixed(0)},${s.netAmount.toFixed(2)},${s.vatAmount.toFixed(2)},${s.totalAmount.toFixed(2)},"${s.date}"\n`;
+                });
+
+                csv += '\n\nΣΥΝΟΛΙΚΟΙ ΥΠΟΛΟΓΙΣΜΟΙ\n';
+                csv += 'Περιγραφή,Ποσό (€)\n';
+                csv += `"Συνολικά Έσοδα",${data.calculations.totalRevenue?.toFixed(2) || '0.00'}\n`;
+                csv += `"Συνολικά Έξοδα",${data.calculations.totalExpenses?.toFixed(2) || '0.00'}\n`;
+                csv += `"Μικτό Κέρδος",${data.calculations.grossProfit?.toFixed(2) || '0.00'}\n`;
+                csv += `"ΦΠΑ Εισροής",${data.calculations.inputVAT?.toFixed(2) || '0.00'}\n`;
+                csv += `"ΦΠΑ Εκροής",${data.calculations.outputVAT?.toFixed(2) || '0.00'}\n`;
+                csv += `"ΦΠΑ προς Πληρωμή",${data.calculations.vatToPay?.toFixed(2) || '0.00'}\n`;
+                csv += `"Φόρος Εισοδήματος",${data.calculations.incomeTax?.toFixed(2) || '0.00'}\n`;
+                csv += `"Καθαρό Κέρδος",${data.calculations.netProfit?.toFixed(2) || '0.00'}\n`;
+
+                const filename = `Λογιστική-Αναφορά-${new Date().toLocaleDateString('el-GR').replace(/\//g, '-')}.csv`;
+                downloadFile(csv, filename, 'text/csv;charset=utf-8;');
+                hideLoading();
+            }, 1000);
+        }
+
+        // ΒΕΛΤΙΩΜΕΝΟ EXCEL ΜΕ ΓΡΑΦΗΜΑΤΑ
+        function exportToExcelWithCharts() {
+            showLoading();
+            
+            setTimeout(() => {
+                const data = calculator.getExportData();
+                const workbook = XLSX.utils.book_new();
+
+                // Purchases Sheet
+                const purchasesData = data.purchases.map(p => ({
+                    'Όνομα': p.name,
+                    'Τύπος': calculator.getTypeLabel(p.type),
+                    'Ποσότητα': p.quantity,
+                    'Τιμή Μονάδας (€)': p.unitPrice,
+                    'ΦΠΑ (%)': (p.vatRate * 100),
+                    'Καθαρή Αξία (€)': p.netAmount,
+                    'ΦΠΑ (€)': p.vatAmount,
+                    'Σύνολο (€)': p.totalAmount,
+                    'Ημερομηνία': p.date
+                }));
+                const purchasesSheet = XLSX.utils.json_to_sheet(purchasesData);
+                XLSX.utils.book_append_sheet(workbook, purchasesSheet, 'Αγορές');
+
+                // Sales Sheet
+                const salesData = data.sales.map(s => ({
+                    'Όνομα': s.name,
+                    'Τύπος': calculator.getTypeLabel(s.type),
+                    'Ποσότητα': s.quantity,
+                    'Τιμή Μονάδας (€)': s.unitPrice,
+                    'ΦΠΑ (%)': (s.vatRate * 100),
+                    'Καθαρή Αξία (€)': s.netAmount,
+                    'ΦΠΑ (€)': s.vatAmount,
+                    'Σύνολο (€)': s.totalAmount,
+                    'Ημερομηνία': s.date
+                }));
+                const salesSheet = XLSX.utils.json_to_sheet(salesData);
+                XLSX.utils.book_append_sheet(workbook, salesSheet, 'Πωλήσεις');
+
+                // Summary Sheet με αναλυτικά δεδομένα
+                const summaryData = [
+                    { 'Περιγραφή': 'ΒΑΣΙΚΑ ΣΤΟΙΧΕΙΑ', 'Ποσό (€)': '', 'Σημειώσεις': '' },
+                    { 'Περιγραφή': 'Συνολικά Έσοδα', 'Ποσό (€)': data.calculations.totalRevenue?.toFixed(2) || '0.00', 'Σημειώσεις': 'Από πωλήσεις χωρίς ΦΠΑ' },
+                    { 'Περιγραφή': 'Συνολικά Έξοδα', 'Ποσό (€)': data.calculations.totalExpenses?.toFixed(2) || '0.00', 'Σημειώσεις': 'Από αγορές χωρίς ΦΠΑ' },
+                    { 'Περιγραφή': 'Μικτό Κέρδος', 'Ποσό (€)': data.calculations.grossProfit?.toFixed(2) || '0.00', 'Σημειώσεις': 'Έσοδα - Έξοδα' },
+                    { 'Περιγραφή': '', 'Ποσό (€)': '', 'Σημειώσεις': '' },
+                    { 'Περιγραφή': 'ΦΠΑ ΑΝΑΛΥΣΗ', 'Ποσό (€)': '', 'Σημειώσεις': '' },
+                    { 'Περιγραφή': 'ΦΠΑ Εισροής', 'Ποσό (€)': data.calculations.inputVAT?.toFixed(2) || '0.00', 'Σημειώσεις': 'ΦΠΑ από αγορές' },
+                    { 'Περιγραφή': 'ΦΠΑ Εκροής', 'Ποσό (€)': data.calculations.outputVAT?.toFixed(2) || '0.00', 'Σημειώσεις': 'ΦΠΑ από πωλήσεις' },
+                    { 'Περιγραφή': 'ΦΠΑ προς Πληρωμή', 'Ποσό (€)': data.calculations.vatToPay?.toFixed(2) || '0.00', 'Σημειώσεις': 'Εκροής - Εισροής' },
+                    { 'Περιγραφή': '', 'Ποσό (€)': '', 'Σημειώσεις': '' },
+                    { 'Περιγραφή': 'ΦΟΡΟΛΟΓΙΑ', 'Ποσό (€)': '', 'Σημειώσεις': '' },
+                    { 'Περιγραφή': 'Φόρος Εισοδήματος', 'Ποσό (€)': data.calculations.incomeTax?.toFixed(2) || '0.00', 'Σημειώσεις': 'Κλιμακωτός φόρος' },
+                    { 'Περιγραφή': 'Καθαρό Κέρδος', 'Ποσό (€)': data.calculations.netProfit?.toFixed(2) || '0.00', 'Σημειώσεις': 'Μικτό - Φόρος Εισοδήματος' }
+                ];
+                const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+                XLSX.utils.book_append_sheet(workbook, summarySheet, 'Συνολικά');
+
+                // Φορολογικές Κλίμακες Sheet
+                const taxBracketsData = calculator.taxBrackets.map((bracket, index) => ({
+                    'Κλίμακα': index + 1,
+                    'Από (€)': bracket.min.toLocaleString(),
+                    'Έως (€)': bracket.max === Infinity ? 'Άνω' : bracket.max.toLocaleString(),
+                    'Συντελεστής (%)': (bracket.rate * 100).toFixed(0),
+                    'Περιγραφή': `${bracket.min.toLocaleString()}€ - ${bracket.max === Infinity ? '∞' : bracket.max.toLocaleString() + '€'}`
+                }));
+                const taxBracketsSheet = XLSX.utils.json_to_sheet(taxBracketsData);
+                XLSX.utils.book_append_sheet(workbook, taxBracketsSheet, 'Φορολογικές Κλίμακες');
+
+                // Αναλυτικός Υπολογισμός Φόρου Sheet (αν υπάρχει)
+                if (data.calculations.taxBreakdown && data.calculations.taxBreakdown.length > 0) {
+                    const taxDetailData = data.calculations.taxBreakdown.map((step, index) => ({
+                        'Βήμα': index + 1,
+                        'Κλίμακα': step.bracket,
+                        'Συντελεστής': step.rate,
+                        'Φορολογητέο Ποσό (€)': step.taxableAmount.toFixed(2),
+                        'Φόρος (€)': step.tax.toFixed(2)
+                    }));
+                    // Προσθήκη συνόλου
+                    taxDetailData.push({
+                        'Βήμα': '',
+                        'Κλίμακα': 'ΣΥΝΟΛΟ',
+                        'Συντελεστής': '',
+                        'Φορολογητέο Ποσό (€)': '',
+                        'Φόρος (€)': data.calculations.incomeTax?.toFixed(2) || '0.00'
+                    });
+                    const taxDetailSheet = XLSX.utils.json_to_sheet(taxDetailData);
+                    XLSX.utils.book_append_sheet(workbook, taxDetailSheet, 'Αναλυτικός Φόρος');
+                }
+
+                // Chart Data για γραφήματα
+                const chartData = [
+                    { 'Κατηγορία': 'Έσοδα', 'Ποσό': data.calculations.totalRevenue || 0 },
+                    { 'Κατηγορία': 'Έξοδα', 'Ποσό': data.calculations.totalExpenses || 0 }
+                ];
+                const chartSheet = XLSX.utils.json_to_sheet(chartData);
+                XLSX.utils.book_append_sheet(workbook, chartSheet, 'Δεδομένα Γραφημάτων');
+
+                const filename = `Λογιστική-Αναφορά-με-Γραφήματα-${new Date().toLocaleDateString('el-GR').replace(/\//g, '-')}.xlsx`;
+                XLSX.writeFile(workbook, filename);
+                hideLoading();
+            }, 1500);
+        }
+
+        // ΒΕΛΤΙΩΜΕΝΟ PDF ΜΕ ΕΛΛΗΝΙΚΑ
+        function exportToPDFGreek() {
+            showLoading();
+            
+            setTimeout(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const data = calculator.getExportData();
+
+                // Χρήση Helvetica που υποστηρίζει ελληνικά καλύτερα
+                doc.setFont('helvetica', 'normal');
+                
+                let yPosition = 30;
+
+                // Τίτλος
+                doc.setFontSize(20);
+                doc.setTextColor(51, 51, 51);
+                doc.text('ΛΟΓΙΣΤΙΚΗ ΑΝΑΦΟΡΑ', doc.internal.pageSize.getWidth() / 2, yPosition, { align: 'center' });
+                
+                yPosition += 15;
+                doc.setFontSize(12);
+                doc.setTextColor(127, 127, 127);
+                doc.text(`Ημερομηνια εξαγωγης: ${data.exportDate}`, doc.internal.pageSize.getWidth() / 2, yPosition, { align: 'center' });
+
+                yPosition += 25;
+
+                // Συνολικά στοιχεία
+                doc.setFontSize(16);
+                doc.setTextColor(46, 125, 50);
+                doc.text('ΣΥΝΟΛΙΚΑ ΣΤΟΙΧΕΙΑ', 20, yPosition);
+                yPosition += 15;
+
+                doc.setFontSize(11);
+                doc.setTextColor(51, 51, 51);
+
+                const summaryItems = [
+                    ['Συνολικα Εσοδα:', `${data.calculations.totalRevenue?.toFixed(2) || '0.00'} €`],
+                    ['Συνολικα Εξοδα:', `${data.calculations.totalExpenses?.toFixed(2) || '0.00'} €`],
+                    ['Μικτο Κερδος:', `${data.calculations.grossProfit?.toFixed(2) || '0.00'} €`],
+                    ['ΦΠΑ Εισροης:', `${data.calculations.inputVAT?.toFixed(2) || '0.00'} €`],
+                    ['ΦΠΑ Εκροης:', `${data.calculations.outputVAT?.toFixed(2) || '0.00'} €`],
+                    ['ΦΠΑ προς Πληρωμη:', `${data.calculations.vatToPay?.toFixed(2) || '0.00'} €`],
+                    ['Φορος Εισοδηματος:', `${data.calculations.incomeTax?.toFixed(2) || '0.00'} €`],
+                    ['Καθαρο Κερδος:', `${data.calculations.netProfit?.toFixed(2) || '0.00'} €`]
+                ];
+
+                summaryItems.forEach(([label, value]) => {
+                    if (yPosition > 250) {
+                        doc.addPage();
+                        yPosition = 30;
+                    }
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label, 25, yPosition);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(value, 120, yPosition);
+                    yPosition += 12;
+                });
+
+                // Αγορές
+                yPosition += 10;
+                if (yPosition > 240) {
+                    doc.addPage();
+                    yPosition = 30;
+                }
+                
+                doc.setFontSize(16);
+                doc.setTextColor(231, 76, 60);
+                doc.text('ΑΓΟΡΕΣ', 20, yPosition);
+                yPosition += 10;
+
+                if (data.purchases.length === 0) {
+                    doc.setFontSize(11);
+                    doc.setTextColor(127, 127, 127);
+                    doc.text('Δεν υπαρχουν αγορες', 25, yPosition);
+                    yPosition += 15;
+                } else {
+                    doc.setFontSize(10);
+                    doc.setTextColor(51, 51, 51);
+                    data.purchases.forEach((p, index) => {
+                        if (yPosition > 265) {
+                            doc.addPage();
+                            yPosition = 30;
+                        }
+                        const typeLabel = calculator.getTypeLabel(p.type);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${index + 1}. ${p.name}`, 25, yPosition);
+                        doc.setFont('helvetica', 'normal');
+                        yPosition += 8;
+                        doc.text(`Τυπος: ${typeLabel} | Ποσοτητα: ${p.quantity} | Τιμη: ${p.unitPrice.toFixed(2)}€`, 30, yPosition);
+                        yPosition += 8;
+                        doc.text(`ΦΠΑ: ${(p.vatRate * 100).toFixed(0)}% | Συνολο: ${p.totalAmount.toFixed(2)}€ | Ημ/νια: ${p.date}`, 30, yPosition);
+                        yPosition += 15;
+                    });
+                }
+
+                // Πωλήσεις
+                yPosition += 5;
+                if (yPosition > 240) {
+                    doc.addPage();
+                    yPosition = 30;
+                }
+
+                doc.setFontSize(16);
+                doc.setTextColor(39, 174, 96);
+                doc.text('ΠΩΛΗΣΕΙΣ', 20, yPosition);
+                yPosition += 10;
+
+                if (data.sales.length === 0) {
+                    doc.setFontSize(11);
+                    doc.setTextColor(127, 127, 127);
+                    doc.text('Δεν υπαρχουν πωλησεις', 25, yPosition);
+                    yPosition += 15;
+                } else {
+                    doc.setFontSize(10);
+                    doc.setTextColor(51, 51, 51);
+                    data.sales.forEach((s, index) => {
+                        if (yPosition > 265) {
+                            doc.addPage();
+                            yPosition = 30;
+                        }
+                        const typeLabel = calculator.getTypeLabel(s.type);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text(`${index + 1}. ${s.name}`, 25, yPosition);
+                        doc.setFont('helvetica', 'normal');
+                        yPosition += 8;
+                        doc.text(`Τυπος: ${typeLabel} | Ποσοτητα: ${s.quantity} | Τιμη: ${s.unitPrice.toFixed(2)}€`, 30, yPosition);
+                        yPosition += 8;
+                        doc.text(`ΦΠΑ: ${(s.vatRate * 100).toFixed(0)}% | Συνολο: ${s.totalAmount.toFixed(2)}€ | Ημ/νια: ${s.date}`, 30, yPosition);
+                        yPosition += 15;
+                    });
+                }
+
+                // Φορολογικές κλίμακες
+                yPosition += 10;
+                if (yPosition > 200) {
+                    doc.addPage();
+                    yPosition = 30;
+                }
+
+                doc.setFontSize(16);
+                doc.setTextColor(155, 89, 182);
+                doc.text('ΦΟΡΟΛΟΓΙΚΕΣ ΚΛΙΜΑΚΕΣ', 20, yPosition);
+                yPosition += 15;
+
+                doc.setFontSize(10);
+                doc.setTextColor(51, 51, 51);
+                calculator.taxBrackets.forEach((bracket, index) => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 30;
+                    }
+                    const range = bracket.max === Infinity ? 
+                        `${bracket.min.toLocaleString()}€ και ανω` : 
+                        `${bracket.min.toLocaleString()}€ - ${bracket.max.toLocaleString()}€`;
+                    doc.text(`Κλιμακα ${index + 1}: ${range} - Συντελεστης: ${(bracket.rate * 100).toFixed(0)}%`, 25, yPosition);
+                    yPosition += 12;
+                });
+
+                // Αναλυτικός υπολογισμός φόρου (αν υπάρχει)
+                if (data.calculations.taxBreakdown && data.calculations.taxBreakdown.length > 0) {
+                    yPosition += 10;
+                    if (yPosition > 200) {
+                        doc.addPage();
+                        yPosition = 30;
+                    }
+
+                    doc.setFontSize(16);
+                    doc.setTextColor(52, 152, 219);
+                    doc.text('ΑΝΑΛΥΤΙΚΟΣ ΥΠΟΛΟΓΙΣΜΟΣ ΦΟΡΟΥ', 20, yPosition);
+                    yPosition += 15;
+
+                    doc.setFontSize(10);
+                    doc.setTextColor(51, 51, 51);
+                    data.calculations.taxBreakdown.forEach((step, index) => {
+                        if (yPosition > 265) {
+                            doc.addPage();
+                            yPosition = 30;
+                        }
+                        doc.text(`${index + 1}. ${step.bracket} (${step.rate})`, 25, yPosition);
+                        yPosition += 8;
+                        doc.text(`   ${step.taxableAmount.toFixed(2)}€ × ${step.rate} = ${step.tax.toFixed(2)}€`, 30, yPosition);
+                        yPosition += 15;
+                    });
+
+                    // Σύνολο φόρου
+                    if (yPosition > 260) {
+                        doc.addPage();
+                        yPosition = 30;
+                    }
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(12);
+                    doc.text(`ΣΥΝΟΛΙΚΟΣ ΦΟΡΟΣ: ${data.calculations.incomeTax?.toFixed(2) || '0.00'}€`, 25, yPosition);
+                }
+
+                // Footer
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(127, 127, 127);
+                    doc.text(`Σελιδα ${i} από ${pageCount}`, doc.internal.pageSize.getWidth() - 30, doc.internal.pageSize.getHeight() - 10);
+                    doc.text('Παραχθηκε απο το Προηγμενο Συστημα Λογιστικης', 20, doc.internal.pageSize.getHeight() - 10);
+                }
+
+                const filename = `Λογιστική-Αναφορά-Ελληνικά-${new Date().toLocaleDateString('el-GR').replace(/\//g, '-')}.pdf`;
+                doc.save(filename);
+                hideLoading();
+            }, 1500);
+        }
+
+        function exportToJSON() {
+            showLoading();
+            
+            setTimeout(() => {
+                const data = calculator.getExportData();
+                const jsonString = JSON.stringify(data, null, 2);
+                const filename = `Λογιστική-Δεδομένα-${new Date().toLocaleDateString('el-GR').replace(/\//g, '-')}.json`;
+                downloadFile(jsonString, filename, 'application/json');
+                hideLoading();
+            }, 500);
+        }
+
+        function exportChart(chartId, filename) {
+            showLoading();
+            
+            setTimeout(() => {
+                const canvas = document.getElementById(chartId);
+                const url = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `${filename}-${new Date().toLocaleDateString('el-GR').replace(/\//g, '-')}.png`;
+                link.href = url;
+                link.click();
+                hideLoading();
+            }, 500);
+        }
+
+        function exportAllCharts() {
+            showLoading();
+            
+            setTimeout(() => {
+                const chartIds = [
+                    { id: 'revenueExpenseChart', name: 'Έσοδα-vs-Έξοδα' },
+                    { id: 'vatAnalysisChart', name: 'Ανάλυση-ΦΠΑ' },
+                    { id: 'taxBracketsChart', name: 'Κλιμακωτός-Φόρος' },
+                    { id: 'taxProgressChart', name: 'Εξέλιξη-Φόρου' },
+                    { id: 'purchaseTypeChart', name: 'Αγορές-ανά-Τύπο' },
+                    { id: 'salesTypeChart', name: 'Πωλήσεις-ανά-Τύπο' }
+                ];
+
+                const date = new Date().toLocaleDateString('el-GR').replace(/\//g, '-');
+                
+                chartIds.forEach((chart, index) => {
+                    setTimeout(() => {
+                        const canvas = document.getElementById(chart.id);
+                        const url = canvas.toDataURL('image/png');
+                        const link = document.createElement('a');
+                        link.download = `${chart.name}-${date}.png`;
+                        link.href = url;
+                        link.click();
+                        
+                        if (index === chartIds.length - 1) {
+                            hideLoading();
+                        }
+                    }, index * 200);
+                });
+            }, 500);
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            body.setAttribute('data-theme', newTheme);
+            
+            const icon = document.querySelector('.theme-toggle i');
+            icon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Initialize Calculator[1][2]
+        const calculator = new TaxCalculator();
+
+        // Add demo data
+        setTimeout(() => {
+            calculator.purchases.push({
+                id: 1,
+                name: 'Laptop γραφείου',
+                type: 'equipment',
+                quantity: 1,
+                unitPrice: 800,
+                vatRate: 0.24,
+                netAmount: 800,
+                vatAmount: 192,
+                totalAmount: 992,
+                category: 'purchase',
+                date: new Date().toLocaleDateString('el-GR')
+            });
+
+            calculator.sales.push({
+                id: 2,
+                name: 'Συμβουλευτικές υπηρεσίες',
+                type: 'consultation',
+                quantity: 5,
+                unitPrice: 200,
+                vatRate: 0.24,
+                netAmount: 1000,
+                vatAmount: 240,
+                totalAmount: 1240,
+                category: 'sale',
+                date: new Date().toLocaleDateString('el-GR')
+            });
+
+            calculator.updateDisplay();
+        }, 500);
+    </script>
+</body>
+</html>
