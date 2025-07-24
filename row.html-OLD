@@ -1,0 +1,118 @@
+
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Μενού Πλοήγησης</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #2c3e50    ; /* Ελαφρύ γκρι χρώμα */
+        }
+
+        .menu {
+            font-family: 'Arial', sans-serif;
+            background-color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .menu ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .menu li {
+            margin: 10px 15px;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            position: relative;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .menu a::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffcc00;
+            visibility: hidden;
+            transform: scaleX(0);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .menu a:hover::before {
+            visibility: visible;
+            transform: scaleX(1);
+        }
+
+        .menu a:hover {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .menu ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .menu li {
+                margin: 8px 0;
+            }
+
+            .menu a {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="menu">
+        <ul>
+            <li><a href="row/loancalculate.html">Υπολογισμός Δανείου</a></li>
+            <li><a href="row/ceramic.html">Κεραμικός Πυκνωτής</a></li>
+            <li><a href="row/scalc.html">Επιστημονική Αριθμομηχανή</a></li>
+            <li><a href="row/resistors.html">Υπολογισμός Αντιστάσεων</a></li>
+            <li><a href="row/rescal.html">Χρώματα Αντιστάσεων</a></li>
+            <li><a href="row/vdrop.html">Πτώση Τάσης</a></li>
+            <li><a href="row/blackhole.html">Μαύρη Τρύπα</a></li>
+            <li><a href="row/varit1.htm">Varistor 1</a></li>
+            <li><a href="row/varit2.htm">Varistor 2</a></li>
+        </ul>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuItems = document.querySelectorAll('.menu a');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('mouseover', function() {
+                    this.style.color = '#ffcc00';
+                });
+                
+                item.addEventListener('mouseout', function() {
+                    this.style.color = 'white';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
