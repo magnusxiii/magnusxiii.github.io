@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Μενού Πλοήγησης</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #2c3e50;
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+        }
+
+        .menu {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .menu-container {
+            list-style-type: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .menu-item {
+            position: relative;
+        }
+
+        .menu-button {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 12px 20px;
+            display: block;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .menu-button::after {
+            content: ' ▼';
+            font-size: 12px;
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-button.active::after {
+            transform: rotate(180deg);
+        }
+
+        .menu-button:hover,
+        .menu-button.active {
+            background-color: #555;
+            color: #ffcc00;
+        }
+
+        .menu-button::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #ffcc00;
+            visibility: hidden;
+            transform: scaleX(0);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .menu-button:hover::before,
+        .menu-button.active::before {
+            visibility: visible;
+            transform: scaleX(1);
+        }
+
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #444;
+            min-width: 280px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+            z-index: 1000;
+            border-radius: 8px;
+            padding: 8px 0;
+            margin-top: 5px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-link {
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            display: block;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 2px 8px;
+        }
+
+        .dropdown-link:hover {
+            background-color: #555;
+            color: #ffcc00;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .menu-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .menu-item {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .menu-button {
+                width: 100%;
+                text-align: center;
+                font-size: 16px;
+                padding: 12px 15px;
+            }
+
+            .dropdown-content {
+                position: static;
+                width: 100%;
+                min-width: auto;
+                box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+                margin-top: 0;
+                border-radius: 0 0 8px 8px;
+                background-color: #555;
+            }
+
+            .dropdown-link {
+                padding: 10px 20px;
+                margin: 1px 4px;
+            }
+        }
+
+        /* Για πολύ μικρές οθόνες */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .menu {
+                padding: 10px;
+            }
+
+            .menu-button {
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+
+            .dropdown-link {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="menu">
+        <ul class="menu-container">
+            <!-- Κατηγορία Υπολογισμοί -->
+            <li class="menu-item">
+                <button class="menu-button" data-dropdown="dropdown1">Υπολογισμοί</button>
+                <div class="dropdown-content" id="dropdown1">
+                    <a href="sales/loancalculate.html" class="dropdown-link">Υπολογισμός Δανείου</a>
+                    <a href="sales/salesgraph.html" class="dropdown-link">Πωλήσεις 1</a>
+                    <a href="sales/salesplanlast.html" class="dropdown-link">Πωλήσεις 2</a>
+                    <a href="sales/vat.html" class="dropdown-link">Απόδοση ΦΠΑ</a>
+                    <a href="sales/vat2.htm" class="dropdown-link">Απόδοση ΦΠΑ 2</a>
+                </div>
+            </li>
+
+            <!-- Κατηγορία Electronics -->
+            <li class="menu-item">
+                <button class="menu-button" data-dropdown="dropdown2">Electronics</button>
+                <div class="dropdown-content" id="dropdown2">
+                    <a href="electronics/vdrop.html" class="dropdown-link">Υπολογισμός Πτώσης Τάσης</a>
+                    <a href="electronics/circuitsymbol.html" class="dropdown-link">Σύμβολα</a>
+                    <a href="electronics/ceramic.html" class="dropdown-link">Κεραμικοί Πυκνωτές</a>
+                    <a href="electronics/monogramic.html" class="dropdown-link">Προσομοίωση Μονογραμικού</a>
+                    <a href="electronics/resistorisxios.html" class="dropdown-link">Υπολογισμός Ρελέ Ισχύος</a>
+                    <a href="electronics/resistance.htm" class="dropdown-link">Υπολογισμός Αντιστάσεων</a>
+                    <a href="electronics/QC.html" class="dropdown-link">IC QC Έλεγχος</a>
+                </div>
+            </li>
+
+            <!-- Κατηγορία Other Tools -->
+            <li class="menu-item">
+                <button class="menu-button" data-dropdown="dropdown3">Other Tools</button>
+                <div class="dropdown-content" id="dropdown3">
+                    <a href="othertools/ironforges.html" class="dropdown-link">Σκληρότητα Μετάλλων</a>
+                    <a href="othertools/streamdeskexamples.htm" class="dropdown-link">Stream Deck Assembly Simulator</a>
+                </div>
+            </li>
+
+            <!-- Κατηγορία Massive -->
+            <li class="menu-item">
+                <button class="menu-button" data-dropdown="dropdown4">Massive</button>
+                <div class="dropdown-content" id="dropdown4">
+                    <a href="massive/bigban.htm" class="dropdown-link">Προηγμένος Έλεγχος Αστρικών Σωμάτων</a>
+                    <a href="massive/blackhole.html" class="dropdown-link">3D Σύγκριση Μάζας</a>
+                    <a href="massive/varit1.htm" class="dropdown-link">Προσομοίωση Βαρυτικών Κυμάτων 1</a>
+                    <a href="massive/varit2.htm" class="dropdown-link">Προσομοίωση Βαρυτικών Κυμάτων 2</a>
+                </div>
+            </li>
+
+            <!-- Κατηγορία Debug -->
+            <li class="menu-item">
+                <button class="menu-button" data-dropdown="dropdown5">Debug</button>
+                <div class="dropdown-content" id="dropdown5">
+                    <a href="debug/ANDROIDSETINGS.html" class="dropdown-link">Open Android Settings</a>
+                    <a href="debug/pingusansi.html" class="dropdown-link">Ping Files</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButtons = document.querySelectorAll('.menu-button');
+            const dropdowns = document.querySelectorAll('.dropdown-content');
+
+            // Κλείσε όλα τα dropdowns
+            function closeAllDropdowns() {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
+                menuButtons.forEach(button => {
+                    button.classList.remove('active');
+                });
+            }
+
+            // Event listeners για τα buttons
+            menuButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const targetDropdown = document.getElementById(this.getAttribute('data-dropdown'));
+                    const isOpen = targetDropdown.classList.contains('show');
+                    
+                    // Κλείσε όλα τα άλλα
+                    closeAllDropdowns();
+                    
+                    // Αν δεν ήταν ανοιχτό, άνοιξέ το
+                    if (!isOpen) {
+                        targetDropdown.classList.add('show');
+                        this.classList.add('active');
+                    }
+                });
+            });
+
+            // Κλείσε dropdowns όταν κάνεις click έξω
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.menu-item')) {
+                    closeAllDropdowns();
+                }
+            });
+
+            // Κλείσε dropdown όταν επιλέγεις link
+            const dropdownLinks = document.querySelectorAll('.dropdown-link');
+            dropdownLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    closeAllDropdowns();
+                });
+            });
+
+            // Handle keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeAllDropdowns();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
