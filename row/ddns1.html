@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto DDNS Redirect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 28px;
+        }
+        
+        .status {
+            font-size: 18px;
+            margin: 15px 0;
+        }
+        
+        .ip-display {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffeb3b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Auto Redirect</h1>
+        <div class="spinner"></div>
+        <div class="status" id="status">Αναζήτηση IP για magnificent.hopto.org...</div>
+        <div class="ip-display" id="ipDisplay" style="display:none;"></div>
+        <div class="countdown" id="countdown"></div>
+    </div>
+
+    <script>
+        // Το DDNS URL που θέλεις (αλλαγή εδώ)
+        const DDNS_URL = 'magnificent.hopto.org';
+        
+        async function autoRedirect() {
+            const statusDiv = document.getElementById('status');
+            const ipDisplay = document.getElementById('ipDisplay');
+            const countdownDiv = document.getElementById('countdown');
+            
+            try {
+                statusDiv.textContent = `🔍 Αναζήτηση IP για ${DDNS_URL}...`;
+                
+                // DNS resolve μέσω Google DNS API
+                const response = await fetch(`https://dns.google/resolve?name=${DDNS_URL}&type=A`);
+                const data = await response.json();
+                
+                if (data.Answer && data.Answer.length > 0) {
+                    const ip = data.Answer.find(record => record.type === 1)?.data;
+                    
+                    if (ip) {
+                        statusDiv.textContent = '✅ IP βρέθηκε!';
+                        ipDisplay.textContent = `IP: ${ip}`;
+                        ipDisplay.style.display = 'block';
+                        
+                        // Άμεσο redirect χωρίς countdown
+                        statusDiv.textContent = '🚀 Redirect...';
+                        setTimeout(() => {
+                            window.location.href = `http://${ip}`;
+                        }, 500); // Μικρή καθυστέρηση για να δεις την IP
+                        
+                    } else {
+                        statusDiv.textContent = '❌ Δε βρέθηκε A record';
+                        countdownDiv.textContent = 'Σφάλμα DNS resolution';
+                    }
+                } else {
+                    statusDiv.textContent = '❌ Δε βρέθηκε IP';
+                    countdownDiv.textContent = 'Domain δεν απαντά';
+                }
+                
+            } catch (error) {
+                console.error('DNS Error:', error);
+                statusDiv.textContent = '❌ Σφάλμα σύνδεσης';
+                countdownDiv.textContent = 'Δοκίμασε ξανά αργότερα';
+            }
+        }
+        
+        // Άμεσο redirect όταν φορτώνει η σελίδα
+        window.onload = () => autoRedirect();
+    </script>
+</body>
+</html>
