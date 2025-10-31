@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOM Generator Pro - Δημιουργία Λίστας Υλικών</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151a30;
+            --bg-tertiary: #1e2640;
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: #2d3447;
+            --shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        .light-mode {
+            --bg-primary: #f3f4f6;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f9fafb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --border: #e5e7eb;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px var(--shadow);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 40px;
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+        }
+
+        .header-left p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: var(--bg-tertiary);
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .form-section h2 {
+            color: var(--accent-primary);
+            margin-bottom: 25px;
+            font-size: 2em;
+            font-weight: 700;
+            border-bottom: 3px solid var(--accent-primary);
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+        }
+
+        thead {
+            background: var(--accent-gradient);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 18px 16px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-tertiary);
+            transform: scale(1.01);
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 28px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 8px 24px var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .stat-card p {
+            font-size: 1em;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .export-section {
+            background: var(--bg-tertiary);
+            padding: 32px;
+            border-radius: 20px;
+            margin-top: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .export-section h3 {
+            color: var(--accent-primary);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 140px;
+            height: 140px;
+            margin-bottom: 24px;
+            opacity: 0.4;
+        }
+
+        .empty-state h3 {
+            font-size: 1.8em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-left h1 {
+                font-size: 2em;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 0.85em;
+            }
+        }
+
+        .required {
+            color: var(--danger);
+        }
+
+        .form-group small {
+            color: var(--text-secondary);
+            margin-top: 6px;
+            font-size: 0.85em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+
+        .badge-smd {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-pth {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Κρυφό file input */
+        #xmlFileInput {
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-gradient);
+            color: white;
+            padding: 18px 28px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px var(--shadow);
+            z-index: 10000;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>⚡ BOM Generator Pro</h1>
+                    <p>Επαγγελματική Διαχείριση Λίστας Υλικών</p>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeText">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Φόρμα Προσθήκης Component -->
+            <div class="form-section">
+                <h2>➕ Προσθήκη Component</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Designator <span class="required">*</span></label>
+                        <input type="text" id="designator" placeholder="π.χ. R1, C5, IC1, U2">
+                        <small>Αναγνωριστικό εξαρτήματος στο PCB</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Τιμή / Value <span class="required">*</span></label>
+                        <input type="text" id="value" placeholder="π.χ. 10kΩ, 100nF, LM358">
+                        <small>Τιμή ή μοντέλο εξαρτήματος</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ποσότητα <span class="required">*</span></label>
+                        <input type="number" id="quantity" value="1" min="1">
+                        <small>Αριθμός τεμαχίων</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Τύπος <span class="required">*</span></label>
+                        <select id="type">
+                            <option value="">-- Επιλέξτε Τύπο --</option>
+                            <option value="SMD">SMD (Surface Mount)</option>
+                            <option value="PTH">PTH (Through Hole)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Package</label>
+                        <input type="text" id="package" placeholder="π.χ. 0805, DIP-8, SOT-23">
+                        <small>Μέγεθος / Περίβλημα</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Κατασκευαστής</label>
+                        <input type="text" id="manufacturer" placeholder="π.χ. Texas Instruments">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Part Number (MPN)</label>
+                        <input type="text" id="mpn" placeholder="π.χ. LM358P">
+                        <small>Κωδικός κατασκευαστή</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Προμηθευτής</label>
+                        <input type="text" id="supplier" placeholder="π.χ. Mouser, DigiKey">
+                    </div>
+
+                    <div class="form-group">
+                        <label>SKU / Κωδικός Προμηθευτή</label>
+                        <input type="text" id="sku" placeholder="Κωδικός παραγγελίας">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Τιμή Μονάδας (€)</label>
+                        <input type="number" id="price" step="0.001" min="0" placeholder="0.00">
+                        <small>Κόστος ανά τεμάχιο</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Περιγραφή / Σημειώσεις</label>
+                    <textarea id="description" placeholder="Πρόσθετες πληροφορίες, specs, ή σημειώσεις..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="addComponent()">➕ Προσθήκη</button>
+                    <button class="btn btn-secondary" onclick="clearForm()">🔄 Καθαρισμός</button>
+                </div>
+            </div>
+
+            <!-- Στατιστικά -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="totalComponents">0</h3>
+                    <p>Σύνολο Components</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalQuantity">0</h3>
+                    <p>Συνολικά Τεμάχια</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalCost">0.00€</h3>
+                    <p>Συνολικό Κόστος</p>
+                </div>
+            </div>
+
+            <!-- Πίνακας BOM -->
+            <div class="form-section">
+                <h2>📊 Λίστα Υλικών (BOM)</h2>
+                <div class="table-container">
+                    <table id="bomTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Designator</th>
+                                <th>Value</th>
+                                <th>Ποσότητα</th>
+                                <th>Τύπος</th>
+                                <th>Package</th>
+                                <th>Κατασκευαστής</th>
+                                <th>MPN</th>
+                                <th>Προμηθευτής</th>
+                                <th>SKU</th>
+                                <th>Τιμή (€)</th>
+                                <th>Σύνολο (€)</th>
+                                <th>Περιγραφή</th>
+                                <th>Ενέργειες</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bomTableBody">
+                            <tr>
+                                <td colspan="14" class="empty-state">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <h3>Δεν υπάρχουν components</h3>
+                                    <p>Προσθέστε το πρώτο σας component ή εισάγετε XML αρχείο</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Export/Import Section -->
+            <div class="export-section">
+                <h3>📤 Εξαγωγή & Εισαγωγή</h3>
+                <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 1.05em;">Διαχειριστείτε τη λίστα υλικών σας</p>
+                
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: var(--text-primary); margin-bottom: 12px; font-size: 1.1em;">📥 Εισαγωγή από XML</h4>
+                    <div class="button-group">
+                        <!-- Κρυφό file input -->
+                        <input type="file" id="xmlFileInput" accept=".xml" onchange="importFromXML(event)">
+                        <!-- Κουμπί που ενεργοποιεί το file input -->
+                        <button class="btn btn-warning" onclick="document.getElementById('xmlFileInput').click()">📁 Επιλογή XML Αρχείου</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 12px; font-size: 1.1em;">📤 Εξαγωγή σε Αρχείο</h4>
+                    <div class="button-group">
+                        <button class="btn btn-success" onclick="exportToXLSX()">📊 XLSX</button>
+                        <button class="btn btn-success" onclick="exportToCSV()">📄 CSV</button>
+                        <button class="btn btn-success" onclick="exportToXML()">🔖 XML</button>
+                        <button class="btn btn-success" onclick="exportToPDF()">📕 PDF με Ελληνικά</button>
+                        <button class="btn btn-danger" onclick="clearAllComponents()">🗑️ Καθαρισμός</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let bomData = [];
+        let componentCounter = 1;
+        let darkMode = true;
+        let greekFontLoaded = false;
+
+        // Φόρτωση ελληνικής γραμματοσειράς
+        async function loadGreekFont() {
+            if (greekFontLoaded) return true;
+            
+            try {
+                const response = await fetch('https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf');
+                const fontBlob = await response.blob();
+                const fontBase64 = await blobToBase64(fontBlob);
+                
+                greekFontLoaded = true;
+                return fontBase64;
+            } catch (error) {
+                console.error('Αποτυχία φόρτωσης γραμματοσειράς:', error);
+                return null;
+            }
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // Φόρτωση δεδομένων και θέματος
+        window.onload = function() {
+            const savedData = localStorage.getItem('bomData');
+            const savedTheme = localStorage.getItem('theme');
+            
+            if (savedData) {
+                bomData = JSON.parse(savedData);
+                componentCounter = bomData.length > 0 ? Math.max(...bomData.map(c => c.id)) + 1 : 1;
+                updateTable();
+            }
+
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                darkMode = false;
+                updateThemeButton();
+            }
+
+            // Reset file input on click για να λειτουργεί πάντα
+            document.getElementById('xmlFileInput').addEventListener('click', function() {
+                this.value = null;
+            });
+        };
+
+        function toggleTheme() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+            updateThemeButton();
+            showNotification(darkMode ? '🌙 Dark Mode ενεργοποιήθηκε' : '☀️ Light Mode ενεργοποιήθηκε');
+        }
+
+        function updateThemeButton() {
+            document.getElementById('themeIcon').textContent = darkMode ? '☀️' : '🌙';
+            document.getElementById('themeText').textContent = darkMode ? 'Light Mode' : 'Dark Mode';
+        }
+
+        function saveData() {
+            localStorage.setItem('bomData', JSON.stringify(bomData));
+        }
+
+        function addComponent() {
+            const designator = document.getElementById('designator').value.trim();
+            const value = document.getElementById('value').value.trim();
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const type = document.getElementById('type').value;
+
+            if (!designator || !value || !quantity || !type) {
+                alert('❌ Παρακαλώ συμπληρώστε όλα τα υποχρεωτικά πεδία!');
+                return;
+            }
+
+            const component = {
+                id: componentCounter++,
+                designator: designator,
+                value: value,
+                quantity: quantity,
+                type: type,
+                package: document.getElementById('package').value.trim(),
+                manufacturer: document.getElementById('manufacturer').value.trim(),
+                mpn: document.getElementById('mpn').value.trim(),
+                supplier: document.getElementById('supplier').value.trim(),
+                sku: document.getElementById('sku').value.trim(),
+                price: parseFloat(document.getElementById('price').value) || 0,
+                description: document.getElementById('description').value.trim()
+            };
+
+            bomData.push(component);
+            saveData();
+            updateTable();
+            clearForm();
+            showNotification('✅ Component προστέθηκε επιτυχώς!');
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('bomTableBody');
+            
+            if (bomData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="14" class="empty-state">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <h3>Δεν υπάρχουν components</h3>
+                            <p>Προσθέστε το πρώτο σας component ή εισάγετε XML αρχείο</p>
+                        </td>
+                    </tr>
+                `;
+                updateStats();
+                return;
+            }
+
+            tbody.innerHTML = '';
+            bomData.forEach((component, index) => {
+                const total = (component.price * component.quantity).toFixed(3);
+                const typeBadge = component.type === 'SMD' ? 
+                    '<span class="badge badge-smd">SMD</span>' : 
+                    '<span class="badge badge-pth">PTH</span>';
+                
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${component.designator}</strong></td>
+                        <td>${component.value}</td>
+                        <td>${component.quantity}</td>
+                        <td>${typeBadge}</td>
+                        <td>${component.package || '-'}</td>
+                        <td>${component.manufacturer || '-'}</td>
+                        <td>${component.mpn || '-'}</td>
+                        <td>${component.supplier || '-'}</td>
+                        <td>${component.sku || '-'}</td>
+                        <td>${component.price.toFixed(3)}</td>
+                        <td><strong>${total}</strong></td>
+                        <td>${component.description || '-'}</td>
+                        <td>
+                            <button class="btn-delete" onclick="deleteComponent(${component.id})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalComponents = bomData.length;
+            const totalQuantity = bomData.reduce((sum, c) => sum + c.quantity, 0);
+            const totalCost = bomData.reduce((sum, c) => sum + (c.price * c.quantity), 0);
+
+            document.getElementById('totalComponents').textContent = totalComponents;
+            document.getElementById('totalQuantity').textContent = totalQuantity;
+            document.getElementById('totalCost').textContent = totalCost.toFixed(2) + '€';
+        }
+
+        function deleteComponent(id) {
+            if (confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το component;')) {
+                bomData = bomData.filter(c => c.id !== id);
+                saveData();
+                updateTable();
+                showNotification('🗑️ Component διαγράφηκε!');
+            }
+        }
+
+        function clearAllComponents() {
+            if (bomData.length === 0) {
+                alert('Η λίστα είναι ήδη άδεια!');
+                return;
+            }
+
+            if (confirm('⚠️ Διαγραφή ΟΛΩΝ των components;')) {
+                bomData = [];
+                componentCounter = 1;
+                saveData();
+                updateTable();
+                showNotification('🗑️ Όλα τα components διαγράφηκαν!');
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('designator').value = '';
+            document.getElementById('value').value = '';
+            document.getElementById('quantity').value = '1';
+            document.getElementById('type').value = '';
+            document.getElementById('package').value = '';
+            document.getElementById('manufacturer').value = '';
+            document.getElementById('mpn').value = '';
+            document.getElementById('supplier').value = '';
+            document.getElementById('sku').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('designator').focus();
+        }
+
+        function exportToXLSX() {
+            if (bomData.length === 0) {
+                alert('❌ Δεν υπάρχουν δεδομένα!');
+                return;
+            }
+
+            const worksheet_data = [
+                ['#', 'Designator', 'Value', 'Ποσότητα', 'Τύπος', 'Package', 'Κατασκευαστής', 'MPN', 'Προμηθευτής', 'SKU', 'Τιμή (€)', 'Σύνολο (€)', 'Περιγραφή']
+            ];
+
+            bomData.forEach((component, index) => {
+                worksheet_data.push([
+                    index + 1,
+                    component.designator,
+                    component.value,
+                    component.quantity,
+                    component.type,
+                    component.package || '',
+                    component.manufacturer || '',
+                    component.mpn || '',
+                    component.supplier || '',
+                    component.sku || '',
+                    component.price.toFixed(3),
+                    (component.price * component.quantity).toFixed(3),
+                    component.description || ''
+                ]);
+            });
+
+            const totalQuantity = bomData.reduce((sum, c) => sum + c.quantity, 0);
+            const totalCost = bomData.reduce((sum, c) => sum + (c.price * c.quantity), 0);
+            
+            worksheet_data.push([]);
+            worksheet_data.push(['', '', 'ΣΥΝΟΛΑ:', totalQuantity, '', '', '', '', '', '', '', totalCost.toFixed(2), '']);
+
+            const worksheet = XLSX.utils.aoa_to_sheet(worksheet_data);
+            worksheet['!cols'] = [
+                {wch: 5}, {wch: 15}, {wch: 15}, {wch: 10}, {wch: 8}, 
+                {wch: 12}, {wch: 20}, {wch: 20}, {wch: 15}, {wch: 15}, 
+                {wch: 10}, {wch: 12}, {wch: 40}
+            ];
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'BOM');
+
+            XLSX.writeFile(workbook, `BOM_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showNotification('✅ XLSX εξήχθη επιτυχώς!');
+        }
+
+        function exportToCSV() {
+            if (bomData.length === 0) {
+                alert('❌ Δεν υπάρχουν δεδομένα!');
+                return;
+            }
+
+            let csv = '#,Designator,Value,Ποσότητα,Τύπος,Package,Κατασκευαστής,MPN,Προμηθευτής,SKU,Τιμή (€),Σύνολο (€),Περιγραφή\n';
+
+            bomData.forEach((component, index) => {
+                const total = (component.price * component.quantity).toFixed(3);
+                csv += `${index + 1},"${component.designator}","${component.value}",${component.quantity},"${component.type}","${component.package}","${component.manufacturer}","${component.mpn}","${component.supplier}","${component.sku}",${component.price.toFixed(3)},${total},"${component.description}"\n`;
+            });
+
+            const totalQuantity = bomData.reduce((sum, c) => sum + c.quantity, 0);
+            const totalCost = bomData.reduce((sum, c) => sum + (c.price * c.quantity), 0);
+            csv += `\n,,"ΣΥΝΟΛΑ:",${totalQuantity},,,,,,,,${totalCost.toFixed(2)},\n`;
+
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.setAttribute('href', URL.createObjectURL(blob));
+            link.setAttribute('download', `BOM_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('✅ CSV εξήχθη επιτυχώς!');
+        }
+
+        function exportToXML() {
+            if (bomData.length === 0) {
+                alert('❌ Δεν υπάρχουν δεδομένα!');
+                return;
+            }
+
+            let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+            xml += '<BOM>\n';
+            xml += `  <metadata>\n`;
+            xml += `    <date>${new Date().toISOString()}</date>\n`;
+            xml += `    <totalComponents>${bomData.length}</totalComponents>\n`;
+            xml += `    <totalQuantity>${bomData.reduce((sum, c) => sum + c.quantity, 0)}</totalQuantity>\n`;
+            xml += `    <totalCost>${bomData.reduce((sum, c) => sum + (c.price * c.quantity), 0).toFixed(2)}</totalCost>\n`;
+            xml += `  </metadata>\n`;
+            xml += '  <components>\n';
+
+            bomData.forEach(component => {
+                xml += '    <component>\n';
+                xml += `      <id>${component.id}</id>\n`;
+                xml += `      <designator><![CDATA[${component.designator}]]></designator>\n`;
+                xml += `      <value><![CDATA[${component.value}]]></value>\n`;
+                xml += `      <quantity>${component.quantity}</quantity>\n`;
+                xml += `      <type>${component.type}</type>\n`;
+                xml += `      <package><![CDATA[${component.package || ''}]]></package>\n`;
+                xml += `      <manufacturer><![CDATA[${component.manufacturer || ''}]]></manufacturer>\n`;
+                xml += `      <mpn><![CDATA[${component.mpn || ''}]]></mpn>\n`;
+                xml += `      <supplier><![CDATA[${component.supplier || ''}]]></supplier>\n`;
+                xml += `      <sku><![CDATA[${component.sku || ''}]]></sku>\n`;
+                xml += `      <price>${component.price}</price>\n`;
+                xml += `      <description><![CDATA[${component.description || ''}]]></description>\n`;
+                xml += '    </component>\n';
+            });
+
+            xml += '  </components>\n';
+            xml += '</BOM>';
+
+            const blob = new Blob([xml], { type: 'application/xml;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.setAttribute('href', URL.createObjectURL(blob));
+            link.setAttribute('download', `BOM_${new Date().toISOString().split('T')[0]}.xml`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('✅ XML εξήχθη επιτυχώς!');
+        }
+
+        // ΔΙΟΡΘΩΜΕΝΗ ΣΥΝΑΡΤΗΣΗ Import από XML
+        function importFromXML(event) {
+            const file = event.target.files[0];
+            
+            if (!file) {
+                console.log('Δεν επιλέχθηκε αρχείο');
+                return;
+            }
+
+            console.log('Φόρτωση αρχείου:', file.name);
+            showNotification('⏳ Φόρτωση XML...');
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    console.log('Ανάγνωση XML...');
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+                    
+                    // Έλεγχος για parsing errors
+                    const parserError = xmlDoc.getElementsByTagName("parsererror");
+                    if (parserError.length > 0) {
+                        throw new Error('Μη έγκυρο XML αρχείο');
+                    }
+
+                    const components = xmlDoc.getElementsByTagName('component');
+                    console.log('Βρέθηκαν components:', components.length);
+                    
+                    if (components.length === 0) {
+                        alert('❌ Το XML δεν περιέχει components!');
+                        return;
+                    }
+
+                    // Αν υπάρχουν ήδη δεδομένα, ρώτα για επιβεβαίωση
+                    if (bomData.length > 0) {
+                        if (!confirm(`⚠️ Υπάρχουν ήδη ${bomData.length} components. Θα αντικατασταθούν με τα ${components.length} components από το XML. Συνέχεια;`)) {
+                            return;
+                        }
+                    }
+
+                    bomData = [];
+                    let maxId = 0;
+
+                    for (let i = 0; i < components.length; i++) {
+                        const comp = components[i];
+                        const id = parseInt(comp.getElementsByTagName('id')[0]?.textContent || '0');
+                        
+                        if (id > maxId) maxId = id;
+
+                        const component = {
+                            id: id,
+                            designator: comp.getElementsByTagName('designator')[0]?.textContent || '',
+                            value: comp.getElementsByTagName('value')[0]?.textContent || '',
+                            quantity: parseInt(comp.getElementsByTagName('quantity')[0]?.textContent || '1'),
+                            type: comp.getElementsByTagName('type')[0]?.textContent || 'SMD',
+                            package: comp.getElementsByTagName('package')[0]?.textContent || '',
+                            manufacturer: comp.getElementsByTagName('manufacturer')[0]?.textContent || '',
+                            mpn: comp.getElementsByTagName('mpn')[0]?.textContent || '',
+                            supplier: comp.getElementsByTagName('supplier')[0]?.textContent || '',
+                            sku: comp.getElementsByTagName('sku')[0]?.textContent || '',
+                            price: parseFloat(comp.getElementsByTagName('price')[0]?.textContent || '0'),
+                            description: comp.getElementsByTagName('description')[0]?.textContent || ''
+                        };
+
+                        bomData.push(component);
+                        console.log('Component προστέθηκε:', component.designator);
+                    }
+
+                    componentCounter = maxId + 1;
+                    saveData();
+                    updateTable();
+                    showNotification(`✅ Εισήχθησαν ${bomData.length} components από XML!`);
+                    
+                    // Reset file input για να μπορεί να διαλέξει ξανά το ίδιο αρχείο
+                    event.target.value = '';
+                    
+                } catch (error) {
+                    console.error('XML Error:', error);
+                    alert('❌ Σφάλμα κατά την ανάγνωση του XML: ' + error.message);
+                }
+            };
+
+            reader.onerror = function() {
+                console.error('FileReader Error');
+                alert('❌ Σφάλμα κατά την ανάγνωση του αρχείου!');
+            };
+
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // Εξαγωγή σε PDF με πλήρη υποστήριξη ελληνικών
+        async function exportToPDF() {
+            if (bomData.length === 0) {
+                alert('❌ Δεν υπάρχουν δεδομένα!');
+                return;
+            }
+
+            showNotification('⏳ Δημιουργία PDF με ελληνικά...');
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4');
+
+            try {
+                // Φόρτωση ελληνικής γραμματοσειράς
+                const fontBase64 = await loadGreekFont();
+                
+                if (fontBase64) {
+                    doc.addFileToVFS('DejaVuSans.ttf', fontBase64);
+                    doc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+                    doc.setFont('DejaVuSans');
+                }
+
+                // Τίτλος με ελληνικά
+                doc.setFontSize(20);
+                doc.setTextColor(99, 102, 241);
+                doc.text('Λίστα Υλικών (BOM)', 148, 15, { align: 'center' });
+                
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Ημερομηνία: ${new Date().toLocaleDateString('el-GR')}`, 148, 22, { align: 'center' });
+
+                // Δημιουργία πίνακα με ελληνικά
+                const tableData = bomData.map((component, index) => [
+                    index + 1,
+                    component.designator,
+                    component.value,
+                    component.quantity,
+                    component.type,
+                    component.package || '',
+                    component.manufacturer || '',
+                    component.mpn || '',
+                    component.supplier || '',
+                    component.price.toFixed(3) + '€',
+                    (component.price * component.quantity).toFixed(3) + '€'
+                ]);
+
+                const totalQuantity = bomData.reduce((sum, c) => sum + c.quantity, 0);
+                const totalCost = bomData.reduce((sum, c) => sum + (c.price * c.quantity), 0);
+                
+                tableData.push([
+                    '', '', 'ΣΥΝΟΛΑ:', totalQuantity, '', '', '', '', '', '', totalCost.toFixed(2) + '€'
+                ]);
+
+                doc.autoTable({
+                    head: [['#', 'Designator', 'Τιμή', 'Τεμ.', 'Τύπος', 'Package', 'Κατασκευαστής', 'MPN', 'Προμηθευτής', 'Τιμή', 'Σύνολο']],
+                    body: tableData,
+                    startY: 30,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [99, 102, 241],
+                        textColor: 255,
+                        fontSize: 9,
+                        fontStyle: 'bold',
+                        font: fontBase64 ? 'DejaVuSans' : 'helvetica'
+                    },
+                    bodyStyles: {
+                        fontSize: 8,
+                        font: fontBase64 ? 'DejaVuSans' : 'helvetica'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [245, 245, 245]
+                    },
+                    margin: { top: 30, left: 10, right: 10 }
+                });
+
+                // Footer με ελληνικά
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(150);
+                    doc.text(`Σελίδα ${i} από ${pageCount}`, 148, 200, { align: 'center' });
+                    doc.text('Δημιουργήθηκε με BOM Generator Pro', 148, 205, { align: 'center' });
+                }
+
+                doc.save(`BOM_${new Date().toISOString().split('T')[0]}.pdf`);
+                showNotification('✅ PDF με ελληνικά εξήχθη επιτυχώς!');
+                
+            } catch (error) {
+                console.error('PDF Error:', error);
+                showNotification('❌ Σφάλμα κατά τη δημιουργία PDF');
+            }
+        }
+
+        function showNotification(message) {
+            // Αφαίρεση παλιών notifications
+            const oldNotifications = document.querySelectorAll('.notification');
+            oldNotifications.forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                addComponent();
+            }
+            if (e.key === 'Escape') {
+                clearForm();
+            }
+        });
+    </script>
+</body>
+</html>
