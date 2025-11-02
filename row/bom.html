@@ -74,7 +74,13 @@
             font-size: 2rem;
         }
 
-        .theme-toggle {
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .theme-toggle, .persist-toggle {
             background: var(--bg-card);
             border: 1px solid var(--border);
             color: var(--text-primary);
@@ -89,8 +95,14 @@
             gap: 8px;
         }
 
-        .theme-toggle:hover {
+        .theme-toggle:hover, .persist-toggle:hover {
             background: var(--bg-secondary);
+            border-color: var(--accent);
+        }
+
+        .persist-toggle.active {
+            background: var(--accent);
+            color: white;
             border-color: var(--accent);
         }
 
@@ -508,6 +520,8 @@
         @media (max-width: 768px) {
             .container { padding: 12px; }
             .header { flex-direction: column; gap: 16px; text-align: center; }
+            .header-controls { flex-direction: column; width: 100%; }
+            .theme-toggle, .persist-toggle { width: 100%; justify-content: center; }
             .form-grid { grid-template-columns: 1fr; }
             .button-group { flex-direction: column; }
             .btn { width: 100%; justify-content: center; }
@@ -566,10 +580,16 @@
     <div class="container">
         <div class="header">
             <h1>BOM Manager Pro</h1>
-            <button class="theme-toggle" onclick="toggleTheme()">
-                <span id="themeIcon">🌙</span>
-                <span id="themeText">Dark</span>
-            </button>
+            <div class="header-controls">
+                <button class="persist-toggle active" id="persistToggle" onclick="togglePersistence()">
+                    <span id="persistIcon">💾</span>
+                    <span id="persistText">Auto-Save</span>
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeText">Dark</span>
+                </button>
+            </div>
         </div>
 
         <!-- Project Name Section -->
@@ -714,7 +734,7 @@
                     <button class="btn btn-success" onclick="exportToCSV()">📄 CSV</button>
                     <button class="btn btn-success" onclick="exportToXML()">🔖 XML</button>
                     <button class="btn btn-success" onclick="openPDFModal()">📕 PDF</button>
-                    <button class="btn btn-danger" onclick="clearAllComponents()">🗑️ Καθαρισμός</button>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Καθαρισμός Όλων</button>
                 </div>
             </div>
         </div>
@@ -724,15 +744,18 @@
         let bomData = [];
         let componentCounter = 1;
         let darkMode = true;
-        let greekFontLoaded = false;
+        let persistData = true;
+        let fontCache = null; // Cache για το font
 
         async function loadGreekFont() {
-            if (greekFontLoaded) return true;
+            // Χρήση cache για να αποφύγουμε re-download
+            if (fontCache) return fontCache;
+            
             try {
                 const response = await fetch('https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf');
                 const fontBlob = await response.blob();
                 const fontBase64 = await blobToBase64(fontBlob);
-                greekFontLoaded = true;
+                fontCache = fontBase64; // Cache it
                 return fontBase64;
             } catch (error) {
                 console.error('Font error:', error);
@@ -750,40 +773,85 @@
         }
 
         window.onload = function() {
-            const savedData = localStorage.getItem('bomData');
-            const savedTheme = localStorage.getItem('theme');
-            const savedProject = localStorage.getItem('projectName');
+            // Load persistence setting
+            const savedPersist = localStorage.getItem('persistData');
+            persistData = savedPersist !== 'false'; // Default true
             
-            if (savedData) {
-                bomData = JSON.parse(savedData);
-                componentCounter = bomData.length > 0 ? Math.max(...bomData.map(c => c.id)) + 1 : 1;
-                updateTable();
+            if (persistData) {
+                const savedData = localStorage.getItem('bomData');
+                const savedTheme = localStorage.getItem('theme');
+                const savedProject = localStorage.getItem('projectName');
+                
+                if (savedData) {
+                    bomData = JSON.parse(savedData);
+                    componentCounter = bomData.length > 0 ? Math.max(...bomData.map(c => c.id)) + 1 : 1;
+                    updateTable();
+                }
+
+                if (savedProject) {
+                    document.getElementById('projectName').value = savedProject;
+                }
+
+                if (savedTheme === 'light') {
+                    document.body.classList.add('light-mode');
+                    darkMode = false;
+                    updateThemeButton();
+                }
             }
 
-            if (savedProject) {
-                document.getElementById('projectName').value = savedProject;
-            }
-
-            if (savedTheme === 'light') {
-                document.body.classList.add('light-mode');
-                darkMode = false;
-                updateThemeButton();
-            }
+            updatePersistButton();
 
             document.getElementById('xmlFileInput').addEventListener('click', function() {
                 this.value = null;
             });
 
-            // Save project name on change
+            // Save project name on change (only if persist is enabled)
             document.getElementById('projectName').addEventListener('input', function() {
-                localStorage.setItem('projectName', this.value);
+                if (persistData) {
+                    localStorage.setItem('projectName', this.value);
+                }
             });
         };
+
+        function togglePersistence() {
+            persistData = !persistData;
+            localStorage.setItem('persistData', persistData);
+            updatePersistButton();
+            
+            if (persistData) {
+                // Save current state
+                saveData();
+                showNotification('💾 Auto-Save ενεργοποιήθηκε');
+            } else {
+                // Clear all saved data
+                localStorage.removeItem('bomData');
+                localStorage.removeItem('projectName');
+                showNotification('🔓 Auto-Save απενεργοποιήθηκε');
+            }
+        }
+
+        function updatePersistButton() {
+            const btn = document.getElementById('persistToggle');
+            const icon = document.getElementById('persistIcon');
+            const text = document.getElementById('persistText');
+            
+            if (persistData) {
+                btn.classList.add('active');
+                icon.textContent = '💾';
+                text.textContent = 'Auto-Save';
+            } else {
+                btn.classList.remove('active');
+                icon.textContent = '🔓';
+                text.textContent = 'No Save';
+            }
+        }
 
         function toggleTheme() {
             darkMode = !darkMode;
             document.body.classList.toggle('light-mode');
-            localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+            if (persistData) {
+                localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+            }
             updateThemeButton();
             showNotification(darkMode ? '🌙 Dark Mode' : '☀️ Light Mode');
         }
@@ -794,7 +862,9 @@
         }
 
         function saveData() {
-            localStorage.setItem('bomData', JSON.stringify(bomData));
+            if (persistData) {
+                localStorage.setItem('bomData', JSON.stringify(bomData));
+            }
         }
 
         function addComponent() {
@@ -881,14 +951,23 @@
             }
         }
 
-        function clearAllComponents() {
-            if (bomData.length === 0) return alert('Άδεια λίστα!');
-            if (confirm('⚠️ Διαγραφή ΟΛΩΝ;')) {
+        function clearAllData() {
+            if (bomData.length === 0 && !document.getElementById('projectName').value) {
+                return alert('Δεν υπάρχουν δεδομένα!');
+            }
+
+            if (confirm('⚠️ Διαγραφή ΟΛΩΝ των δεδομένων (BOM + Project Name);')) {
                 bomData = [];
                 componentCounter = 1;
-                saveData();
+                document.getElementById('projectName').value = '';
+                
+                if (persistData) {
+                    localStorage.removeItem('bomData');
+                    localStorage.removeItem('projectName');
+                }
+                
                 updateTable();
-                showNotification('🗑️ Καθαρίστηκαν όλα');
+                showNotification('🗑️ Όλα τα δεδομένα διαγράφηκαν');
             }
         }
 
@@ -992,11 +1071,12 @@
                         throw new Error('Invalid XML');
                     }
 
-                    // Import project name if exists
                     const projectNameNode = xmlDoc.getElementsByTagName('projectName')[0];
                     if (projectNameNode) {
                         document.getElementById('projectName').value = projectNameNode.textContent;
-                        localStorage.setItem('projectName', projectNameNode.textContent);
+                        if (persistData) {
+                            localStorage.setItem('projectName', projectNameNode.textContent);
+                        }
                     }
 
                     const components = xmlDoc.getElementsByTagName('component');
@@ -1057,10 +1137,12 @@
 
         async function exportToPDF(orientation) {
             showNotification('⏳ Δημιουργία PDF...');
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF(orientation, 'mm', 'a4');
-
+            
             try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF(orientation, 'mm', 'a4');
+
+                // Load font (cached)
                 const fontBase64 = await loadGreekFont();
                 if (fontBase64) {
                     doc.addFileToVFS('DejaVuSans.ttf', fontBase64);
@@ -1072,20 +1154,16 @@
                 const pageHeight = doc.internal.pageSize.getHeight();
                 const projectName = document.getElementById('projectName').value.trim();
 
-                // Header background
+                // Header
                 doc.setFillColor(240, 242, 245);
                 doc.rect(0, 0, pageWidth, projectName ? 42 : 35, 'F');
                 
-                // Title - με ή χωρίς project name
                 doc.setFontSize(18);
                 doc.setTextColor(15, 23, 42);
                 
                 if (projectName) {
-                    // Μετατροπή project name σε ΚΕΦΑΛΑΙΑ
                     const projectUpper = projectName.toUpperCase();
                     doc.text(`BILL OF MATERIALS`, pageWidth / 2, 13, {align: 'center'});
-                    
-                    // Project name με accent color
                     doc.setFontSize(14);
                     doc.setTextColor(99, 102, 241);
                     doc.text(`PROJECT: ${projectUpper}`, pageWidth / 2, 22, {align: 'center'});
@@ -1094,7 +1172,6 @@
                     doc.text('BILL OF MATERIALS', pageWidth / 2, 15, {align: 'center'});
                 }
                 
-                // Metadata
                 doc.setFontSize(9);
                 doc.setTextColor(100, 116, 139);
                 const metadataY = projectName ? 29 : 22;
@@ -1215,7 +1292,6 @@
                         const totalPages = doc.internal.getNumberOfPages();
                         doc.text(`Σελίδα ${pageNum} από ${totalPages}`, pageWidth / 2, pageHeight - 10, {align: 'center'});
                         
-                        // Footer με project name αν υπάρχει
                         const footerText = projectName ? projectName : 'BOM Manager Pro';
                         doc.text(footerText, pageWidth / 2, pageHeight - 5, {align: 'center'});
                         
@@ -1228,11 +1304,11 @@
                 const fileName = projectName ? `BOM_${projectName}_${orientation}_${new Date().toISOString().split('T')[0]}.pdf` : `BOM_${orientation}_${new Date().toISOString().split('T')[0]}.pdf`;
                 
                 doc.save(fileName);
-                showNotification(`✅ PDF ${orientation === 'portrait' ? 'Portrait' : 'Landscape'} exported!`);
+                showNotification(`✅ PDF exported successfully!`);
                 
             } catch (error) {
                 console.error('PDF Error:', error);
-                showNotification('❌ Σφάλμα PDF');
+                showNotification('❌ Σφάλμα PDF: ' + error.message);
             }
         }
 
