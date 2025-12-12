@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <title>Baofeng Menu Documentation & Frequency Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', Arial, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+    header { 
+      background: #2d3748; 
+      color: #fff; 
+      padding: 20px 15px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    header h1 { 
+      margin: 0; 
+      font-size: 24px; 
+      font-weight: 600;
+    }
+    header p {
+      margin: 5px 0 0 0;
+      font-size: 14px;
+      color: #cbd5e0;
+    }
+    nav {
+      background: #1a202c;
+      padding: 10px 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    nav a {
+      color: #63b3ed;
+      text-decoration: none;
+      margin-right: 15px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    nav a:hover {
+      color: #90cdf4;
+      text-decoration: underline;
+    }
+    main { 
+      padding: 20px 15px 60px 15px; 
+      max-width: 1100px; 
+      margin: auto; 
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .section-header {
+      background: linear-gradient(90deg, #4299e1 0%, #667eea 100%);
+      color: #fff;
+      padding: 12px 15px;
+      margin: 30px 0 15px 0;
+      border-radius: 6px;
+      font-size: 20px;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .intro-box {
+      background: #edf2f7;
+      border-left: 4px solid #4299e1;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    .intro-box strong {
+      color: #2d3748;
+    }
+    .menu-item { 
+      background: #f7fafc; 
+      margin: 10px 0; 
+      padding: 14px 16px; 
+      border-radius: 6px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-left: 4px solid #4299e1;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .menu-item:hover {
+      transform: translateX(3px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .menu-name { 
+      font-weight: 700; 
+      font-size: 17px; 
+      color: #2d3748; 
+      margin-bottom: 3px;
+    }
+    .menu-aka { 
+      font-size: 13px; 
+      color: #718096; 
+      margin-bottom: 8px; 
+      font-style: italic;
+    }
+    .menu-text { 
+      font-size: 14px; 
+      line-height: 1.6; 
+      color: #4a5568;
+      margin: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    table thead {
+      background: #4299e1;
+      color: #fff;
+    }
+    table th, table td {
+      padding: 10px 12px;
+      text-align: left;
+      border: 1px solid #e2e8f0;
+    }
+    table tbody tr:nth-child(even) {
+      background: #f7fafc;
+    }
+    table tbody tr:hover {
+      background: #edf2f7;
+    }
+    .warning-box {
+      background: #fff5f5;
+      border-left: 4px solid #fc8181;
+      padding: 12px 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    .warning-box strong {
+      color: #c53030;
+    }
+    .info-box {
+      background: #e6fffa;
+      border-left: 4px solid #38b2ac;
+      padding: 12px 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    .info-box strong {
+      color: #234e52;
+    }
+    ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    ul li {
+      margin: 5px 0;
+      line-height: 1.5;
+    }
+    footer {
+      background: #2d3748;
+      color: #cbd5e0;
+      text-align: center;
+      padding: 15px;
+      font-size: 13px;
+    }
+    @media (max-width: 600px) {
+      header h1 { font-size: 20px; }
+      .section-header { font-size: 18px; }
+      .menu-item { padding: 10px 12px; }
+      .menu-name { font-size: 15px; }
+      nav a { font-size: 12px; margin-right: 10px; }
+      table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📡 Baofeng – Πλήρης Οδηγός Menu & Συχνοτήτων</h1>
+  <p>Αναλυτική τεκμηρίωση για όλα τα menu settings, PMR446, VHF/UHF μπάντες και νομική χρήση</p>
+</header>
+
+<nav>
+  <a href="#intro">Εισαγωγή</a>
+  <a href="#txp-antenna">Ισχύς & Κεραία</a>
+  <a href="#menu-settings">Menu Settings</a>
+  <a href="#pmr446">PMR446 Κανάλια</a>
+  <a href="#bands">VHF/UHF Μπάντες</a>
+  <a href="#legal">Νομικά</a>
+</nav>
+
+<main>
+
+<!-- ΕΙΣΑΓΩΓΗ -->
+<div id="intro" class="intro-box">
+  <strong>Σημαντικό:</strong> Η κεραία έχει σταθερό κέρδος που δεν μπορεί να αλλάξει μέσω menu. Η μόνη ρύθμιση που επηρεάζει την εκπεμπόμενη ισχύ είναι το <strong>TXP (Transmit Power)</strong>. Για πραγματική βελτίωση εμβέλειας χρειάζεται καλύτερη κεραία ή σωστή τοποθέτηση (ύψος, ανοιχτός χώρος).
+</div>
+
+<!-- ΙΣΧΥΣ & ΚΕΡΑΙΑ -->
+<div class="section-header" id="txp-antenna">⚡ Ισχύς Πομπού & Κεραία</div>
+
+<div class="info-box">
+  <strong>TXP (Transmit Power):</strong> Η μόνη ρύθμιση που αλλάζει την ακτινοβολούμενη ισχύ.
+  <ul>
+    <li><strong>HIGH:</strong> Συνήθως 4–5 W (ανάλογα μοντέλο)</li>
+    <li><strong>LOW:</strong> Συνήθως 1 W</li>
+  </ul>
+  Χρησιμοποίησε LOW για μικρές αποστάσεις (εξοικονόμηση μπαταρίας, λιγότερες παρεμβολές) και HIGH μόνο όταν χρειάζεται μεγαλύτερη εμβέλεια.
+</div>
+
+<div class="warning-box">
+  <strong>Κεραία:</strong> Το gain της κεραίας δεν ελέγχεται από menu. Για βελτίωση:
+  <ul>
+    <li>Αντικατάστησε με κεραία υψηλότερου gain (π.χ. telescopic ή εξωτερική)</li>
+    <li>Τοποθέτησε το μηχάνημα σε ύψος (λόφος, ταράτσα)</li>
+    <li>Απόφυγε κτίρια και εμπόδια</li>
+  </ul>
+</div>
+
+<!-- MENU SETTINGS -->
+<div class="section-header" id="menu-settings">⚙️ Αναλυτικά Menu Settings</div>
+
+<section class="menu-item" id="sql">
+  <div class="menu-name">SQL (Squelch)</div>
+  <div class="menu-aka">Ρύθμιση φίλτρου θορύβου λήψης</div>
+  <p class="menu-text">
+    Καθορίζει το επίπεδο σήματος πάνω από το οποίο ανοίγει ο δέκτης και ακούς ήχο. Μικρή τιμή (0-2) ανοίγει πιο εύκολα (περισσότερος θόρυβος), μεγάλη τιμή (7-9) απαιτεί πιο δυνατό σήμα (λιγότερος θόρυβος αλλά μπορεί να «κόβει» αδύνατα σήματα). Συνήθως ρύθμιση 3-5 είναι ισορροπημένη.
+  </p>
+</section>
+
+<section class="menu-item" id="reset-all">
+  <div class="menu-name">RESET ALL</div>
+  <div class="menu-aka">Επαναφορά εργοστασιακών ρυθμίσεων</div>
+  <p class="menu-text">
+    Διαγράφει όλες τις αποθηκευμένες συχνότητες, ρυθμίσεις και προσωπικά δεδομένα και επαναφέρει το μηχάνημα στην default κατάσταση εργοστασίου. Χρησιμοποίησε μόνο αν θέλεις πλήρη καθαρισμό από λάθος ρυθμίσεις ή προβλήματα λειτουργίας.
+  </p>
+</section>
+
+<section class="menu-item" id="roger">
+  <div class="menu-name">ROGER (ROGER OFF/ON)</div>
+  <div class="menu-aka">Roger Beep στο τέλος εκπομπής</div>
+  <p class="menu-text">
+    Ενεργοποιεί ή απενεργοποιεί έναν ήχο (beep) που στέλνεται όταν αφήνεις το PTT. Χρησιμοποιείται για να ξέρει ο συνομιλητής ότι τελείωσε η μετάδοση (σαν το «over» στις επικοινωνίες), αλλά σε πολλά δίκτυα θεωρείται ενοχλητικό. Συνήθως: OFF.
+  </p>
+</section>
+
+<section class="menu-item" id="ponmgs">
+  <div class="menu-name">PONMGS (Power-On Message)</div>
+  <div class="menu-aka">Μήνυμα εκκίνησης</div>
+  <p class="menu-text">
+    Ρυθμίζει τι εμφανίζεται στην οθόνη όταν ανοίγει το μηχάνημα: λογότυπο εργοστασίου, συχνότητα, custom κείμενο ή τίποτα. Καθαρά αισθητική/ενημερωτική ρύθμιση χωρίς επίδραση στη λήψη ή στην εκπομπή. Επιλογές: FULL (λογότυπο), MSG (κείμενο), VOL (ένταση).
+  </p>
+</section>
+
+<section class="menu-item" id="rpt-rl">
+  <div class="menu-name">RPT-RL (Repeater Related)</div>
+  <div class="menu-aka">Παράμετροι σχετικές με αναμεταδότες</div>
+  <p class="menu-text">
+    Σχετίζεται με τον τρόπο που το μηχάνημα χειρίζεται το σήμα αναμεταδοτών (π.χ. χρονισμοί tail tone, συμπεριφορά shift). Συνήθως OFF για simplex και ON όταν συνδέεσαι σε repeater που απαιτεί ειδικούς χειρισμούς σηματοδοσίας.
+  </p>
+</section>
+
+<section class="menu-item" id="pr-ste">
+  <div class="menu-name">PR-STE (Pre-End of Transmission Squelch Tail Elimination)</div>
+  <div class="menu-aka">Μείωση «ουράς» θορύβου στο τέλος εκπομπής</div>
+  <p class="menu-text">
+    Ενεργοποιεί ειδικό τόνο/χειρισμό λίγο πριν το τέλος της εκπομπής για να μειώσει τον χαρακτηριστικό θόρυβο (squelch tail) όταν κλείνει το squelch στον συνομιλητή. Χρήσιμο σε επικοινωνίες με αναμεταδότες και τερματικά που υποστηρίζουν την ίδια λειτουργία. Συνδυάζεται με STE.
+  </p>
+</section>
+
+<section class="menu-item" id="ste">
+  <div class="menu-name">STE (Squelch Tail Elimination)</div>
+  <div class="menu-aka">Καταστολή θορύβου στο τέλος λήψης</div>
+  <p class="menu-text">
+    Στέλνει/αναγνωρίζει ειδικό «turn-off» τόνο (συνήθως 55 Hz ή 134 Hz) στο τέλος εκπομπής ώστε να αποφεύγεται ο χαρακτηριστικός «κρότος» όταν κλείνει ο δέκτης. Μπορεί να χρειάζεται ενεργό (ON) για ομαλή λειτουργία με συγκεκριμένα repeater ή άλλα Baofeng. Επιλογές: OFF / 55Hz / 134Hz.
+  </p>
+</section>
+
+<section class="menu-item" id="tdr-ab">
+  <div class="menu-name">TDR-AB</div>
+  <div class="menu-aka">Κανάλι προτεραιότητας όταν είναι ενεργό το TDR</div>
+  <p class="menu-text">
+    Όταν το μηχάνημα παρακολουθεί δύο συχνότητες ταυτόχρονα (dual watch/TDR), αυτή η ρύθμιση ορίζει ποιο από τα δύο κανάλια (Α ή Β) έχει προτεραιότητα ή εμφανίζεται στην οθόνη για εκπομπή όταν ανιχνευθεί σήμα. Επιλογές: A, B, OFF.
+  </p>
+</section>
+
+<section class="menu-item" id="band">
+  <div class="menu-name">BAND</div>
+  <div class="menu-aka">Επιλογή εύρους συχνοτήτων</div>
+  <p class="menu-text">
+    Επιλέγει σε ποια μπάντα δουλεύει η συγκεκριμένη θέση κάθε στιγμή (VHF: 136-174 MHz ή UHF: 400-520 MHz). Επηρεάζει τη συχνότητα που μπορείς να εισάγεις και να αποθηκεύσεις σε αυτό το κανάλι. Αλλαγή μπάντας γίνεται και με πάτημα BAND button.
+  </p>
+</section>
+
+<section class="menu-item" id="al-mod">
+  <div class="menu-name">AL-MOD (Alert Mode)</div>
+  <div class="menu-aka">Λειτουργία συναγερμού</div>
+  <p class="menu-text">
+    Ορίζει πώς λειτουργεί ο ενσωματωμένος συναγερμός (alarm) όταν ενεργοποιηθεί από το side button: SITE (μόνο τοπικό ηχείο), TONE (αποστολή τόνου εκπομπής), CODE (αποστολή DTMF κωδικού), ή συνδυασμός. Συνήθως χρησιμοποιείται για SOS/alert λειτουργίες σε οργανωμένες ομάδες.
+  </p>
+</section>
+
+<section class="menu-item" id="tx-led">
+  <div class="menu-name">TX-LED</div>
+  <div class="menu-aka">Χρώμα LED κατά την εκπομπή</div>
+  <p class="menu-text">
+    Ρυθμίζει το χρώμα ή τη συμπεριφορά του LED όταν το μηχάνημα εκπέμπει (RED, GREEN, BLUE ανάλογα μοντέλο). Καθαρά οπτική ένδειξη για να βλέπεις αν μεταδίδεις χωρίς να κοιτάς την οθόνη.
+  </p>
+</section>
+
+<section class="menu-item" id="rx-led">
+  <div class="menu-name">RX-LED</div>
+  <div class="menu-aka">Χρώμα LED κατά τη λήψη</div>
+  <p class="menu-text">
+    Ορίζει το χρώμα/λειτουργία του LED όταν λαμβάνεται σήμα. Σε συνδυασμό με άλλες ενδείξεις (TX-LED, WT-LED) βοηθάει στην γρήγορη οπτική αναγνώριση κατάστασης χωρίς να κοιτάς το display.
+  </p>
+</section>
+
+<section class="menu-item" id="wt-led">
+  <div class="menu-name">WT-LED (Standby/Waiting LED)</div>
+  <div class="menu-aka">Χρώμα LED σε αναμονή</div>
+  <p class="menu-text">
+    Ρυθμίζει πώς φωτίζεται το LED όταν το μηχάνημα είναι σε αναμονή (ούτε λήψη ούτε εκπομπή). Χρήσιμο για να ξεχωρίζεις καταστάσεις με μια ματιά, ειδικά σε σκοτεινό περιβάλλον ή όταν έχεις πολλαπλά μηχανήματα.
+  </p>
+</section>
+
+<section class="menu-item" id="del-ch">
+  <div class="menu-name">DEL-CH (Delete Channel)</div>
+  <div class="menu-aka">Διαγραφή καναλιού μνήμης</div>
+  <p class="menu-text">
+    Διαγράφει τη συχνότητα και τις παραμέτρους από συγκεκριμένη θέση μνήμης (memory slot). Χρήσιμο όταν θέλεις να «ελευθερώσεις» ή να αναδιοργανώσεις κανάλια. Προσοχή: Η διαγραφή είναι μόνιμη, δεν υπάρχει undo.
+  </p>
+</section>
+
+<section class="menu-item" id="mem-ch">
+  <div class="menu-name">MEM-CH (Memory Channel)</div>
+  <div class="menu-aka">Αποθήκευση/επιλογή καναλιού μνήμης</div>
+  <p class="menu-text">
+    Χρησιμοποιείται για να αποθηκεύσεις την τρέχουσα συχνότητα και τις ρυθμίσεις της (CTCSS, DCS, offset, power κ.λπ.) σε μια θέση μνήμης (1-128 ανάλογα μοντέλο) ή για να δεις/διαχειριστείς υπάρχοντα κανάλια. Διευκολύνει γρήγορη εναλλαγή σε αποθηκευμένες συχνότητες.
+  </p>
+</section>
+
+<section class="menu-item" id="offset">
+  <div class="menu-name">OFFSET</div>
+  <div class="menu-aka">Διαφορά συχνότητας για αναμεταδότη</div>
+  <p class="menu-text">
+    Καθορίζει το μέγεθος της μετατόπισης (σε MHz) μεταξύ συχνότητας λήψης και εκπομπής όταν χρησιμοποιείς repeater. Συνήθεις τιμές: +0.600 MHz (VHF 2m), +5.000 MHz (UHF 70cm) ανάλογα το δίκτυο. Συνδυάζεται με το SFT-D για να ορίσει αν η μετατόπιση είναι θετική (+) ή αρνητική (-).
+  </p>
+</section>
+
+<section class="menu-item" id="sft-d">
+  <div class="menu-name">SFT-D (Shift Direction)</div>
+  <div class="menu-aka">Κατεύθυνση μετατόπισης αναμεταδότη</div>
+  <p class="menu-text">
+    Επιλέγει εάν η συχνότητα εκπομπής θα είναι +OFFSET (θετική μετατόπιση), -OFFSET (αρνητική) ή OFF (simplex, δεν υπάρχει μετατόπιση, λήψη=εκπομπή) σε σχέση με τη συχνότητα λήψης. Απαραίτητο για σωστή λειτουργία σε repeater. Παράδειγμα: λήψη 145.000, SFT-D=+, OFFSET=0.600 → εκπομπή 145.600.
+  </p>
+</section>
+
+<section class="menu-item" id="autolock">
+  <div class="menu-name">AUTOLOCK</div>
+  <div class="menu-aka">Αυτόματο κλείδωμα πληκτρολογίου</div>
+  <p class="menu-text">
+    Όριζει αν και μετά από πόσο χρόνο θα κλειδώνει αυτόματα το πληκτρολόγιο για να αποφεύγονται κατά λάθος πατήματα πλήκτρων (π.χ. στην τσέπη). Επιλογές συνήθως: OFF, 5s, 10s, 15s. Για χειροκίνητο lock/unlock: πάτα # button.
+  </p>
+</section>
+
+<section class="menu-item" id="bcl">
+  <div class="menu-name">BCL (Busy Channel Lockout)</div>
+  <div class="menu-aka">Απαγόρευση εκπομπής σε κατειλημμένο κανάλι</div>
+  <p class="menu-text">
+    Όταν είναι ON, δεν επιτρέπει εκπομπή (πάτημα PTT) αν το κανάλι έχει ήδη σήμα από άλλον σταθμό. Χρήσιμο για να αποφεύγεις να κόβεις άλλους που μιλάνε (ιδίως σε δίκτυα με πολλούς χρήστες ή σε ομαδική λειτουργία). Συνήθως OFF για simplex, ON για shared channels.
+  </p>
+</section>
+
+<section class="menu-item" id="mdf-b">
+  <div class="menu-name">MDF-B (Display Format B)</div>
+  <div class="menu-aka">Τύπος εμφάνισης για την κάτω γραμμή (B)</div>
+  <p class="menu-text">
+    Ρυθμίζει αν θα εμφανίζεται συχνότητα (FREQ), όνομα καναλιού (NAME) ή αριθμός καναλιού (CH) στη θέση Β της οθόνης (dual display). Βοηθά στην καλύτερη οργάνωση και αναγνώριση καναλιών. Συνήθως FREQ για VFO mode, NAME/CH για Memory mode.
+  </p>
+</section>
+
+<section class="menu-item" id="mdf-a">
+  <div class="menu-name">MDF-A (Display Format A)</div>
+  <div class="menu-aka">Τύπος εμφάνισης για την πάνω γραμμή (A)</div>
+  <p class="menu-text">
+    Αντίστοιχη ρύθμιση με την MDF-B αλλά για την πάνω περιοχή (κανάλι A). Μπορείς να έχεις π.χ. όνομα καναλιού στο A και συχνότητα στο B για καλύτερη επισκόπηση. Ανεξάρτητη ρύθμιση για κάθε display line.
+  </p>
+</section>
+
+<section class="menu-item" id="ptt-lt">
+  <div class="menu-name">PTT-LT (PTT Lead Time)</div>
+  <div class="menu-aka">Καθυστέρηση πριν ακουστεί η φωνή</div>
+  <p class="menu-text">
+    Ορίζει μικρή χρονική καθυστέρηση (συνήθως 50-200 ms) από τη στιγμή που πατάς PTT μέχρι να ξεκινήσει η μετάδοση φωνής, ώστε να προλάβουν να σταλούν τόνοι (CTCSS/DCS/DTMF) στην αρχή. Χρήσιμο σε δίκτυα με αναμεταδότες που χρειάζονται χρόνο να «ανοίξουν». Συνήθως 100-150ms.
+  </p>
+</section>
+
+<section class="menu-item" id="ptt-id">
+  <div class="menu-name">PTT-ID</div>
+  <div class="menu-aka">Αποστολή αναγνωριστικού (ANI/DTMF) με το PTT</div>
+  <p class="menu-text">
+    Ρυθμίζει αν/πότε θα στέλνει το μηχάνημα έναν κωδικό ταυτοποίησης (ANI-ID, συνήθως DTMF) όταν πατάς ή αφήνεις το PTT. Επιλογές: OFF, BOT (begin of transmission), EOT (end), BOTH. Χρησιμοποιείται σε συστήματα όπου κάθε σταθμός έχει μοναδικό ID για logging ή access control.
+  </p>
+</section>
+
+<section class="menu-item" id="sc-rev">
+  <div class="menu-name">SC-REV (Scan Resume)</div>
+  <div class="menu-aka">Συμπεριφορά σάρωσης μετά από εύρεση σήματος</div>
+  <p class="menu-text">
+    Καθορίζει αν η σάρωση θα συνεχίσει, θα σταματήσει ή θα περιμένει λίγα δευτερόλεπτα μετά το τέλος της λήψης. Επιλογές: TO (time-operated: περιμένει 5s και συνεχίζει), CO (carrier-operated: συνεχίζει μόλις χαθεί το σήμα), SE (search: σταματά στο κανάλι). Συνήθως TO για γενική σάρωση.
+  </p>
+</section>
+
+<section class="menu-item" id="s-code">
+  <div class="menu-name">S-CODE</div>
+  <div class="menu-aka">Προκαθορισμένοι DTMF / σήματα ID</div>
+  <p class="menu-text">
+    Επιλέγει έναν από τους προκαθορισμένους κωδικούς (DTMF sequences, 1-15) που μπορούν να σταλούν ως ID ή για remote λειτουργίες (π.χ. ενεργοποίηση repeater, remote stun/kill). Συνδέεται με DTMFST και ANI-ID. Προγραμματισμός κωδικών γίνεται από PC software.
+  </p>
+</section>
+
+<section class="menu-item" id="dtmfst">
+  <div class="menu-name">DTMFST (DTMF Side Tone)</div>
+  <div class="menu-aka">Ακουστός ήχος DTMF στο ηχείο</div>
+  <p class="menu-text">
+    Ορίζει αν θα ακούς τους DTMF τόνους (beep-beep) από το ηχείο όταν πατιούνται ή μεταδίδονται. Επιλογές: OFF (σίγαση), DT-ST (ακούς μόνο όταν πατάς keypad), ANI-ST (ακούς ANI ID), DT+ANI (ακούς και τα δύο). Χρήσιμο για επιβεβαίωση επιλογής ή για να μην ακούγονται καθόλου για stealth.
+  </p>
+</section>
+
+<section class="menu-item" id="ani-id">
+  <div class="menu-name">ANI-ID</div>
+  <div class="menu-aka">Αναγνωριστικό σταθμού για PTT-ID</div>
+  <p class="menu-text">
+    Καθορίζει τον αριθμητικό κωδικό (συνήθως 3-6 ψηφία DTMF) που εκπέμπεται ως ID όταν ενεργοποιηθεί η λειτουργία PTT-ID. Χρήσιμο σε οργανωμένα δίκτυα, επαγγελματικές εφαρμογές, ή ομάδες που χρειάζονται αναγνώριση σταθμού. Παράδειγμα: 12345.
+  </p>
+</section>
+
+<section class="menu-item" id="voice">
+  <div class="menu-name">VOICE</div>
+  <div class="menu-aka">Φωνητική καθοδήγηση μενού</div>
+  <p class="menu-text">
+    Ενεργοποιεί/απενεργοποιεί φωνητικά μηνύματα (συνήθως στα αγγλικά ή κινέζικα) που ανακοινώνουν νούμερα menu, συχνότητες και καταστάσεις. Επιλογές: OFF, CHINESE, ENGLISH. Χρήσιμο στην αρχή για εκμάθηση, αλλά πολλοί το κλείνουν (OFF) για ησυχία και ταχύτερη λειτουργία.
+  </p>
+</section>
+
+<section class="menu-item" id="t-ctcs">
+  <div class="menu-name">T-CTCS</div>
+  <div class="menu-aka">CTCSS τόνος στην εκπομπή</div>
+  <p class="menu-text">
+    Ρυθμίζει τον συνεχόμενο υποηχητικό τόνο (Continuous Tone-Coded Squelch System, 67-254 Hz) που στέλνεται με την εκπομπή, ώστε να ανοίγουν squelch αναμεταδότες ή άλλοι δέκτες που απαιτούν συγκεκριμένο PL (Private Line) τόνο. Συνήθως OFF για simplex χωρίς φιλτράρισμα, ή επιλογή συγκεκριμένου τόνου (π.χ. 88.5 Hz) για repeater access.
+  </p>
+</section>
+
+<section class="menu-item" id="t-dcs">
+  <div class="menu-name">T-DCS</div>
+  <div class="menu-aka">DCS κωδικός στην εκπομπή</div>
+  <p class="menu-text">
+    Επιλέγει ψηφιακό κωδικό αναγνώρισης (Digital-Coded Squelch, 23-754) που στέλνεται στην εκπομπή, αντί για αναλογικό CTCSS. Χρησιμοποιείται σε δίκτυα/αναμεταδότες που λειτουργούν με DCS (συνήθως πιο «σιωπηλό» και λιγότερο επιρρεπές σε ψευδείς ανοίγματα από θόρυβο). Συνήθως OFF ή κωδικός όπως D023N / D023I (N=normal, I=inverted).
+  </p>
+</section>
+
+<section class="menu-item" id="r-ctcs">
+  <div class="menu-name">R-CTCS</div>
+  <div class="menu-aka">CTCSS τόνος στη λήψη</div>
+  <p class="menu-text">
+    Ορίζει ότι το μηχάνημα θα ανοίγει σίγαση (squelch) μόνο όταν ληφθεί συγκεκριμένος CTCSS τόνος. Φιλτράρει άλλες εκπομπές στο ίδιο κανάλι χωρίς τον σωστό τόνο (selective calling). Χρήσιμο σε πολυσύχναστα κανάλια για να ακούς μόνο την ομάδα σου. Συνήθως OFF ή ίδιος τόνος με T-CTCS.
+  </p>
+</section>
+
+<section class="menu-item" id="r-dcs">
+  <div class="menu-name">R-DCS</div>
+  <div class="menu-aka">DCS κωδικός στη λήψη</div>
+  <p class="menu-text">
+    Αντίστοιχο με το R-CTCS αλλά για ψηφιακούς DCS κωδικούς. Η λήψη ανοίγει μόνο αν ο εισερχόμενος κωδικός ταιριάζει με τον επιλεγμένο DCS (π.χ. D023N). Πιο αξιόπιστο από CTCSS για φιλτράρισμα θορύβου και παρεμβολών. Συνήθως OFF ή ίδιος κωδικός με T-DCS.
+  </p>
+</section>
+
+<section class="menu-item" id="tot">
+  <div class="menu-name">TOT (Time-Out Timer)</div>
+  <div class="menu-aka">Μέγιστη διάρκεια συνεχούς εκπομπής</div>
+  <p class="menu-text">
+    Περιορίζει τον χρόνο που μπορείς να κρατήσεις πατημένο το PTT συνεχόμενα (π.χ. 15-600 δευτερόλεπτα). Προστατεύει τον πομπό από υπερθέρμανση και αποτρέπει κατά λάθος συνεχόμενη εκπομπή (π.χ. PTT κολλημένο). Μετά το όριο, το μηχάνημα κόβει την εκπομπή και βγάζει beep. Συνήθης τιμή: 60-180s. OFF=απενεργοποίηση.
+  </p>
+</section>
+
+<section class="menu-item" id="beep">
+  <div class="menu-name">BEEP</div>
+  <div class="menu-aka">Ήχος πλήκτρων</div>
+  <p class="menu-text">
+    Ενεργοποιεί ή απενεργοποιεί το beep όταν πατιούνται πλήκτρα ή επιβεβαιώνονται επιλογές στο menu. Καθαρά θέμα προτίμησης: ON για επιβεβαίωση πατήματος, OFF για σιωπηλή λειτουργία (stealth, νυχτερινή χρήση). Δεν επηρεάζει beeps συστήματος (low battery, TOT κ.λπ.).
+  </p>
+</section>
+
+<section class="menu-item" id="tdr">
+  <div class="menu-name">TDR (Dual Watch / Dual Standby)</div>
+  <div class="menu-aka">Παρακολούθηση δύο καναλιών</div>
+  <p class="menu-text">
+    Όταν είναι ON, το μηχάνημα παρακολουθεί εναλλάξ δύο συχνότητες/κανάλια (A και B) και σταματά σε όποιο έχει σήμα πρώτο. Χρήσιμο για να ακούς π.χ. τοπικό repeater και διεθνή κλήση ταυτόχρονα. Συνδυάζεται με TDR-AB για να ορίσεις ποιο κανάλι έχει προτεραιότητα για εκπομπή. OFF=μονό κανάλι.
+  </p>
+</section>
+
+<section class="menu-item" id="abr">
+  <div class="menu-name">ABR (Backlight Auto-Off)</div>
+  <div class="menu-aka">Χρόνος σβησίματος φωτισμού οθόνης</div>
+  <p class="menu-text">
+    Ρυθμίζει μετά από πόσο χρόνο αδράνειας σβήνει ο φωτισμός (backlight) της οθόνης. Επιλογές: OFF (πάντα σβηστό), ON (πάντα ανοιχτό), 5s, 10s, 20s, 30s. Μικρός χρόνος εξοικονομεί μπαταρία (σημαντικό για portable χρήση), μεγάλος ή ON προσφέρει καλύτερη ορατότητα σε σκοτεινές συνθήκες. Συνήθης: 10s.
+  </p>
+</section>
+
+<section class="menu-item" id="wn">
+  <div class="menu-name">WN (Wide/Narrow Bandwidth)</div>
+  <div class="menu-aka">Εύρος ζώνης εκπομπής/λήψης</div>
+  <p class="menu-text">
+    Επιλογή μεταξύ WIDE (25 kHz deviation, πιο ευρύ φάσμα, καλύτερος ήχος αλλά μεγαλύτερη κατάληψη ζώνης) και NARROW (12.5 kHz, στενότερη ζώνη σύμφωνα με σύγχρονες προδιαγραφές FCC/ETSI). Πολλοί repeater και επαγγελματικά δίκτυα απαιτούν NARROW. PMR446 είναι αποκλειστικά NARROW. Συνήθως: NARROW για VHF/UHF δίκτυα, WIDE για simplex με καλύτερο ήχο.
+  </p>
+</section>
+
+<section class="menu-item" id="vox">
+  <div class="menu-name">VOX</div>
+  <div class="menu-aka">Φωνητική ενεργοποίηση εκπομπής</div>
+  <p class="menu-text">
+    Καθορίζει ευαισθησία VOX (Voice-Operated Transmit, επίπεδα 1-10), δηλαδή αν η εκπομπή θα ξεκινά αυτόματα όταν ανιχνευθεί φωνή στο μικρόφωνο χωρίς πάτημα PTT. Χρήσιμο για hands-free λειτουργία (π.χ. με headset). Θέλει προσεκτική ρύθμιση για να μη στέλνει θορύβους περιβάλλοντος. OFF=απενεργοποίηση, 1=χαμηλότερη ευαισθησία, 10=υψηλότερη.
+  </p>
+</section>
+
+<section class="menu-item" id="save">
+  <div class="menu-name">SAVE (Battery Saver)</div>
+  <div class="menu-aka">Εξοικονόμηση ενέργειας δέκτη</div>
+  <p class="menu-text">
+    Ρυθμίζει πόσο επιθετικά ενεργοποιείται το power-saving στο δέκτη (κύκλοι on/off για να μειώσει κατανάλωση). Επιλογές: OFF, 1:1, 1:2, 1:3, 1:4. Μεγαλύτερες τιμές (π.χ. 1:4) μειώνουν περισσότερο κατανάλωση αλλά μπορεί να προσθέτουν μικρή καθυστέρηση (100-200ms) στην έναρξη λήψης και να χάνεις αρχή μηνυμάτων. Συνήθης: OFF για base station, 1:1 ή 1:2 για portable.
+  </p>
+</section>
+
+<section class="menu-item" id="txp">
+  <div class="menu-name">TXP (Transmit Power)</div>
+  <div class="menu-aka">Ισχύς εκπομπής (LOW/HIGH)</div>
+  <p class="menu-text">
+    Επιλέγει το επίπεδο ισχύος πομπού. Επιλογές: LOW (συνήθως ~1 W), HIGH (συνήθως 4-5 W ανάλογα το μοντέλο). Για μικρές αποστάσεις (&lt;5 km) προτίμησε LOW για να κρατάς μπαταρία, να μειώνεις θερμοκρασία πομπού και να περιορίζεις παρεμβολές σε άλλους. HIGH μόνο όπου χρειάζεται καλύτερη εμβέλεια ή σε δύσκολες συνθήκες διάδοσης (κτίρια, λόφοι). <strong>Σημαντικό:</strong> Αυτή είναι η μόνη ρύθμιση που επηρεάζει την εκπεμπόμενη ισχύ.
+  </p>
+</section>
+
+<section class="menu-item" id="step">
+  <div class="menu-name">STEP (Frequency Step)</div>
+  <div class="menu-aka">Βήμα αλλαγής συχνότητας</div>
+  <p class="menu-text">
+    Ορίζει τα βήματα (σε kHz) με τα οποία αλλάζει η συχνότητα όταν χρησιμοποιείς τα πλήκτρα UP/DOWN στο VFO mode. Επιλογές: 2.5, 5, 6.25, 10, 12.5, 25, 50 kHz. Πρέπει να ταιριάζει με το channel spacing της μπάντας που δουλεύεις. Παραδείγματα: PMR446=12.5 kHz, Marine VHF=25 kHz, Amateur 2m=5 kHz ή 12.5 kHz. Συνήθης: 12.5 kHz για VHF/UHF.
+  </p>
+</section>
+
+<!-- PMR446 SECTION -->
+<div class="section-header" id="pmr446">📻 PMR446 – Κανάλια & Χαρακτηριστικά</div>
+
+<div class="intro-box">
+  <strong>PMR446 (Personal Mobile Radio 446 MHz)</strong> είναι το κύριο license-free UHF δίκτυο στην Ευρώπη (συμπεριλαμβανομένης της Ελλάδας). Επιτρέπει επικοινωνία χωρίς άδεια με συγκεκριμένους περιορισμούς.
+</div>
+
+<h3>Τεχνικά Χαρακτηριστικά</h3>
+<ul>
+  <li><strong>Εύρος Συχνοτήτων:</strong> 446.0–446.2 MHz (UHF)</li>
+  <li><strong>Κανάλια Analogue FM:</strong> 16 (channel spacing 12.5 kHz)</li>
+  <li><strong>Μέγιστη Ισχύς:</strong> 500 mW ERP (0.5 W)</li>
+  <li><strong>Κεραία:</strong> Μόνο ενσωματωμένη (non-detachable), απαγορεύεται εξωτερική</li>
+  <li><strong>Bandwidth:</strong> NARROW (12.5 kHz) – υποχρεωτικό</li>
+  <li><strong>Εμβέλεια:</strong> 500 m – 2 km (αστική περιοχή), 3-5 km (ανοιχτός χώρος, ιδανικές συνθήκες)</li>
+  <li><strong>Πρωτόκολλα:</strong> Analogue FM, DMR Tier 1, dPMR446</li>
+</ul>
+
+<h3>Πίνακας Καναλιών PMR446 (Analogue)</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Κανάλι</th>
+      <th>Συχνότητα (MHz)</th>
+      <th>Χρήση / Σημειώσεις</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>446.00625</td><td>Emergency / Truckers / Baby monitor</td></tr>
+    <tr><td>2</td><td>446.01875</td><td>Geocaching / Camping</td></tr>
+    <tr><td>3</td><td>446.03125</td><td>Preppers / Bicycle groups</td></tr>
+    <tr><td>4</td><td>446.04375</td><td>Drones / 4WD / Boating</td></tr>
+    <tr><td>5</td><td>446.05625</td><td>Scouts / Youth groups</td></tr>
+    <tr><td>6</td><td>446.06875</td><td>Events / Hunters / Security</td></tr>
+    <tr><td>7</td><td>446.08125</td><td>Mountain safety (Spain)</td></tr>
+    <tr><td>8</td><td>446.09375</td><td><strong>DX & Calling / Distress</strong> (κύριο κανάλι κλήσης)</td></tr>
+    <tr><td>9</td><td>446.10625</td><td>Digital calling (DMR) / Airsoft</td></tr>
+    <tr><td>10</td><td>446.11875</td><td>Fox hunting / Direction finding</td></tr>
+    <tr><td>11</td><td>446.13125</td><td>Γενική χρήση</td></tr>
+    <tr><td>12</td><td>446.14375</td><td>Γενική χρήση</td></tr>
+    <tr><td>13</td><td>446.15625</td><td>Γενική χρήση</td></tr>
+    <tr><td>14</td><td>446.16875</td><td>Γενική χρήση</td></tr>
+    <tr><td>15</td><td>446.18125</td><td>Γενική χρήση</td></tr>
+    <tr><td>16</td><td>446.19375</td><td>Γενική χρήση</td></tr>
+  </tbody>
+</table>
+
+<div class="info-box">
+  <strong>Κανάλι 8 (446.09375 MHz)</strong> θεωρείται το διεθνές «calling channel» για PMR446, όπως το 146.520 MHz για VHF amateur. Χρησιμοποίησε το για αρχική επαφή και μετά μετακίνησε τη συζήτηση σε άλλο κανάλι.
+</div>
+
+<h3>Ψηφιακά PMR446</h3>
+<ul>
+  <li><strong>DMR Tier 1:</strong> 16 κανάλια (446.103125–446.196875 MHz, 6.25 kHz spacing), επιτρέπει έως 32 talk groups με TDMA</li>
+  <li><strong>dPMR446:</strong> Παρόμοιο με DMR, 6.25 kHz spacing</li>
+  <li>Ψηφιακά πρωτόκολλα προσφέρουν καλύτερη ποιότητα ήχου σε αδύνατα σήματα και περισσότερα κανάλια, αλλά χρειάζονται συμβατά μηχανήματα</li>
+</ul>
+
+<div class="warning-box">
+  <strong>Baofeng & PMR446:</strong> Τα περισσότερα Baofeng (UV-5R, BF-F8HP κ.λπ.) <strong>ΔΕΝ είναι νόμιμα για PMR446</strong> γιατί:
+  <ul>
+    <li>Έχουν αποσπώμενη κεραία (illegal για PMR446)</li>
+    <li>Υπερβαίνουν τα 500 mW (HIGH mode ~4-5 W)</li>
+    <li>Δεν έχουν πιστοποίηση CE για PMR446</li>
+  </ul>
+  Για νόμιμη χρήση PMR446 χρειάζονται <strong>πιστοποιημένα PMR446 radios</strong> (π.χ. Midland, Motorola TLKR, Baofeng BF-T1 Mini).
+</div>
+
+<!-- BANDS SECTION -->
+<div class="section-header" id="bands">📡 Μπάντες VHF/UHF & Ραδιοερασιτεχνισμός</div>
+
+<h3>Κύριες Μπάντες Συχνοτήτων</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Μπάντα</th>
+      <th>Εύρος</th>
+      <th>Χρήση</th>
+      <th>Άδεια</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>HF</strong><br>(High Frequency)</td>
+      <td>3–30 MHz</td>
+      <td>Μεγάλες αποστάσεις (DX), ionospheric propagation<br>CB: 26.965–27.405 MHz (40 ch)</td>
+      <td>CB: Όχι (πολλές χώρες)<br>Amateur: Ναι</td>
+    </tr>
+    <tr>
+      <td><strong>VHF</strong><br>(Very High Frequency)</td>
+      <td>30–300 MHz</td>
+      <td>Τοπικές επικοινωνίες, line-of-sight<br><strong>2m band:</strong> 144–146 MHz (amateur)<br>Marine: 156–162 MHz<br>Airband: 118–137 MHz</td>
+      <td>Amateur: Ναι<br>Marine/Air: Ειδική άδεια</td>
+    </tr>
+    <tr>
+      <td><strong>UHF</strong><br>(Ultra High Frequency)</td>
+      <td>300–3000 MHz</td>
+      <td>Αστικές επικοινωνίες, repeater<br><strong>70cm band:</strong> 430–440 MHz (EU amateur)<br><strong>PMR446:</strong> 446.0–446.2 MHz (license-free)<br><strong>LPD433:</strong> 433.075–434.775 MHz (69 ch, 10 mW)</td>
+      <td>Amateur: Ναι<br>PMR/LPD: Όχι</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Ραδιοερασιτεχνικές Μπάντες (Ελλάδα)</h3>
+
+<div class="info-box">
+  Για να εκπέμπεις στις παρακάτω μπάντες χρειάζεσαι <strong>άδεια ραδιοερασιτέχνη (SV call-sign)</strong> από την ΕΕΤΤ (Εθνική Επιτροπή Τηλεπικοινωνιών & Ταχυδρομείων).
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Μπάντα</th>
+      <th>Συχνότητες (MHz)</th>
+      <th>Μήκος Κύματος</th>
+      <th>Χαρακτηριστικά</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>160m</strong></td>
+      <td>1.810–1.850</td>
+      <td>HF</td>
+      <td>Νυχτερινά DX, περιορισμένη χρήση</td>
+    </tr>
+    <tr>
+      <td><strong>80m</strong></td>
+      <td>3.500–3.800</td>
+      <td>HF</td>
+      <td>Περιφερειακές επικοινωνίες</td>
+    </tr>
+    <tr>
+      <td><strong>40m</strong></td>
+      <td>7.000–7.200</td>
+      <td>HF</td>
+      <td>Δημοφιλής για DX, ημέρα & νύχτα</td>
+    </tr>
+    <tr>
+      <td><strong>20m</strong></td>
+      <td>14.000–14.350</td>
+      <td>HF</td>
+      <td>Κύρια μπάντα DX, παγκόσμιες επικοινωνίες</td>
+    </tr>
+    <tr>
+      <td><strong>15m</strong></td>
+      <td>21.000–21.450</td>
+      <td>HF</td>
+      <td>DX σε υψηλή ηλιακή δραστηριότητα</td>
+    </tr>
+    <tr>
+      <td><strong>10m</strong></td>
+      <td>28.000–29.700</td>
+      <td>HF</td>
+      <td>Sporadic-E, FM repeater</td>
+    </tr>
+    <tr>
+      <td><strong>6m</strong></td>
+      <td>50.000–52.000</td>
+      <td>VHF</td>
+      <td>«Magic band», sporadic-E, EME</td>
+    </tr>
+    <tr>
+      <td><strong>2m</strong></td>
+      <td>144.000–146.000</td>
+      <td>VHF</td>
+      <td><strong>Πιο δημοφιλής!</strong> Repeater, simplex, FM/SSB</td>
+    </tr>
+    <tr>
+      <td><strong>70cm</strong></td>
+      <td>430.000–440.000</td>
+      <td>UHF</td>
+      <td>Αστικές επικοινωνίες, repeater, digital modes</td>
+    </tr>
+    <tr>
+      <td><strong>23cm</strong></td>
+      <td>1240–1300</td>
+      <td>UHF/SHF</td>
+      <td>Μικροκύματα, ATV, data links</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Συχνότητες Κλήσης (Calling Frequencies)</h3>
+<ul>
+  <li><strong>VHF 2m FM:</strong> 145.500 MHz (Ευρώπη), 146.520 MHz (Η.Π.Α.)</li>
+  <li><strong>VHF 2m SSB:</strong> 144.300 MHz</li>
+  <li><strong>UHF 70cm FM:</strong> 433.500 MHz (Ευρώπη)</li>
+  <li><strong>UHF 70cm SSB:</strong> 432.200 MHz</li>
+  <li><strong>PMR446:</strong> 446.09375 MHz (κανάλι 8)</li>
+</ul>
+
+<h3>Baofeng UV-5R Κάλυψη</h3>
+<ul>
+  <li><strong>VHF:</strong> 136–174 MHz (καλύπτει 2m band: 144–146 MHz)</li>
+  <li><strong>UHF:</strong> 400–520 MHz (καλύπτει 70cm band: 430–440 MHz και PMR446: 446 MHz)</li>
+  <li><strong>Ισχύς:</strong> 1 W (LOW) / 4–5 W (HIGH) – πολύ πάνω από το όριο PMR446 (0.5 W)</li>
+</ul>
+
+<!-- LEGAL SECTION -->
+<div class="section-header" id="legal">⚖️ Νομικά & Χρήση στην Ελλάδα</div>
+
+<div class="warning-box">
+  <strong>ΠΡΟΣΟΧΗ:</strong> Η Ελλάδα είναι <strong>πολύ αυστηρή</strong> με τη χρήση ασυρμάτων χωρίς άδεια. Υπάρχουν κρούσματα προστίμων και νομικών κυρώσεων ακόμα και για απλή λήψη (ιδίως παλαιότερα).
+</div>
+
+<h3>Νόμιμη Χρήση Baofeng στην Ελλάδα</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Σενάριο</th>
+      <th>Νομιμότητα</th>
+      <th>Απαιτήσεις</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Εκπομπή VHF/UHF<br>(amateur bands)</strong></td>
+      <td>✅ Νόμιμο</td>
+      <td>Άδεια ραδιοερασιτέχνη (SV call-sign)<br>Εξετάσεις ΕΕΤΤ<br>Ετήσιο τέλος άδειας</td>
+    </tr>
+    <tr>
+      <td><strong>Λήψη μόνο<br>(receive-only)</strong></td>
+      <td>✅ Νόμιμο</td>
+      <td>Καμία άδεια (γενικά ανεκτό)<br>Μη εκπομπή!</td>
+    </tr>
+    <tr>
+      <td><strong>Εκπομπή PMR446<br>με Baofeng</strong></td>
+      <td>❌ Παράνομο</td>
+      <td>Baofeng δεν είναι πιστοποιημένο PMR446<br>Υπερβαίνει 500 mW<br>Αποσπώμενη κεραία</td>
+    </tr>
+    <tr>
+      <td><strong>Εκπομπή PMR446<br>με πιστοποιημένο radio</strong></td>
+      <td>✅ Νόμιμο</td>
+      <td>CE-certified PMR446 radio<br>Max 500 mW, ενσωματωμένη κεραία<br>Καμία άδεια</td>
+    </tr>
+    <tr>
+      <td><strong>Εκπομπή χωρίς άδεια<br>σε amateur bands</strong></td>
+      <td>❌ Παράνομο</td>
+      <td>Πρόστιμα €500–€5000+<br>Δυνατή κατάσχεση εξοπλισμού</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Πώς να Αποκτήσεις Άδεια Ραδιοερασιτέχνη</h3>
+<ol>
+  <li><strong>Μελέτη:</strong> Διάβασε το επίσημο εγχειρίδιο της ΕΕΤΤ (θεωρία ραδιοεπικοινωνιών, νομοθεσία, τεχνικά)</li>
+  <li><strong>Εξετάσεις:</strong> Γραπτές εξετάσεις σε κέντρο ΕΕΤΤ (Αθήνα/Θεσσαλονίκη, συνήθως 2 φορές/έτος)</li>
+  <li><strong>Κατηγορίες:</strong>
+    <ul>
+      <li><strong>Harec (CEPT):</strong> Πλήρης άδεια, όλες οι μπάντες & ισχύς</li>
+      <li><strong>Novice:</strong> Περιορισμένες μπάντες (VHF/UHF κυρίως), μικρότερη ισχύς</li>
+    </ul>
+  </li>
+  <li><strong>Call-sign:</strong> Μετά την επιτυχία παίρνεις SV call (π.χ. SV1ABC)</li>
+  <li><strong>Κόστος:</strong> Εξέταση ~€50, ετήσιο τέλος άδειας ~€30-50</li>
+</ol>
+
+<div class="info-box">
+  <strong>Ραδιοερασιτεχνικοί Σύλλογοι:</strong>
+  <ul>
+    <li><strong>RAAG (Radio Amateur Association of Greece):</strong> Κύριος σύλλογος, οργανώνει μαθήματα & εξετάσεις</li>
+    <li><strong>Τοπικοί σύλλογοι:</strong> Αθήνα, Θεσσαλονίκη, Πάτρα, Ηράκλειο κ.α.</li>
+    <li>Προσφέρουν support, εκπαίδευση, ομαδικές δραστηριότητες (contests, field days)</li>
+  </ul>
+</div>
+
+<h3>Άλλα License-Free Συ
