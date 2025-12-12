@@ -1,148 +1,145 @@
 
+
 <html lang="el">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Μενού Πλοήγησης</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #2c3e50    ; /* Ελαφρύ γκρι χρώμα */
-        }
-
-        .menu {
-            font-family: 'Arial', sans-serif;
-            background-color: #333;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .menu ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .menu li {
-            margin: 10px 15px;
-        }
-
-        .menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 20px;
-            position: relative;
-            padding: 8px 15px;
-            transition: all 0.3s ease;
-        }
-
-        .menu a::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: #ffcc00;
-            visibility: hidden;
-            transform: scaleX(0);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .menu a:hover::before {
-            visibility: visible;
-            transform: scaleX(1);
-        }
-
-        .menu a:hover {
-            background-color: #555;
-            border-radius: 5px;
-        }
-
-        @media (max-width: 768px) {
-            .menu ul {
-                flex-direction: column;
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Μενού Πλοήγησης</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
                 align-items: center;
+                min-height: 100vh;
+                background-color: #2c3e50    ; /* Ελαφρύ γκρι χρώμα */
             }
-            
+    
+            .menu {
+                font-family: 'Arial', sans-serif;
+                background-color: #333;
+                padding: 15px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+    
+            .menu ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+    
             .menu li {
-                margin: 8px 0;
+                margin: 10px 15px;
             }
-
+    
             .menu a {
-                font-size: 18px;
+                color: white;
+                text-decoration: none;
+                font-size: 20px;
+                position: relative;
+                padding: 8px 15px;
+                transition: all 0.3s ease;
             }
-        }
-    </style>
-</head>
-<body>
-    <nav class="menu">
-        <ul>
-           <li> <a href="row/sales/loancalculate.html" class="dropdown-link">Υπολογισμός Δανείου</a></li>
-			<li><a href="row/sales/salesgraph.html" class="dropdown-link">Πωλήσεις 1</a></li>
-            <li><a href="row/sales/salesplanlast.html" class="dropdown-link">Πωλήσεις 2</a></li>
-            <li><a href="row/sales/vat.html" class="dropdown-link">Απόδοση ΦΠΑ</a></li>
-            <li><a href="row/sales/vat2.htm" class="dropdown-link">Απόδοση ΦΠΑ 2</a></li>
-			</ul>
-			<ul>
-			<li><a href="row/electronics/vdrop.html" class="dropdown-link">Υπολογισμός Πτώσης Τάσης</a></li>
-            <li><a href="row/electronics/circuitsymbol.html" class="dropdown-link">Σύμβολα</a></li>
-            <li><a href="row/electronics/ceramic.html" class="dropdown-link">Κεραμικοί Πυκνωτές</a></li>
-            <li><a href="row/electronics/monogramic.html" class="dropdown-link">Προσομοίωση Μονογραμικού</a></li>
-            <li><a href="row/electronics/resistorisxios.html" class="dropdown-link">Υπολογισμός Ρελέ Ισχύος</a></li>
-            <li><a href="row/electronics/resistance.htm" class="dropdown-link">Υπολογισμός Αντιστάσεων</a></li>
-            <li><a href="row/electronics/QC.html" class="dropdown-link">IC QC Έλεγχος</a></li> 
-			</ul>
-			<ul>
-			<li><a href="row/othertools/ironforges.html" class="dropdown-link">Σκληρότητα Μετάλλων</a></li>  
-            <li><a href="row/othertools/streamdeskexamples.htm" class="dropdown-link">Stream Deck Assembly Simulator</a></li>  	   
-			</ul>
-			<ul>
-			<li><a href="row/massive/bigban.htm" class="dropdown-link">Προηγμένος Έλεγχος Αστρικών Σωμάτων</a></li>  
-            <li><a href="row/massive/blackhole.html" class="dropdown-link">3D Σύγκριση Μάζας</a></li>  
-            <li><a href="row/massive/varit1.htm" class="dropdown-link">Προσομοίωση Βαρυτικών Κυμάτων 1</a></li>  
-            <li><a href="row/massive/varit2.htm" class="dropdown-link">Προσομοίωση Βαρυτικών Κυμάτων 2</a></li>     
-			<ul>
-			<li><a href="row/debug/ANDROIDSETINGS.html" class="dropdown-link">Open Android Settings</a></li>  
-            <li><a href="row/debug/pingusansi.html" class="dropdown-link">Ping Files</a></li>     
-<<<<<<< HEAD
-            <li><a href="row/othertools/wt.htm" class="dropdown-link">wt trnsmtr</a></li>     
-
-=======
-             <li><a href="row/pla.html" class="dropdown-link">ender3v3se</a></li>
-			<li><a href="row/bom.html" class="dropdown-link">bom maker</a></li>
-
-				
->>>>>>> 8c41bc04bedb4b6f1263c6a3c8762022b3070a7f
-        </ul>
-    </nav>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuItems = document.querySelectorAll('.menu a');
-            
-            menuItems.forEach(item => {
-                item.addEventListener('mouseover', function() {
-                    this.style.color = '#ffcc00';
-                });
+    
+            .menu a::before {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 2px;
+                bottom: 0;
+                left: 0;
+                background-color: #ffcc00;
+                visibility: hidden;
+                transform: scaleX(0);
+                transition: all 0.3s ease-in-out;
+            }
+    
+            .menu a:hover::before {
+                visibility: visible;
+                transform: scaleX(1);
+            }
+    
+            .menu a:hover {
+                background-color: #555;
+                border-radius: 5px;
+            }
+    
+            @media (max-width: 768px) {
+                .menu ul {
+                    flex-direction: column;
+                    align-items: center;
+                }
                 
-                item.addEventListener('mouseout', function() {
-                    this.style.color = 'white';
+                .menu li {
+                    margin: 8px 0;
+                }
+    
+                .menu a {
+                    font-size: 18px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="menu">
+            <ul>
+               <li> <a href="row/sales/loancalculate.html" class="dropdown-link">Υπολογισμός Δανείου</a></li>
+                <li><a href="row/sales/salesgraph.html" class="dropdown-link">Πωλήσεις 1</a></li>
+                <li><a href="row/sales/salesplanlast.html" class="dropdown-link">Πωλήσεις 2</a></li>
+                <li><a href="row/sales/vat.html" class="dropdown-link">Απόδοση ΦΠΑ</a></li>
+                <li><a href="row/sales/vat2.htm" class="dropdown-link">Απόδοση ΦΠΑ 2</a></li>
+                </ul>
+                <ul>
+                <li><a href="row/electronics/vdrop.html" class="dropdown-link">Υπολογισμός Πτώσης Τάσης</a></li>
+                <li><a href="row/electronics/circuitsymbol.html" class="dropdown-link">Σύμβολα</a></li>
+                <li><a href="row/electronics/ceramic.html" class="dropdown-link">Κεραμικοί Πυκνωτές</a></li>
+                <li><a href="row/electronics/monogramic.html" class="dropdown-link">Προσομοίωση Μονογραμικού</a></li>
+                <li><a href="row/electronics/resistorisxios.html" class="dropdown-link">Υπολογισμός Ρελέ Ισχύος</a></li>
+                <li><a href="row/electronics/resistance.htm" class="dropdown-link">Υπολογισμός Αντιστάσεων</a></li>
+                <li><a href="row/electronics/QC.html" class="dropdown-link">IC QC Έλεγχος</a></li> 
+                </ul>
+                <ul>
+                <li><a href="row/othertools/ironforges.html" class="dropdown-link">Σκληρότητα Μετάλλων</a></li>  
+                <li><a href="row/othertools/streamdeskexamples.htm" class="dropdown-link">Stream Deck Assembly Simulator</a></li>  	   
+                </ul>
+                <ul>
+                <li><a href="row/massive/bigban.htm" class="dropdown-link">Προηγμένος Έλεγχος Αστρικών Σωμάτων</a></li>  
+                <li><a href="row/massive/blackhole.html" class="dropdown-link">3D Σύγκριση Μάζας</a></li>  
+                <li><a href="row/massive/varit1.htm" class="dropdown-link">Προσομοίωση Βαρυτικών Κυμάτων 1</a></li>  
+                <li><a href="row/massive/varit2.htm" class="dropdown-link">Προσομοίωση Βαρυτικών Κυμάτων 2</a></li>     
+                <ul>
+                <li><a href="row/debug/ANDROIDSETINGS.html" class="dropdown-link">Open Android Settings</a></li>  
+                <li><a href="row/debug/pingusansi.html" class="dropdown-link">Ping Files</a></li>     
+                 <li><a href="row/pla.html" class="dropdown-link">ender3v3se</a></li>
+                <li><a href="row/bom.html" class="dropdown-link">bom maker</a></li>
+                 <li><a href="row/othertools/wt.htm" class="dropdown-link">wt trnsmtr</a></li>     
+                    
+            </ul>
+        </nav>
+    
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const menuItems = document.querySelectorAll('.menu a');
+                
+                menuItems.forEach(item => {
+                    item.addEventListener('mouseover', function() {
+                        this.style.color = '#ffcc00';
+                    });
+                    
+                    item.addEventListener('mouseout', function() {
+                        this.style.color = 'white';
+                    });
                 });
             });
-        });
-    </script>
-</body>
-</html>
-
-
-
+        </script>
+    </body>
+    </html>
+    
+    
+    
+    
