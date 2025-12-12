@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ender 3 V3 SE — Ρυθμίσεις & Tricks για PLA (Nozzle 0.4)</title>
+  <style>
+    :root{--bg:#0f1720;--card:#0b1220;--muted:#9fb0c8;--accent:#4fd1c5;--glass:rgba(255,255,255,0.04)}
+    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; margin:0;background:linear-gradient(180deg,#071026 0%, #07182b 100%);color:#e6f3fb}
+    header{padding:28px 20px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .container{max-width:1000px;margin:28px auto;padding:20px}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0;color:var(--muted)}
+    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    select,input[type=number]{background:var(--glass);border:1px solid rgba(255,255,255,0.2);color:#e6f3fb;padding:8px 10px;border-radius:8px;appearance:none;-webkit-appearance:none;}
+    select option{background:#0b1220;color:#e6f3fb;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+    .setting{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:8px}
+    .setting h3{margin:0;font-size:13px}
+    .value{margin-top:8px;font-weight:700;font-size:15px}
+    .muted{color:var(--muted);font-size:13px}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    .row{display:flex;gap:8px;align-items:center}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:inherit}
+    pre{background:#061020;padding:12px;border-radius:8px;overflow:auto}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:720px){.two-col{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Ender 3 V3 SE — PLA Ρυθμίσεις Πρώτης Στρώσης & Tricks</h1>
+      <p class="lead">Προτεινόμενες ρυθμίσεις και τεχνάσματα για σταθερή πρόσφυση και άριστο πρώτο layer στον Ender 3 V3 SE με PLA και μύτη 0.4 mm.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card">
+      <div class="controls">
+        <div class="row">
+          <label for="resolution">Ανάλυση (Layer height):&nbsp;</label>
+          <select id="resolution" aria-label="Επιλογή ανάλυσης">
+            <option value="0.12">0.12 mm</option>
+            <option value="0.16">0.16 mm</option>
+            <option value="0.20" selected>0.20 mm</option>
+            <option value="0.28">0.28 mm</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="nozzle">Μύτη (Nozzle):&nbsp;</label>
+          <input id="nozzle" type="text" value="0.4 mm" readonly aria-readonly="true">
+        </div>
+      </div>
+
+      <div class="grid" id="settingsGrid" style="margin-top:16px"></div>
+    </div>
+
+    <div class="card two-col" style="margin-top:12px">
+      <div>
+        <h2>Cheat-sheet (σύντομο)</h2>
+        <pre id="cheatsheet" aria-hidden="false"></pre>
+      </div>
+      <div>
+        <h2>Tricks & Extras για Ender 3 V3 SE</h2>
+        <ul class="muted" style="margin:8px 0 0;padding-left:18px">
+          <li><b>Auto Bed Leveling + Z Offset:</b> Εκτέλεσε ABL σε προθερμασμένο bed (~60°C) και κάνε fine tune με μικρά βήματα 0.02mm.</li>
+          <li><b>Επανα-καλιμπράρισε το flow</b> με μέτρηση κύβου 20mm για 100% ακρίβεια σε πρώτη στρώση.</li>
+          <li><b>Προθέρμανση πριν το print:</b> Περίμενε 1-2 λεπτά μετά τη σταθεροποίηση θερμοκρασιών για ομοιόμορφη θερμότητα στο bed.</li>
+          <li><b>Bed Adhesion:</b> Προτίμησε απλό PEI sheet ή μαγνητική επιφάνεια, καθάρισε με IPA ή σαπούνι.</li>
+          <li><b>Retraction:</b> 0.8–1.0mm στα 35mm/s για αποφυγή stringing στο PLA.</li>
+          <li><b>Fan Speed:</b> Κράτα 0–30% στις πρώτες 3 στρώσεις για καλή πρόσφυση, μετά 100%.</li>
+          <li><b>Μείωσε Vibrations:</b> Βάλε αντικραδασμικά ποδαράκια ή πάτο σιλικόνης κάτω από τον εκτυπωτή.</li>
+          <li><b>Μην αγγίζεις το bed</b> μετά τον καθαρισμό — τα έλαια των χεριών μειώνουν την πρόσφυση.</li>
+          <li><b>Έλεγχος πρώτης στρώσης:</b> Η ράβδος πρέπει να δείχνει “στρωμένη” αλλά όχι υπερ-πιεσμένη (βλέπε elephant foot).</li>
+          <li><b>Κλείδωμα καλωδίων:</b> Έλεγξε τα καλώδια της κεφαλής — σε κάποιες V3 SE χτυπούν το frame.</li>
+          <li><b>G-code Trick:</b> Πρόσθεσε <code>M420 S1</code> μετά το G28 για να ενεργοποιείται αυτόματα το mesh leveling.</li>
+          <li><b>Δοκίμασε διαφορετικά patterns 1ης στρώσης:</b> concentric ή zig-zag προσφέρουν πιο σταθερή πρόσφυση.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const presets = {
+      "0.12": {"Layer Height": "0.12 mm","Initial Layer Height": "0.20 - 0.24 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 20 mm/s","Initial Layer Line Width": "120%","Nozzle Temp": "205°C","Bed Temp": "60°C"},
+      "0.16": {"Layer Height": "0.16 mm","Initial Layer Height": "0.22 - 0.26 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 22 mm/s","Initial Layer Line Width": "115%","Nozzle Temp": "205°C","Bed Temp": "60°C"},
+      "0.20": {"Layer Height": "0.20 mm","Initial Layer Height": "0.24 - 0.28 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 25 mm/s","Initial Layer Line Width": "115%","Nozzle Temp": "205°C","Bed Temp": "60°C"},
+      "0.28": {"Layer Height": "0.28 mm","Initial Layer Height": "0.30 - 0.34 mm","Initial Layer Flow": "105%","Initial Layer Speed": "15 - 30 mm/s","Initial Layer Line Width": "110%","Nozzle Temp": "205°C","Bed Temp": "60°C"}
+    };
+
+    function renderSettings(res){
+      const grid = document.getElementById('settingsGrid');
+      grid.innerHTML = '';
+      const p = presets[res];
+      for(const key in p){
+        const d = document.createElement('div');
+        d.className = 'setting';
+        d.innerHTML = `<h3>${key}</h3><div class='value'>${p[key]}</div>`;
+        grid.appendChild(d);
+      }
+      document.getElementById('cheatsheet').textContent = `Ender 3 V3 SE PLA\nΑνάλυση ${res}mm\n` + Object.entries(p).map(([k,v])=>`${k}: ${v}`).join('\n');
+    }
+
+    document.getElementById('resolution').addEventListener('change', e=>renderSettings(e.target.value));
+    renderSettings('0.20');
+  </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDNS to IP Resolver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .loading {
+            color: #666;
+        }
+        
+        .success {
+            color: #28a745;
+        }
+        
+        .error {
+            color: #dc3545;
+        }
+        
+        .countdown {
+            font-weight: bold;
+            font-size: 18px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 DDNS to IP Resolver</h1>
+        <p>Δώσε το DDNS URL και θα κάνω redirect στην IP του!</p>
+        
+        <input type="text" id="ddnsUrl" placeholder="π.χ. magnificent.hopto.org" value="magnificent.hopto.org">
+        
+        <div>
+            <button onclick="resolveAndRedirect()">🔍 Βρες IP & Redirect</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function resolveAndRedirect() {
+            const ddnsUrl = document.getElementById('ddnsUrl').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!ddnsUrl) {
+                showResult('Παρακαλώ δώσε ένα DDNS URL!', 'error');
+                return;
+            }
+            
+            // Εμφάνιση loading
+            showResult('🔄 Αναζήτηση IP...', 'loading');
+            
+            try {
+                // Χρήση DNS-over-HTTPS API για resolve
+                const response = await fetch(`https://dns.google/resolve?name=${ddnsUrl}&type=A`);
+                const data = await response.json();
+                
+                if (data.Answer && data.Answer.length > 0) {
+                    const ip = data.Answer.find(record => record.type === 1)?.data;
+                    
+                    if (ip) {
+                        showResult(`✅ Βρέθηκε IP: <strong>${ip}</strong>`, 'success');
+                        
+                        // Countdown πριν το redirect
+                        let countdown = 3;
+                        const countdownInterval = setInterval(() => {
+                            showResult(`✅ Βρέθηκε IP: <strong>${ip}</strong><br><span class="countdown">Redirect σε ${countdown} δευτερόλεπτα...</span>`, 'success');
+                            countdown--;
+                            
+                            if (countdown < 0) {
+                                clearInterval(countdownInterval);
+                                window.location.href = `http://${ip}`;
+                            }
+                        }, 1000);
+                        
+                    } else {
+                        showResult('❌ Δε βρέθηκε A record για αυτό το domain', 'error');
+                    }
+                } else {
+                    showResult('❌ Δε βρέθηκε IP για αυτό το DDNS URL', 'error');
+                }
+                
+            } catch (error) {
+                console.error('DNS Resolution Error:', error);
+                showResult('❌ Σφάλμα κατά την αναζήτηση IP. Δοκίμασε ξανά.', 'error');
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = type;
+            resultDiv.style.display = 'block';
+        }
+        
+        // Enter key support
+        document.getElementById('ddnsUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                resolveAndRedirect();
+            }
+        });
+        
+        // Auto-resolve όταν φορτώνει η σελίδα (optional)
+        // window.onload = () => resolveAndRedirect();
+    </script>
+</body>
+</html>
