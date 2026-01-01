@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Πλήρης Οδηγός Power Design για ESP32 & Custom PCB</title>
+<style>
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #f4f6f8 0%, #e8eef2 100%);
+    color: #222;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+h1 {
+    color: #003366;
+    text-align: center;
+    background: linear-gradient(135deg, #0066cc 0%, #003366 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+h2 {
+    color: #003366;
+    border-left: 5px solid #0066cc;
+    padding-left: 15px;
+    margin-top: 30px;
+}
+h3 {
+    color: #0066cc;
+    margin-top: 20px;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+th {
+    background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+    color: white;
+    font-weight: bold;
+}
+tr:nth-child(even) {
+    background: #f8f9fa;
+}
+tr:hover {
+    background: #e3f2fd;
+}
+.section {
+    background: #ffffff;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.good {
+    color: #28a745;
+    font-weight: bold;
+}
+.bad {
+    color: #dc3545;
+    font-weight: bold;
+}
+.warning {
+    color: #fd7e14;
+    font-weight: bold;
+}
+.note {
+    background: #fff3cd;
+    padding: 15px;
+    border-left: 5px solid #ffc107;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+.tip {
+    background: #d1ecf1;
+    padding: 15px;
+    border-left: 5px solid #17a2b8;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+.danger {
+    background: #f8d7da;
+    padding: 15px;
+    border-left: 5px solid #dc3545;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+code {
+    background: #f1f3f5;
+    padding: 3px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #c7254e;
+}
+pre {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    line-height: 1.4;
+}
+.calculator {
+    background: #e7f3ff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #0066cc;
+    margin: 20px 0;
+}
+.formula {
+    background: #f8f9fa;
+    padding: 15px;
+    border-left: 4px solid #0066cc;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1em;
+}
+ul, ol {
+    margin: 10px 0;
+    padding-left: 25px;
+}
+li {
+    margin: 8px 0;
+}
+.component-box {
+    display: inline-block;
+    background: #fff;
+    border: 2px solid #0066cc;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+.toc {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+.toc a {
+    color: #0066cc;
+    text-decoration: none;
+    display: block;
+    padding: 5px 0;
+}
+.toc a:hover {
+    color: #003366;
+    text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>🔋 Πλήρης Οδηγός Power Design<br>για ESP32 & Custom PCB</h1>
+
+<div class="section toc">
+<h2>📑 Περιεχόμενα</h2>
+<a href="#intro">1. Εισαγωγή στα Voltage Regulators</a>
+<a href="#ams1117">2. Γιατί ΟΧΙ AMS1117</a>
+<a href="#thermal">3. Θερμική Ανάλυση & Υπολογισμοί</a>
+<a href="#ldo-selection">4. Προτεινόμενα LDO ICs</a>
+<a href="#buck-ldo">5. Buck + LDO Συνδυασμοί</a>
+<a href="#capacitors">6. Πυκνωτές: Επιλογή & Τοποθέτηση</a>
+<a href="#layout">7. PCB Layout Best Practices</a>
+<a href="#testing">8. Testing & Μετρήσεις</a>
+<a href="#troubleshooting">9. Troubleshooting</a>
+<a href="#examples">10. Πρακτικά Παραδείγματα Κυκλωμάτων</a>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="intro">
+<h2>1. Τι είναι Voltage Regulator (LDO)</h2>
+<p>
+Ο <b>voltage regulator</b> είναι το κύκλωμα που μετατρέπει μια ασταθή ή υψηλότερη τάση 
+(π.χ. 5V, 12V, μπαταρία Li-ion 4.2V) σε μια σταθερή τάση (συνήθως 3.3V) για μικροελεγκτές, 
+RF modules και αναλογικά κυκλώματα.
+</p>
+<p>
+Τα <b>LDO (Low Dropout)</b> regulators είναι γραμμικοί ρυθμιστές τάσης που χρειάζονται 
+πολύ μικρή διαφορά τάσης (dropout voltage) μεταξύ εισόδου και εξόδου για να λειτουργήσουν.
+</p>
+
+<div class="tip">
+💡 <b>Dropout Voltage:</b> Η ελάχιστη διαφορά τάσης Vin - Vout που χρειάζεται ο regulator 
+για να διατηρήσει σταθερή την έξοδο. Για LDO: 0.2-0.4V, για παλιά ICs (AMS1117): ~1.1V
+</div>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="ams1117">
+<h2>2. Γιατί ΟΧΙ AMS1117 σε Custom PCB</h2>
+
+<table>
+<tr>
+<th>Χαρακτηριστικό</th>
+<th>AMS1117</th>
+<th>Σύγχρονα LDO</th>
+<th>Επίδραση</th>
+</tr>
+<tr>
+<td><b>Dropout Voltage</b></td>
+<td class="bad">~1.1 - 1.3 V</td>
+<td class="good">0.2 – 0.4 V</td>
+<td>Μεγαλύτερο εύρος λειτουργίας με μπαταρία</td>
+</tr>
+<tr>
+<td><b>Θόρυβος (Noise)</b></td>
+<td class="bad">~100 µVrms</td>
+<td class="good">~10-30 µVrms</td>
+<td>Καθαρότερο σήμα σε ADC & RF</td>
+</tr>
+<tr>
+<td><b>PSRR @ 1 kHz</b></td>
+<td class="bad">~50 dB</td>
+<td class="good">70-80 dB</td>
+<td>Απόρριψη θορύβου τροφοδοσίας</td>
+</tr>
+<tr>
+<td><b>Transient Response</b></td>
+<td class="bad">Αργή (>100 µs)</td>
+<td class="good">Γρήγορη (<20 µs)</td>
+<td>Αντοχή σε WiFi/BLE current bursts</td>
+</tr>
+<tr>
+<td><b>Quiescent Current</b></td>
+<td class="warning">~5 mA</td>
+<td class="good">~50-100 µA</td>
+<td>Σημαντικό για battery-powered</td>
+</tr>
+<tr>
+<td><b>RF / WiFi</b></td>
+<td class="bad">ΟΧΙ</td>
+<td class="good">ΝΑΙ</td>
+<td>Σταθερότητα ESP32/ESP8266</td>
+</tr>
+</table>
+
+<div class="danger">
+<b>⚠️ Προβλήματα με AMS1117 σε ESP32:</b>
+<ul>
+<li>❌ Δεν αντέχει τα current bursts του WiFi/BLE (έως 500mA σε <10µs)</li>
+<li>❌ Προκαλεί brownouts και unexpected resets</li>
+<li>❌ Προσθέτει θόρυβο σε ADC readings (±50-100 counts σε 12-bit ADC)</li>
+<li>❌ Σπαταλά ενέργεια ως θερμότητα → overheating σε SOT-223</li>
+<li>❌ Χαμηλό PSRR → RF instability</li>
+</ul>
+</div>
+
+<p>
+<b>Πότε είναι αποδεκτός ο AMS1117:</b>
+</p>
+<ul>
+<li>✅ Arduino Uno/Nano (χωρίς WiFi/RF)</li>
+<li>✅ Χαμηλό ρεύμα (<100mA)</li>
+<li>✅ Prototyping (όχι τελικό προϊόν)</li>
+<li>✅ Οθόνες, sensors χωρίς ευαίσθητα αναλογικά</li>
+</ul>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="thermal">
+<h2>3. Θερμική Ανάλυση & Υπολογισμοί</h2>
+
+<h3>Υπολογισμός Θερμότητας</h3>
+<div class="formula">
+P<sub>dissipation</sub> = (V<sub>in</sub> - V<sub>out</sub>) × I<sub>load</sub>
+</div>
+
+<div class="calculator">
+<h3>📊 Παραδείγματα Υπολογισμών για ESP32 (Max 420mA WiFi burst)</h3>
+
+<table>
+<tr>
+<th>Σενάριο</th>
+<th>V<sub>in</sub></th>
+<th>V<sub>out</sub></th>
+<th>I<sub>load</sub></th>
+<th>P (Watts)</th>
+<th>Αξιολόγηση</th>
+</tr>
+<tr>
+<td>AMS1117 από USB</td>
+<td>5.0 V</td>
+<td>3.3 V</td>
+<td>0.42 A</td>
+<td class="bad">0.714 W</td>
+<td class="bad">ΚΙΝΔΥΝΟΣ! SOT-223 overheats</td>
+</tr>
+<tr>
+<td>AMS1117 από Li-ion</td>
+<td>4.2 V</td>
+<td>3.3 V</td>
+<td>0.42 A</td>
+<td class="warning">0.378 W</td>
+<td class="warning">Οριακό, χρειάζεται heatsink</td>
+</tr>
+<tr>
+<td>Buck + LDO</td>
+<td>3.6 V</td>
+<td>3.3 V</td>
+<td>0.42 A</td>
+<td class="good">0.126 W</td>
+<td class="good">ΙΔΑΝΙΚΟ! Χαμηλή θερμότητα</td>
+</tr>
+<tr>
+<td>Σύγχρονο LDO από Li-ion</td>
+<td>4.2 V</td>
+<td>3.3 V</td>
+<td>0.42 A</td>
+<td class="warning">0.378 W</td>
+<td class="good">OK με thermal vias</td>
+</tr>
+</table>
+</div>
+
+<h3>Θερμική Αντίσταση (Thermal Resistance)</h3>
+<div class="formula">
+ΔT = P × θ<sub>JA</sub>
+<br>
+T<sub>junction</sub> = T<sub>ambient</sub> + ΔT
+</div>
+
+<p><b>Τυπικές τιμές θ<sub>JA</sub>:</b></p>
+<ul>
+<li>SOT-23-5: <b>~200-250 °C/W</b> (χωρίς copper pour)</li>
+<li>SOT-23-5: <b>~100-150 °C/W</b> (με copper pour & thermal vias)</li>
+<li>SOT-89: <b>~80-120 °C/W</b></li>
+<li>SOT-223: <b>~60-80 °C/W</b></li>
+</ul>
+
+<div class="note">
+<b>💡 Παράδειγμα:</b> SOT-23 LDO με 0.7W dissipation και θ<sub>JA</sub>=200°C/W:
+<br>ΔT = 0.7W × 200°C/W = 140°C
+<br>Αν T<sub>ambient</sub>=25°C → T<sub>junction</sub>=165°C ⚠️ ΥΠΕΡΘΕΡΜΑΝΣΗ!
+<br><br>
+<b>Με Buck+LDO (0.126W):</b>
+<br>ΔT = 0.126W × 200°C/W = 25.2°C
+<br>T<sub>junction</sub>=50.2°C ✅ ΑΣΦΑΛΕΣ!
+</div>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="ldo-selection">
+<h2>4. Προτεινόμενα LDO ICs για ESP32 & RF</h2>
+
+<table>
+<tr>
+<th>Regulator</th>
+<th>Max Ρεύμα</th>
+<th>Dropout</th>
+<th>Quiescent</th>
+<th>Package</th>
+<th>PSRR</th>
+<th>Noise</th>
+<th>Σχόλιο</th>
+</tr>
+
+<tr>
+<td><b>ME6211</b></td>
+<td>500 mA</td>
+<td>0.3 V</td>
+<td>90 µA</td>
+<td>SOT-23-5</td>
+<td>70 dB</td>
+<td>30 µVrms</td>
+<td class="good">Πολύ συχνός, φθηνός (~$0.10), best value</td>
+</tr>
+
+<tr>
+<td><b>MIC5504</b></td>
+<td>300 mA</td>
+<td>0.2 V</td>
+<td>45 µA</td>
+<td>SOT-23-5</td>
+<td>75 dB</td>
+<td>20 µVrms</td>
+<td class="good">Ultra-low noise, εξαιρετικός για RF & ADC</td>
+</tr>
+
+<tr>
+<td><b>TLV700</b></td>
+<td>300 mA</td>
+<td>0.4 V</td>
+<td>55 µA</td>
+<td>SOT-23-5<br>SOT-89</td>
+<td>68 dB</td>
+<td>25 µVrms</td>
+<td class="good">Texas Instruments, industrial grade</td>
+</tr>
+
+<tr>
+<td><b>RT9080</b></td>
+<td>600 mA</td>
+<td>0.25 V</td>
+<td>80 µA</td>
+<td>SOT-23-5</td>
+<td>72 dB</td>
+<td>28 µVrms</td>
+<td class="good">High current, ιδανικός για WiFi bursts</td>
+</tr>
+
+<tr>
+<td><b>XC6220</b></td>
+<td>1000 mA</td>
+<td>0.18 V</td>
+<td>50 µA</td>
+<td>SOT-89</td>
+<td>70 dB</td>
+<td>30 µVrms</td>
+<td class="good">Ultra-high current για demanding apps</td>
+</tr>
+
+<tr>
+<td><b>AP2112</b></td>
+<td>600 mA</td>
+<td>0.25 V</td>
+<td>55 µA</td>
+<td>SOT-23-5</td>
+<td>75 dB</td>
+<td>20 µVrms</td>
+<td class="good">Excellent PSRR, fast transient</td>
+</tr>
+</table>
+
+<h3>🎯 Πώς να επιλέξεις:</h3>
+<ul>
+<li><b>Budget project:</b> ME6211 (best price/performance)</li>
+<li><b>Ultra-clean ADC readings:</b> MIC5504</li>
+<li><b>High WiFi activity:</b> RT9080 ή AP2112</li>
+<li><b>Industrial/automotive:</b> TLV700</li>
+<li><b>High current (>400mA continuous):</b> XC6220</li>
+</ul>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="buck-ldo">
+<h2>5. Buck + LDO Συνδυασμοί (Βέλτιστη Λύση)</h2>
+
+<p>
+Η <b>καλύτερη πρακτική</b> για ESP32/ESP8266 με τροφοδοσία >5V ή battery:
+</p>
+<div class="tip">
+<b>🔌 Αρχιτεκτονική 2-Stage:</b>
+<ol>
+<li><b>Buck Converter:</b> Υψηλή απόδοση (85-95%) → μετατροπή Vin σε 3.6V</li>
+<li><b>LDO:</b> Καθαρό, χαμηλού θορύβου voltage → 3.3V για MCU/RF</li>
+</ol>
+Αποτέλεσμα: <b>Χαμηλή θερμότητα + Καθαρό RF + Υψηλή απόδοση</b>
+</div>
+
+<h3>Προτεινόμενοι Συνδυασμοί</h3>
+
+<table>
+<tr>
+<th>Buck IC</th>
+<th>V<sub>out</sub></th>
+<th>I<sub>max</sub></th>
+<th>LDO IC</th>
+<th>V<sub>out</sub></th>
+<th>Κόστος</th>
+<th>Χρήση</th>
+</tr>
+
+<tr>
+<td><b>MP2315</b></td>
+<td>3.6 V</td>
+<td>3 A</td>
+<td>RT9080</td>
+<td>3.3 V</td>
+<td>~$1.50</td>
+<td>ESP32 + TFT + WiFi heavy use</td>
+</tr>
+
+<tr>
+<td><b>TPS62177</b></td>
+<td>3.6 V</td>
+<td>500 mA</td>
+<td>MIC5504</td>
+<td>3.3 V</td>
+<td>~$2.00</td>
+<td>Ultra-clean RF, precision ADC</td>
+</tr>
+
+<tr>
+<td><b>LMR62014</b></td>
+<td>3.6 V</td>
+<td>1.4 A</td>
+<td>ME6211</td>
+<td>3.3 V</td>
+<td>~$1.00</td>
+<td>Budget-friendly, good performance</td>
+</tr>
+
+<tr>
+<td><b>XL1509</b></td>
+<td>3.6 V</td>
+<td>2 A</td>
+<td>AP2112</td>
+<td>3.3 V</td>
+<td>~$0.80</td>
+<td>Cost-effective, multiple devices</td>
+</tr>
+
+<tr>
+<td><b>AOZ1282</b></td>
+<td>3.6 V</td>
+<td>2 A</td>
+<td>TLV700</td>
+<td>3.3 V</td>
+<td>~$1.80</td>
+<td>Industrial applications</td>
+</tr>
+</table>
+
+<h3>📐 Διάγραμμα Συστήματος</h3>
+<pre>
+   +5V-12V Vin (USB / Battery / Wall adapter)
+      │
+      │ (High voltage, noisy)
+      ▼
+   ┌──────────────┐
+   │ Buck         │  Efficiency: 85-95%
+   │ Converter    │  5-12V → 3.6V @ up to 3A
+   │ (MP2315 etc) │  
+   └──────────────┘
+      │
+      │ 3.6V (efficient, still has switching noise)
+      │
+      ├──→ 22µF Bulk capacitor
+      │
+      ▼
+   ┌──────────────┐
+   │ LDO          │  Ultra-clean output
+   │ (MIC5504 etc)│  3.6V → 3.3V
+   │              │  Filters Buck noise
+   └──────────────┘
+      │
+      │ 3.3V (clean, low-noise, RF-safe)
+      │
+      ├──→ 10µF Bulk cap
+      ├──→ 100nF decoupling (×4-5 near ESP32 pins)
+      │
+      ▼
+   ┌──────────────┐
+   │  ESP32       │
+   │  WiFi/BLE    │
+   │  + TFT/OLED  │
+   │  + Sensors   │
+   └──────────────┘
+
+<b>Πλεονεκτήματα:</b>
+✅ Θερμότητα LDO: ~0.13W (vs 0.7W με 5V direct)
+✅ Συνολική απόδοση: ~80-90% (vs ~50% με LDO μόνο)
+✅ Καθαρό RF signal - χωρίς switching noise στο 3.3V rail
+✅ Stable voltage κατά τη διάρκεια WiFi bursts
+</pre>
+
+<div class="danger">
+<b>⚠️ ΜΗΝ κάνεις αυτά τα λάθη:</b>
+<ul>
+<li>❌ Buck converter κατευθείαν στο ESP32 (switching noise → RF problems)</li>
+<li>❌ LDO 5V→3.3V με >400mA load (υπερθέρμανση)</li>
+<li>❌ Shared power rail για RF και digital I/O (crosstalk)</li>
+</ul>
+</div>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="capacitors">
+<h2>6. Πυκνωτές: Επιλογή & Τοποθέτηση</h2>
+
+<h3>Τύποι Πυκνωτών</h3>
+
+<table>
+<tr>
+<th>Τύπος</th>
+<th>Χωρητικότητα</th>
+<th>ESR</th>
+<th>Χρήση</th>
+<th>Θέση</th>
+</tr>
+<tr>
+<td><b>Κεραμικός X7R</b></td>
+<td>100 nF - 1 µF</td>
+<td>~5-20 mΩ</td>
+<td>Decoupling</td>
+<td>Κολλητά στα VDD pins (≤5mm)</td>
+</tr>
+<tr>
+<td><b>Κεραμικός X5R</b></td>
+<td>10 µF - 22 µF</td>
+<td>~10-50 mΩ</td>
+<td>Bulk capacitor</td>
+<td>Κοντά στο LDO output (≤10mm)</td>
+</tr>
+<tr>
+<td><b>Tantalum</b></td>
+<td>10 µF - 47 µF</td>
+<td>~100-500 mΩ</td>
+<td>Bulk (low freq)</td>
+<td>Buck converter input</td>
+</tr>
+<tr>
+<td><b>Ηλεκτρολυτικός</b></td>
+<td>100 µF - 1000 µF</td>
+<td>~100 mΩ - 2Ω</td>
+<td>Reservoir</td>
+<td>Στην είσοδο τροφοδοσίας</td>
+</tr>
+</table>
+
+<h3>📍 Στρατηγική Τοποθέτησης</h3>
+
+<pre>
+<b>Σειρά Πυκνωτών από Vin προς ESP32:</b>
+
+[Vin] → 100µF Electrolytic → [Buck] → 22µF X5R → [LDO] → 10µF X5R → [ESP32 bulk]
+                                                              ↓
+                                                    4× 100nF X7R (κάθε VDD pin)
+</pre>
+
+<div class="tip">
+<b>💡 Golden Rules για Decoupling:</b>
+<ol>
+<li><b>100 nF κεραμικός:</b> Σε ΚΑΘΕ VDD pin του ESP32 (minimum 4 capacitors)</li>
+<li><b>10-22 µF:</b> Ένας κοντά στο ESP32 για bulk energy storage</li>
+<li><b>Απόσταση:</b> Decoupling caps ≤5mm από το pin, bulk ≤15mm</li>
+<li><b>Vias:</b> Ground vias κοντά στα pads των πυκνωτών</li>
+<li><b>Διέλευση:</b> Κοντά trace Vcc → Cap → GND via → Ground plane</li>
+</ol>
+</div>
+
+<h3>ESR & Frequency Response</h3>
+<p>
+Το <b>ESR (Equivalent Series Resistance)</b> επηρεάζει την ικανότητα του πυκνωτή 
+να απορροφά γρήγορες μεταβολές ρεύματος:
+</p>
+<ul>
+<li><b>X7R Ceramic:</b> Low ESR → εξαιρετικό για high-frequency noise (>1 MHz)</li>
+<li><b>X5R Ceramic:</b> Slightly higher ESR → καλό για mid-frequency (100 kHz - 1 MHz)</li>
+<li><b>Electrolytic:</b> High ESR → μόνο για low-frequency bulk (<100 kHz)</li>
+</ul>
+
+<div class="note">
+<b>Γιατί πολλαπλοί πυκνωτές;</b>
+<br>Το ESP32 WiFi burst έχει συχνότητες από DC έως >10 MHz. Κάθε πυκνωτής 
+"βλέπει" διαφορετικό εύρος συχνοτήτων λόγω ESR & ESL (inductance). 
+Συνδυασμός πυκνωτών = πλήρης κάλυψη φάσματος.
+</div>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="layout">
+<h2>7. PCB Layout Best Practices</h2>
+
+<h3>🔥 Thermal Management</h3>
+
+<h4>Copper Pour</h4>
+<ul>
+<li>Ενιαίο <b>ground plane</b> στο bottom layer (ή internal layer σε 4-layer PCB)</li>
+<li><b>Copper pour</b> γύρω από LDO, ESP32 και RF section (top layer)</li>
+<li>Σύνδεση top/bottom copper με <b>thermal vias</b></li>
+<li>Ελάχιστο 35 µm copper thickness (1 oz), προτιμότερο 70 µm (2 oz)</li>
+</ul>
+
+<h4>Thermal Vias</h4>
+<div class="formula">
+Thermal Via Array:
+- Διάμετρος: 0.3 - 0.4 mm
+- Pitch: 0.8 - 1.0 mm
+- Πλήθος: 6-9 vias κάτω από το thermal pad του LDO
+- Σύνδεση: Top copper pour → Bottom ground plane
+</div>
+
+<pre>
+<b>Layout Example - LDO thermal pad:</b>
+
+    TOP VIEW:               CROSS-SECTION:
+
+    ┌─────────┐            Top Layer: ═══════════
+    │  LDO    │                          ║ via
+    │ SOT-23  │            PCB Core:     ║
+    │         │                          ║
+    │  [GND]  │            Bottom:  ═════╩════════
+    │ •  •  • │                     (ground plane)
+    │  •   •  │
+    │ •  •  • │            Heat flows down through
+    └─────────┘            vias to large copper area
+
+    • = thermal via (0.3mm)
+</pre>
+
+<h3>⚡ Power Routing</h3>
+
+<table>
+<tr>
+<th>Element</th>
+<th>Trace Width</th>
+<th>Guideline</th>
+</tr>
+<tr>
+<td>Buck input (Vin)</td>
+<td>≥1.0 mm</td>
+<td>High current, minimize resistance</td>
+</tr>
+<tr>
+<td>Buck output → LDO</td>
+<td>≥0.8 mm</td>
+<td>Medium current, keep short</td>
+</tr>
+<tr>
+<td>LDO output → ESP32</td>
+<td>≥0.6 mm</td>
+<td>Short & direct, avoid corners</td>
+</tr>
+<tr>
+<td>Ground returns</td>
+<td>≥1.0 mm or plane</td>
+<td>Low impedance path critical</td>
+</tr>
+</table>
+
+<div class="danger">
+<b>❌ Κοινά Λάθη Layout:</b>
+<ul>
+<li>Λεπτές γραμμές τροφοδοσίας (<0.3mm) → voltage drop</li>
+<li>Μακριές traces μεταξύ LDO και decoupling caps → inductance</li>
+<li>Ground loops → EMI & noise</li>
+<li>Μοιρασμένο ground για analog & digital → crosstalk</li>
+<li>Buck converter δίπλα σε RF antenna → interference</li>
+</ul>
+</div>
+
+<h3>📡 RF Section Isolation</h3>
+
+<ul>
+<li><b>Separate power rail:</b> Ξεχωριστό LDO για RF (optional, για ultra-critical apps)</li>
+<li><b>Guard ring:</b> Grounded copper pour γύρω από antenna</li>
+<li><b>Keep-out zone:</b> No traces κάτω από antenna (≥5mm clearance)</li>
+<li><b>Antenna placement:</b> Στην άκρη του PCB, μακριά από Buck/switching ICs</li>
+</ul>
+
+<h3>🎨 Layer Stackup (4-layer PCB - recommended)</h3>
+
+<pre>
+Layer 1 (Top):     Signal + Components + Local copper pour
+Layer 2 (Inner):   Ground Plane (continuous)
+Layer 3 (Inner):   Power Plane (3.3V + 3.6V regions)
+Layer 4 (Bottom):  Signal + Ground pour
+
+<b>Πλεονεκτήματα:</b>
+✅ Excellent EMI performance
+✅ Low impedance power distribution
+✅ Better thermal dissipation
+✅ Controlled impedance για RF traces (50Ω)
+</pre>
+
+<div class="tip">
+<b>💡 Budget Alternative (2-layer):</b>
+<br>- Top: Components + signals + power traces
+<br>- Bottom: Maximum ground plane coverage (≥70%)
+<br>- Stitching vias κάθε 5-10mm για low-impedance ground
+</div>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="testing">
+<h2>8. Testing & Μετρήσεις</h2>
+
+<h3>🔬 Βασικές Μετρήσεις</h3>
+
+<h4>1. Voltage Ripple (Oscilloscope)</h4>
+<div class="formula">
+Setup: AC coupling, 20 MHz BW limit ON, probe tip compensation
+Measurement: Peak-to-peak voltage @ 3.3V rail κατά WiFi TX
+</div>
+
+<table>
+<tr>
+<th>Σενάριο</th>
+<th>Acceptable Ripple</th>
+<th>Warning</th>
+<th>Critical</th>
+</tr>
+<tr>
+<td>ESP32 idle</td>
+<td><10 mV<sub>pp</sub></td>
+<td>10-20 mV<sub>pp</sub></td>
+<td>>20 mV<sub>pp</sub></td>
+</tr>
+<tr>
+<td>WiFi TX burst</td>
+<td><50 mV<sub>pp</sub></td>
+<td>50-100 mV<sub>pp</sub></td>
+<td>>100 mV<sub>pp</sub></td>
+</tr>
+<tr>
+<td>ADC rail</td>
+<td><5 mV<sub>pp</sub></td>
+<td>5-10 mV<sub>pp</sub></td>
+<td>>10 mV<sub>pp</sub></td>
+</tr>
+</table>
+
+<h4>2. Voltage Drop Test</h4>
+<p>Μετρήστε τάση στα σημεία:</p>
+<ul>
+<li><b>LDO output pin</b></li>
+<li><b>ESP32 VDD pin</b></li>
+<li><b>Διαφορά:</b> Δεν πρέπει να υπερβαίνει τα <b>50 mV</b> under load</li>
+</ul>
+
+<h4>3. Temperature Test</h4>
+<pre>
+Test procedure:
+1. Ενεργοποίηση WiFi continuous TX (test mode)
+2. Μέτρηση θερμοκρασίας με IR θερμόμετρο ή thermocouple
+3. Χρόνος: 15-30 λεπτά
+
+<b>Αποδεκτές θερμοκρασίες:</b>
+✅ LDO: <70°C (ambient 25°C)
+✅ ESP32: <60°C
+⚠️  LDO: 70-85°C → πρόσθεσε thermal vias
+❌ LDO: >85°C → ανασχεδιασμός (Buck + LDO)
+</pre>
+
+<h4>4. Current Measurement</h4>
+<div class="formula">
+INA219/INA226 module: High-side current sense
+Ή: DMM σε σειρά (για DC average μόνο)
+</div>
+
+<table>
+<tr>
+<th>Mode</th>
+<th>Typical Current</th>
+<th>Peak Current</th>
+</tr>
+<tr>
+<td>Deep Sleep</td>
+<td>10-150 µA</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Light Sleep</td>
+<td>0.8-1.2 mA</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Idle (WiFi off)</td>
+<td>30-50 mA</td>
+<td>-</td>
+</tr>
+<tr>
+<td>WiFi connected</td>
+<td>80-120 mA</td>
+<td>200-250 mA</td>
+</tr>
+<tr>
+<td>WiFi TX</td>
+<td>120-180 mA</td>
+<td>350-420 mA</td>
+</tr>
+</table>
+
+<h3>📊 Test Code για ESP32</h3>
+
+<pre>
+<b>// WiFi Stress Test</b>
+#include &lt;WiFi.h&gt;
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin("SSID", "password");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("
+WiFi connected");
+}
+
+void loop() {
+  // Continuous WiFi traffic to stress power supply
+  WiFi.ping("8.8.8.8");
+
+  // Read ADC to check for noise
+  int adc = analogRead(34);
+  Serial.printf("ADC: %d, RSSI: %d dBm
+", adc, WiFi.RSSI());
+
+  delay(100);
+}
+
+<b>// Brownout Detection Test</b>
+#include "esp_system.h"
+
+void setup() {
+  Serial.begin(115200);
+
+  esp_reset_reason_t reason = esp_reset_reason();
+
+  if (reason == ESP_RST_BROWNOUT) {
+    Serial.println("⚠️ BROWNOUT DETECTED!");
+  }
+}
+</pre>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="troubleshooting">
+<h2>9. Troubleshooting Common Issues</h2>
+
+<table>
+<tr>
+<th>Πρόβλημα</th>
+<th>Πιθανή Αιτία</th>
+<th>Λύση</th>
+</tr>
+
+<tr>
+<td><b>ESP32 reset κατά WiFi TX</b></td>
+<td>
+- Voltage drop > 200mV<br>
+- Insufficient capacitance<br>
+- High dropout LDO
+</td>
+<td>
+✅ Πρόσθεσε 100µF bulk cap<br>
+✅ Χρησιμοποίησε low-dropout LDO<br>
+✅ Ελέγξε trace resistance
+</td>
+</tr>
+
+<tr>
+<td><b>Brownout detector trigger</b></td>
+<td>
+- LDO can't supply peak current<br>
+- Long power traces<br>
+- Poor decoupling
+</td>
+<td>
+✅ Upgrade σε higher current LDO<br>
+✅ Πρόσθεσε 4× 100nF decoupling<br>
+✅ Buck + LDO architecture
+</td>
+</tr>
+
+<tr>
+<td><b>ADC readings noisy</b></td>
+<td>
+- Buck switching noise<br>
+- Shared ground with digital<br>
+- No filtering
+</td>
+<td>
+✅ LDO post-regulator μετά το Buck<br>
+✅ Separate AGND / DGND<br>
+✅ RC filter στο ADC input
+</td>
+</tr>
+
+<tr>
+<td><b>WiFi αποσυνδέσεις</b></td>
+<td>
+- Voltage ripple > 100mV<br>
+- RF noise from Buck<br>
+- Weak signal + unstable power
+</td>
+<td>
+✅ Καλύτερο bulk capacitor<br>
+✅ LDO filtering<br>
+✅ Antenna placement check
+</td>
+</tr>
+
+<tr>
+<td><b>LDO υπερθερμαίνεται</b></td>
+<td>
+- Dropout voltage πολύ μεγάλο<br>
+- Υψηλό ρεύμα φορτίου<br>
+- Κακή θερμική διαχείριση
+</td>
+<td>
+✅ Buck pre-regulator στα 3.6V<br>
+✅ Thermal vias στο GND pad<br>
+✅ Copper pour για heat dissipation
+</td>
+</tr>
+
+<tr>
+<td><b>Μεγάλη κατανάλωση sleep</b></td>
+<td>
+- LDO υψηλό quiescent current<br>
+- Leakage από peripherals<br>
+- Pullups ενεργά
+</td>
+<td>
+✅ LDO με low Iq (<100µA)<br>
+✅ Disable peripherals<br>
+✅ Float ή disconnect unused pins
+</td>
+</tr>
+
+<tr>
+<td><b>Ασταθές 3.3V</b></td>
+<td>
+- Ανεπαρκής input capacitance<br>
+- Oscillation από κακό layout<br>
+- ESR πολύ υψηλό
+</td>
+<td>
+✅ Input cap σύμφωνα με datasheet<br>
+✅ Short traces LDO↔caps<br>
+✅ Χρήση X7R ceramic, όχι electrolytic
+</td>
+</tr>
+</table>
+
+<h3>🔍 Diagnostic Checklist</h3>
+
+<div class="note">
+<b>Όταν έχεις πρόβλημα, έλεγξε με τη σειρά:</b>
+<ol>
+<li>☑️ Oscilloscope: Voltage ripple στο 3.3V rail κατά WiFi activity</li>
+<li>☑️ Multimeter: DC voltage στο LDO output vs ESP32 VDD (max 50mV diff)</li>
+<li>☑️ Visual: Θερμότητα LDO με χέρι ή IR θερμόμετρο (>70°C = problem)</li>
+<li>☑️ Serial monitor: Brownout messages, reset reason</li>
+<li>☑️ Code: Enable ESP32 brownout detector logging</li>
+<li>☑️ Layout: Inspect capacitor placement (φωτογραφία + ruler)</li>
+<li>☑️ Current: INA219 ή current clamp για peak measurement</li>
+</ol>
+</div>
+</div>
+
+<!-- ============================================= -->
+<div class="section" id="examples">
+<h2>10. Πρακτικά Παραδείγματα Κυκλωμάτων</h2>
+
+<h3>Example 1: Budget ESP32 Board (2-layer PCB)</h3>
+
+<pre>
+<b>Bill of Materials:</b>
+- ESP32-WROOM-32D
+- ME6211 LDO (3.3V, 500mA) - $0.10
+- Capacitors: 2× 100nF, 1× 10µF X7R - $0.05
+- USB-to-Serial: CH340C - $0.30
+- Total BOM (power section): <b>~$0.45</b>
+
+<b>Schematic:</b>
+
+    +5V USB
+      │
+      ├─── 10µF ───┐
+      │            │
+      ▼            │
+   ┌─────────┐     │
+   │ ME6211  │     │
+   │ (3.3V)  │     │
+   │ SOT-23  │     │
+   └─────────┘     │
+      │            │
+      ├─── 10µF ───┤
+      │            │
+      ├─── 100nF ──┤
+      │            │
+      ▼            │
+   (ESP32 VDD) ────┘
+      ×4 pins
+
+   Each pin: 100nF to GND
+   GND: solid plane on bottom layer
+
+<b>Performance:</b>
+✅ WiFi stable
+✅ No brownouts with proper layout
+✅ Temperature: ~55°C @ ambient 25°C
+⚠️  Limited to USB 5V input only
+</pre>
+
+<h3>Example 2: Battery-Powered IoT Device</h3>
+
+<pre>
+<b>Requirements:</b>
+- Input: Li-ion 3.7-4.2V
+- Sleep current: <100µA
+- WiFi periodic (every 5 min)
+
+<b>Solution:</b>
+
+    Li-ion (4.2V max)
+      │
+      ├─── 22µF X5R ───┐
+      │                │
+      ▼                │
+   ┌─────────┐         │
+   │ MIC5504 │ (Iq=45µA, dropout=0.2V)
+   │ 3.3V    │         │
+   │ SOT-23  │         │
+   └─────────┘         │
+      │                │
+      ├─── 10µF ───────┤
+      ├─── 100nF (×4) ─┤
+      │                │
+      ▼                │
+   ESP32 VDD ──────────┘
+
+<b>Battery Life Calculation:</b>
+
+Average current:
+- Sleep 23h 50min: 50µA (ESP32) + 45µA (LDO) = 95µA
+- Active 10min: 120mA average
+
+Daily Ah:
+  (95µA × 23.83h + 120mA × 0.167h) / 24h = 0.933 mAh/day
+
+Battery: 2000mAh Li-ion
+Life: 2000 / 0.933 ≈ <b>2145 days (5.9 years)</b> theoretical
+Practical: ~3-4 years (accounting for self-discharge)
+
+✅ MIC5504 selected for ultra-low Iq
+✅ Dropout 0.2V → works down to 3.5V battery
+</pre>
+
+<h3>Example 3: Industrial ESP32 + TFT (Buck + LDO)</h3>
+
+<pre>
+<b>Requirements:</b>
+- Input: 12V industrial power
+- Load: ESP32 + 2.8" TFT (150mA) = ~300mA total
+- Temperature range: -20°C to +70°C
+
+<b>Solution: 2-stage</b>
+
+    +12V Industrial
+      │
+      ├─── 100µF Electrolytic
+      │
+      ▼
+   ┌──────────────┐
+   │ MP2315 Buck  │  12V → 3.6V @ 3A
+   │ + Inductor   │  Efficiency: ~90%
+   │ + Schottky   │
+   └──────────────┘
+      │
+      ├─── 22µF X5R (output filter)
+      │
+      ▼
+   ┌──────────────┐
+   │ TLV700       │  3.6V → 3.3V (Industrial grade)
+   │ 3.3V 300mA   │  Filters Buck noise
+   │ SOT-89       │
+   └──────────────┘
+      │
+      ├─── 22µF bulk
+      ├─── 10µF 
+      ├─── 100nF (×6)
+      │
+      ├───→ ESP32 (3.3V)
+      └───→ TFT (3.3V)
+
+<b>Thermal Analysis:</b>
+
+Buck stage:
+Pin = 12V × 0.3A = 3.6W
+Pout = 3.6V × 0.3A = 1.08W
+Efficiency = 1.08/3.6 = 30%... WAIT! Buck is efficient!
+Actual: 0.3A × 3.6V / 0.9 = 1.2W input @ 90% eff.
+Ploss_buck ≈ 0.12W (dissipated across inductor + diode + IC)
+
+LDO stage:
+Ploss_LDO = (3.6 - 3.3) × 0.3A = 0.09W ✅ Very cool!
+
+✅ Total efficiency: ~88%
+✅ LDO temperature: <40°C
+✅ TLV700 industrial rating: -40°C to +125°C
+✅ No EMI issues - LDO filters Buck switching noise
+</pre>
+
+<h3>Example 4: Precision ADC Application</h3>
+
+<pre>
+<b>Challenge:</b> ESP32 ADC (12-bit) with analog sensors
+Requirement: Noise < 10mV to avoid ±10 LSB errors
+
+<b>Solution: Dual-rail power</b>
+
+    +5V
+     │
+     ├──→ (Digital rail)
+     │    ┌────────┐
+     │    │ ME6211 │ 5V → 3.3V (for ESP32 digital, WiFi)
+     │    └────────┘
+     │        │
+     │        └─→ ESP32 VDD (pins 1,2,3,4)
+     │
+     └──→ (Analog rail - ultra-clean)
+          ┌────────┐
+          │MIC5504 │ 5V → 3.3V (ultra-low noise)
+          └────────┘
+              │
+              ├─→ 10µF + 100nF
+              │
+              ├─→ RC filter (100Ω + 10µF)
+              │
+              └─→ ESP32 VDDA (analog supply pin)
+                  └─→ ADC reference
+
+<b>Additional filtering:</b>
+- Sensor → 1kΩ → 100nF → ADC input
+- Separate AGND pour around analog section
+- Keep analog traces away from WiFi antenna
+
+<b>Results:</b>
+✅ ADC noise: <5mV
+✅ 12-bit resolution maintained (±2 LSB)
+✅ Stable readings during WiFi TX
+</pre>
+</div>
+
+<!-- ============================================= -->
+<div class="section">
+<h2>📚 Συμπέρασμα & Quick Reference</h2>
+
+<h3>✅ DO's (Κάνε αυτά):</h3>
+<ul>
+<li><b>Χρησιμοποίησε σύγχρονα LDO:</b> ME6211, MIC5504, RT9080, TLV700</li>
+<li><b>Buck + LDO</b> για Vin > 5V ή high current (>300mA)</li>
+<li><b>Multiple decoupling caps:</b> 100nF σε κάθε VDD pin + 10-22µF bulk</li>
+<li><b>Thermal vias:</b> 6-9 vias κάτω από LDO thermal pad</li>
+<li><b>Short traces:</b> LDO → capacitors → ESP32 (minimize inductance)</li>
+<li><b>Solid ground plane:</b> ≥70% coverage on bottom layer (2-layer PCB)</li>
+<li><b>Test under load:</b> WiFi continuous TX, oscilloscope στο 3.3V rail</li>
+</ul>
+
+<h3>❌ DON'Ts (Μην κάνεις αυτά):</h3>
+<ul>
+<li><b>AMS1117</b> για ESP32/WiFi (brownouts guaranteed)</li>
+<li><b>5V → 3.3V direct LDO</b> σε high current (overheating)</li>
+<li><b>Μακριές, λεπτές traces</b> τροφοδοσίας (<0.5mm width)</li>
+<li><b>Ένας μόνο πυκνωτής</b> για decoupling (χρειάζονται πολλαπλοί)</li>
+<li><b>Buck output κατευθείαν</b> στο ESP32 (RF noise)</li>
+<li><b>Ignore thermal design</b> - πάντα υπολόγιζε θερμότητα</li>
+<li><b>Skip testing</b> - measure, don't assume!</li>
+</ul>
+
+<h3>🎯 Quick Selection Guide:</h3>
+
+<table>
+<tr>
+<th>Σενάριο</th>
+<th>Προτεινόμενη Λύση</th>
+<th>Κόστος</th>
+</tr>
+<tr>
+<td>Prototype / Arduino (no WiFi)</td>
+<td>AMS1117</td>
+<td>~$0.05</td>
+</tr>
+<tr>
+<td>ESP32 από USB (5V)</td>
+<td>ME6211 ή RT9080</td>
+<td>~$0.10</td>
+</tr>
+<tr>
+<td>Battery (Li-ion 3.7V)</td>
+<td>MIC5504 ή AP2112</td>
+<td>~$0.15</td>
+</tr>
+<tr>
+<td>12V input</td>
+<td>MP2315 (Buck) + ME6211 (LDO)</td>
+<td>~$1.00</td>
+</tr>
+<tr>
+<td>Industrial / Automotive</td>
+<td>AOZ1282 (Buck) + TLV700 (LDO)</td>
+<td>~$1.80</td>
+</tr>
+<tr>
+<td>Precision ADC</td>
+<td>TPS62177 (Buck) + MIC5504 (LDO)</td>
+<td>~$2.00</td>
+</tr>
+</table>
+
+<div class="tip" style="margin-top: 30px;">
+<b>🎓 Final Tip:</b>
+<br>Η σωστή τροφοδοσία είναι το <b>90% της σταθερότητας</b> ενός embedded project.
+Μην εξοικονομείς $0.10 στο regulator για να χάσεις ώρες debugging brownouts!
+<br><br>
+<b>Measure, test, iterate.</b> Το oscilloscope είναι ο καλύτερός σου φίλος. 📊
+</div>
+</div>
+
+<footer style="text-align: center; padding: 30px; color: #666; margin-top: 40px; border-top: 2px solid #ddd;">
+<p><b>Created for ESP32 & Custom PCB Enthusiasts</b></p>
+<p>Happy building! 🔧⚡</p>
+</footer>
+
+</div>
+</body>
+</html>
