@@ -1,110 +1,264 @@
 <!doctype html>
 <html lang="el">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Ender 3 V3 SE — Ρυθμίσεις & Tricks για PLA (Nozzle 0.4)</title>
-  <style>
-    :root{--bg:#0f1720;--card:#0b1220;--muted:#9fb0c8;--accent:#4fd1c5;--glass:rgba(255,255,255,0.04)}
-    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; margin:0;background:linear-gradient(180deg,#071026 0%, #07182b 100%);color:#e6f3fb}
-    header{padding:28px 20px;border-bottom:1px solid rgba(255,255,255,0.03)}
-    .container{max-width:1000px;margin:28px auto;padding:20px}
-    h1{margin:0 0 6px;font-size:20px}
-    p.lead{margin:0;color:var(--muted)}
-    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
-    .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    select,input[type=number]{background:var(--glass);border:1px solid rgba(255,255,255,0.2);color:#e6f3fb;padding:8px 10px;border-radius:8px;appearance:none;-webkit-appearance:none;}
-    select option{background:#0b1220;color:#e6f3fb;}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
-    .setting{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:8px}
-    .setting h3{margin:0;font-size:13px}
-    .value{margin-top:8px;font-weight:700;font-size:15px}
-    .muted{color:var(--muted);font-size:13px}
-    footer{margin-top:18px;color:var(--muted);font-size:13px}
-    .row{display:flex;gap:8px;align-items:center}
-    button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:inherit}
-    pre{background:#061020;padding:12px;border-radius:8px;overflow:auto}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width:720px){.two-col{grid-template-columns:1fr}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ender 3 V3 SE — Ρυθμίσεις & Tricks για PLA (Nozzle 0.4)</title>
+<style>
+:root{--bg:#0f1720;--card:#0b1220;--muted:#9fb0c8;--accent:#4fd1c5;--glass:rgba(255,255,255,0.04)}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; margin:0;background:linear-gradient(180deg,#071026 0%, #07182b 100%);color:#e6f3fb}
+header{padding:28px 20px;border-bottom:1px solid rgba(255,255,255,0.03)}
+.container{max-width:1000px;margin:28px auto;padding:20px}
+h1{margin:0 0 6px;font-size:20px}
+p.lead{margin:0;color:var(--muted)}
+.card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+select,input[type=number]{background:var(--glass);border:1px solid rgba(255,255,255,0.2);color:#e6f3fb;padding:8px 10px;border-radius:8px;appearance:none;-webkit-appearance:none;}
+select option{background:#0b1220;color:#e6f3fb;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:14px}
+.setting{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:8px}
+.setting h3{margin:0;font-size:13px}
+.value{margin-top:8px;font-weight:700;font-size:15px}
+.location{margin-top:4px;color:var(--accent);font-size:11px;font-style:italic;line-height:1.4}
+.muted{color:var(--muted);font-size:13px}
+footer{margin-top:18px;color:var(--muted);font-size:13px}
+.row{display:flex;gap:8px;align-items:center}
+button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:inherit;cursor:pointer}
+button.active{background:var(--accent);color:#0b1220;border-color:var(--accent)}
+pre{background:#061020;padding:12px;border-radius:8px;overflow:auto;font-size:13px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.calc-group{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;margin-top:10px}
+.calc-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin:8px 0}
+.calc-result{background:var(--accent);color:#0b1220;padding:10px;border-radius:6px;font-weight:700;text-align:center;margin-top:10px}
+label{font-size:13px;white-space:nowrap}
+input[type=number]{width:80px}
+.tip-box{background:rgba(79,209,197,0.1);border-left:3px solid var(--accent);padding:12px;border-radius:6px;margin-top:12px}
+.tip-box strong{color:var(--accent)}
+@media (max-width:720px){.two-col{grid-template-columns:1fr}.calc-row{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <h1>Ender 3 V3 SE — PLA Ρυθμίσεις Πρώτης Στρώσης & Tricks</h1>
-      <p class="lead">Προτεινόμενες ρυθμίσεις και τεχνάσματα για σταθερή πρόσφυση και άριστο πρώτο layer στον Ender 3 V3 SE με PLA και μύτη 0.4 mm.</p>
-    </div>
-  </header>
+<header>
+<div class="container">
+<h1>Ender 3 V3 SE — PLA Ρυθμίσεις Πρώτης Στρώσης & Tricks</h1>
+<p class="lead">Προτεινόμενες ρυθμίσεις και τεχνάσματα για σταθερή πρόσφυση και άριστο πρώτο layer στον Ender 3 V3 SE με PLA και μύτη 0.4 mm.</p>
+</div>
+</header>
+<main class="container">
+<div class="card">
+<div class="tabs">
+<button class="tab-btn active" data-tab="generic">Γενικές Ρυθμίσεις</button>
+<button class="tab-btn" data-tab="orca">Orca Slicer</button>
+<button class="tab-btn" data-tab="calculator">Flow Calculator</button>
+</div>
+<div class="controls">
+<div class="row">
+<label for="resolution">Ανάλυση (Layer height):&nbsp;</label>
+<select id="resolution" aria-label="Επιλογή ανάλυσης">
+<option value="0.12">0.12 mm</option>
+<option value="0.16">0.16 mm</option>
+<option value="0.20" selected>0.20 mm</option>
+<option value="0.24">0.24 mm</option>
+</select>
+</div>
+<div class="row">
+<label for="nozzle">Μύτη (Nozzle):&nbsp;</label>
+<input id="nozzle" type="text" value="0.4 mm" readonly aria-readonly="true">
+</div>
+</div>
 
-  <main class="container">
-    <div class="card">
-      <div class="controls">
-        <div class="row">
-          <label for="resolution">Ανάλυση (Layer height):&nbsp;</label>
-          <select id="resolution" aria-label="Επιλογή ανάλυσης">
-            <option value="0.12">0.12 mm</option>
-            <option value="0.16">0.16 mm</option>
-            <option value="0.20" selected>0.20 mm</option>
-            <option value="0.28">0.28 mm</option>
-          </select>
-        </div>
-        <div class="row">
-          <label for="nozzle">Μύτη (Nozzle):&nbsp;</label>
-          <input id="nozzle" type="text" value="0.4 mm" readonly aria-readonly="true">
-        </div>
-      </div>
+<!-- Tab 1: Γενικές Ρυθμίσεις -->
+<div class="tab-content active" id="tab-generic">
+<div class="grid" id="settingsGrid" style="margin-top:16px"></div>
+</div>
 
-      <div class="grid" id="settingsGrid" style="margin-top:16px"></div>
-    </div>
+<!-- Tab 2: Orca Slicer -->
+<div class="tab-content" id="tab-orca">
+<div class="grid" id="orcaSettingsGrid" style="margin-top:16px"></div>
+</div>
 
-    <div class="card two-col" style="margin-top:12px">
-      <div>
-        <h2>Cheat-sheet (σύντομο)</h2>
-        <pre id="cheatsheet" aria-hidden="false"></pre>
-      </div>
-      <div>
-        <h2>Tricks & Extras για Ender 3 V3 SE</h2>
-        <ul class="muted" style="margin:8px 0 0;padding-left:18px">
-          <li><b>Auto Bed Leveling + Z Offset:</b> Εκτέλεσε ABL σε προθερμασμένο bed (~60°C) και κάνε fine tune με μικρά βήματα 0.02mm.</li>
-          <li><b>Επανα-καλιμπράρισε το flow</b> με μέτρηση κύβου 20mm για 100% ακρίβεια σε πρώτη στρώση.</li>
-          <li><b>Προθέρμανση πριν το print:</b> Περίμενε 1-2 λεπτά μετά τη σταθεροποίηση θερμοκρασιών για ομοιόμορφη θερμότητα στο bed.</li>
-          <li><b>Bed Adhesion:</b> Προτίμησε απλό PEI sheet ή μαγνητική επιφάνεια, καθάρισε με IPA ή σαπούνι.</li>
-          <li><b>Retraction:</b> 0.8–1.0mm στα 35mm/s για αποφυγή stringing στο PLA.</li>
-          <li><b>Fan Speed:</b> Κράτα 0–30% στις πρώτες 3 στρώσεις για καλή πρόσφυση, μετά 100%.</li>
-          <li><b>Μείωσε Vibrations:</b> Βάλε αντικραδασμικά ποδαράκια ή πάτο σιλικόνης κάτω από τον εκτυπωτή.</li>
-          <li><b>Μην αγγίζεις το bed</b> μετά τον καθαρισμό — τα έλαια των χεριών μειώνουν την πρόσφυση.</li>
-          <li><b>Έλεγχος πρώτης στρώσης:</b> Η ράβδος πρέπει να δείχνει “στρωμένη” αλλά όχι υπερ-πιεσμένη (βλέπε elephant foot).</li>
-          <li><b>Κλείδωμα καλωδίων:</b> Έλεγξε τα καλώδια της κεφαλής — σε κάποιες V3 SE χτυπούν το frame.</li>
-          <li><b>G-code Trick:</b> Πρόσθεσε <code>M420 S1</code> μετά το G28 για να ενεργοποιείται αυτόματα το mesh leveling.</li>
-          <li><b>Δοκίμασε διαφορετικά patterns 1ης στρώσης:</b> concentric ή zig-zag προσφέρουν πιο σταθερή πρόσφυση.</li>
-        </ul>
-      </div>
-    </div>
-  </main>
+<!-- Tab 3: Flow Calculator -->
+<div class="tab-content" id="tab-calculator">
+<h2 style="margin-top:16px">Flow Ratio Calculator</h2>
+<p class="muted">Εκτύπωσε calibration cube με single wall (0.4mm thickness) και μέτρησε το πάχος τοίχου με παχύμετρο.</p>
+<div class="calc-group">
+<div class="calc-row">
+<label>Επιθυμητό πάχος:</label>
+<input type="number" id="target" value="0.40" step="0.01" min="0.1" max="1">
+<span>mm</span>
+</div>
+<div class="calc-row">
+<label>Μετρημένο πάχος:</label>
+<input type="number" id="measured" value="0.41" step="0.01" min="0.1" max="1">
+<span>mm</span>
+</div>
+<div class="calc-row">
+<label>Τρέχον Flow Ratio:</label>
+<input type="number" id="currentFlow" value="0.98" step="0.01" min="0.5" max="1.5">
+<span></span>
+</div>
+<button onclick="calculateFlow()" style="width:100%;margin-top:12px;background:var(--accent);color:#0b1220;border:none;padding:12px;font-weight:700">Υπολογισμός</button>
+<div class="calc-result" id="result" style="display:none"></div>
+</div>
+<div class="tip-box">
+<strong>Παράδειγμα:</strong><br>
+Εκτύπωσες cube και μέτρησες:<br>
+• Σημείο 1: 0.42mm<br>
+• Σημείο 2: 0.43mm<br>
+• Σημείο 3: 0.41mm<br>
+• Σημείο 4: 0.42mm<br>
+<strong>Μέσος όρος = 0.42mm</strong><br><br>
+Τύπος: <code>(0.40 / 0.42) × 0.98 = 0.93</code><br>
+➜ Βάλε <strong>Flow Ratio = 0.93</strong> στο Material settings → Filament → Flow ratio
+</div>
+</div>
+</div>
 
-  <script>
-    const presets = {
-      "0.12": {"Layer Height": "0.12 mm","Initial Layer Height": "0.20 - 0.24 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 20 mm/s","Initial Layer Line Width": "120%","Nozzle Temp": "205°C","Bed Temp": "60°C"},
-      "0.16": {"Layer Height": "0.16 mm","Initial Layer Height": "0.22 - 0.26 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 22 mm/s","Initial Layer Line Width": "115%","Nozzle Temp": "205°C","Bed Temp": "60°C"},
-      "0.20": {"Layer Height": "0.20 mm","Initial Layer Height": "0.24 - 0.28 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 25 mm/s","Initial Layer Line Width": "115%","Nozzle Temp": "205°C","Bed Temp": "60°C"},
-      "0.28": {"Layer Height": "0.28 mm","Initial Layer Height": "0.30 - 0.34 mm","Initial Layer Flow": "105%","Initial Layer Speed": "15 - 30 mm/s","Initial Layer Line Width": "110%","Nozzle Temp": "205°C","Bed Temp": "60°C"}
-    };
+<div class="card two-col" style="margin-top:12px">
+<div>
+<h2>Cheat-sheet (σύντομο)</h2>
+<pre id="cheatsheet" aria-hidden="false"></pre>
+</div>
+<div>
+<h2>Tricks & Extras για Ender 3 V3 SE</h2>
+<ul class="muted" style="margin:8px 0 0;padding-left:18px">
+<li><b>Auto Bed Leveling + Z Offset:</b> Εκτέλεσε ABL σε προθερμασμένο bed (~60°C) και κάνε fine tune με μικρά βήματα 0.02mm.</li>
+<li><b>Flow Calibration:</b> Εκτύπωσε single-wall cube, μέτρησε πάχος τοίχου και χρησιμοποίησε το Flow Calculator για ακριβές αποτέλεσμα.</li>
+<li><b>Προθέρμανση πριν το print:</b> Περίμενε 1-2 λεπτά μετά τη σταθεροποίηση θερμοκρασιών για ομοιόμορφη θερμότητα στο bed.</li>
+<li><b>Bed Adhesion:</b> Προτίμησε απλό PEI sheet ή μαγνητική επιφάνεια, καθάρισε με IPA ή σαπούνι. Μην αγγίζεις το bed με τα χέρια.</li>
+<li><b>Retraction:</b> 0.8–1.0mm στα 35mm/s για αποφυγή stringing στο PLA.</li>
+<li><b>Fan Speed:</b> Κράτα 0–30% στις πρώτες 3 στρώσεις για καλή πρόσφυση, μετά 100%.</li>
+<li><b>Top Surface Issues:</b> Αν φαίνεται η από κάτω στρώση: Top surface flow ratio → 1.05, Top surface line width → 0.44-0.45mm, Top shell layers → 4-5.</li>
+<li><b>First Layer Adhesion:</b> Αν δεν κολλάει: Z-offset -0.02 πιο κοντά, bed 65°C, initial layer width 0.48-0.52mm, initial layer speed 10-15mm/s.</li>
+<li><b>Μείωσε Vibrations:</b> Βάλε αντικραδασμικά ποδαράκια ή πάτο σιλικόνης κάτω από τον εκτυπωτή.</li>
+<li><b>Έλεγχος πρώτης στρώσης:</b> Η ράβδος πρέπει να δείχνει "στρωμένη" αλλά όχι υπερ-πιεσμένη (βλέπε elephant foot).</li>
+<li><b>Κλείδωμα καλωδίων:</b> Έλεγξε τα καλώδια της κεφαλής — σε κάποιες V3 SE χτυπούν το frame.</li>
+<li><b>G-code Trick:</b> Πρόσθεσε <code>M420 S1</code> μετά το G28 για να ενεργοποιείται αυτόματα το mesh leveling.</li>
+<li><b>Ironing για τέλειο finish:</b> Quality → Ironing → Ironing Type = All top surfaces.</li>
+<li><b>Δοκίμασε διαφορετικά patterns 1ης στρώσης:</b> concentric ή zig-zag προσφέρουν πιο σταθερή πρόσφυση.</li>
+</ul>
+</div>
+</div>
+</main>
+<script>
+const presets = {
+"0.12": {"Layer Height": "0.12 mm","Initial Layer Height": "0.20 - 0.24 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 20 mm/s","Initial Layer Line Width": "0.48 - 0.52 mm","Nozzle Temp": "205°C","Bed Temp": "60°C"},
+"0.16": {"Layer Height": "0.16 mm","Initial Layer Height": "0.22 - 0.26 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 22 mm/s","Initial Layer Line Width": "0.48 - 0.52 mm","Nozzle Temp": "205°C","Bed Temp": "60°C"},
+"0.20": {"Layer Height": "0.20 mm","Initial Layer Height": "0.24 - 0.28 mm","Initial Layer Flow": "110%","Initial Layer Speed": "15 - 25 mm/s","Initial Layer Line Width": "0.48 - 0.52 mm","Nozzle Temp": "205°C","Bed Temp": "60°C"},
+"0.24": {"Layer Height": "0.24 mm","Initial Layer Height": "0.28 - 0.32 mm","Initial Layer Flow": "105%","Initial Layer Speed": "15 - 30 mm/s","Initial Layer Line Width": "0.48 - 0.52 mm","Nozzle Temp": "205°C","Bed Temp": "60°C"}
+};
 
-    function renderSettings(res){
-      const grid = document.getElementById('settingsGrid');
-      grid.innerHTML = '';
-      const p = presets[res];
-      for(const key in p){
-        const d = document.createElement('div');
-        d.className = 'setting';
-        d.innerHTML = `<h3>${key}</h3><div class='value'>${p[key]}</div>`;
-        grid.appendChild(d);
-      }
-      document.getElementById('cheatsheet').textContent = `Ender 3 V3 SE PLA\nΑνάλυση ${res}mm\n` + Object.entries(p).map(([k,v])=>`${k}: ${v}`).join('\n');
-    }
+const orcaSettings = {
+"0.12": {
+"Layer Height": {value: "0.12 mm", location: "Quality → Layer height → Layer height"},
+"Initial Layer Height": {value: "0.20 - 0.24 mm", location: "Quality → Layer height → Initial layer height"},
+"Initial Layer Flow": {value: "110%", location: "Others → Flow → Initial layer flow ratio"},
+"Initial Layer Speed": {value: "15 - 20 mm/s", location: "Speed → First layer speed"},
+"Initial Layer Line Width": {value: "0.48 - 0.52 mm", location: "Quality → Line width → Initial layer"},
+"Nozzle Temp (First Layer)": {value: "205°C", location: "Filament → Print temperature → Nozzle (Initial layer)"},
+"Bed Temp (First Layer)": {value: "60°C", location: "Filament → Bed temperature → Initial layer"}
+},
+"0.16": {
+"Layer Height": {value: "0.16 mm", location: "Quality → Layer height → Layer height"},
+"Initial Layer Height": {value: "0.22 - 0.26 mm", location: "Quality → Layer height → Initial layer height"},
+"Initial Layer Flow": {value: "110%", location: "Others → Flow → Initial layer flow ratio"},
+"Initial Layer Speed": {value: "15 - 22 mm/s", location: "Speed → First layer speed"},
+"Initial Layer Line Width": {value: "0.48 - 0.52 mm", location: "Quality → Line width → Initial layer"},
+"Nozzle Temp (First Layer)": {value: "205°C", location: "Filament → Print temperature → Nozzle (Initial layer)"},
+"Bed Temp (First Layer)": {value: "60°C", location: "Filament → Bed temperature → Initial layer"}
+},
+"0.20": {
+"Layer Height": {value: "0.20 mm", location: "Quality → Layer height → Layer height"},
+"Initial Layer Height": {value: "0.24 - 0.28 mm", location: "Quality → Layer height → Initial layer height"},
+"Initial Layer Flow": {value: "110%", location: "Others → Flow → Initial layer flow ratio"},
+"Initial Layer Speed": {value: "15 - 25 mm/s", location: "Speed → First layer speed"},
+"Initial Layer Line Width": {value: "0.48 - 0.52 mm", location: "Quality → Line width → Initial layer"},
+"Nozzle Temp (First Layer)": {value: "205°C", location: "Filament → Print temperature → Nozzle (Initial layer)"},
+"Bed Temp (First Layer)": {value: "60°C", location: "Filament → Bed temperature → Initial layer"}
+},
+"0.24": {
+"Layer Height": {value: "0.24 mm", location: "Quality → Layer height → Layer height"},
+"Initial Layer Height": {value: "0.28 - 0.32 mm", location: "Quality → Layer height → Initial layer height"},
+"Initial Layer Flow": {value: "105%", location: "Others → Flow → Initial layer flow ratio"},
+"Initial Layer Speed": {value: "15 - 30 mm/s", location: "Speed → First layer speed"},
+"Initial Layer Line Width": {value: "0.48 - 0.52 mm", location: "Quality → Line width → Initial layer"},
+"Nozzle Temp (First Layer)": {value: "205°C", location: "Filament → Print temperature → Nozzle (Initial layer)"},
+"Bed Temp (First Layer)": {value: "60°C", location: "Filament → Bed temperature → Initial layer"}
+}
+};
 
-    document.getElementById('resolution').addEventListener('change', e=>renderSettings(e.target.value));
-    renderSettings('0.20');
-  </script>
+function renderSettings(res){
+const grid = document.getElementById('settingsGrid');
+grid.innerHTML = '';
+const p = presets[res];
+for(const key in p){
+const d = document.createElement('div');
+d.className = 'setting';
+d.innerHTML = `<h3>${key}</h3><div class='value'>${p[key]}</div>`;
+grid.appendChild(d);
+}
+document.getElementById('cheatsheet').textContent = `Ender 3 V3 SE PLA\nΑνάλυση ${res}mm\n` + Object.entries(p).map(([k,v])=>`${k}: ${v}`).join('\n');
+}
+
+function renderOrcaSettings(res){
+const grid = document.getElementById('orcaSettingsGrid');
+grid.innerHTML = '';
+const p = orcaSettings[res];
+for(const key in p){
+const d = document.createElement('div');
+d.className = 'setting';
+d.innerHTML = `<h3>${key}</h3><div class='value'>${p[key].value}</div><div class='location'>📍 ${p[key].location}</div>`;
+grid.appendChild(d);
+}
+}
+
+function calculateFlow(){
+const target = parseFloat(document.getElementById('target').value);
+const measured = parseFloat(document.getElementById('measured').value);
+const current = parseFloat(document.getElementById('currentFlow').value);
+if(isNaN(target) || isNaN(measured) || isNaN(current) || measured === 0){
+alert('Παρακαλώ συμπλήρωσε όλα τα πεδία με έγκυρες τιμές');
+return;
+}
+const newFlow = (target / measured) * current;
+const result = document.getElementById('result');
+result.style.display = 'block';
+result.innerHTML = `
+<div style="font-size:16px">Νέο Flow Ratio</div>
+<div style="font-size:24px;margin-top:6px">${newFlow.toFixed(3)} ≈ ${newFlow.toFixed(2)}</div>
+<div style="font-size:12px;margin-top:8px;opacity:0.8">Τύπος: (${target.toFixed(2)} / ${measured.toFixed(2)}) × ${current.toFixed(2)} = ${newFlow.toFixed(3)}</div>
+<div style="font-size:11px;margin-top:8px;opacity:0.7">Βάλε αυτή την τιμή στο: Material settings → Filament → Flow ratio</div>
+`;
+}
+
+document.getElementById('resolution').addEventListener('change', e => {
+const res = e.target.value;
+renderSettings(res);
+renderOrcaSettings(res);
+});
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+btn.addEventListener('click', e => {
+document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+e.target.classList.add('active');
+document.getElementById('tab-' + e.target.dataset.tab).classList.add('active');
+});
+});
+
+// Allow Enter key on calculator inputs
+document.querySelectorAll('#tab-calculator input').forEach(input => {
+input.addEventListener('keypress', e => {
+if(e.key === 'Enter') calculateFlow();
+});
+});
+
+renderSettings('0.20');
+renderOrcaSettings('0.20');
+</script>
 </body>
 </html>
