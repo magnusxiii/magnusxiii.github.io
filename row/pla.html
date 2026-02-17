@@ -53,6 +53,7 @@ input[type=number]{width:80px}
 <button class="tab-btn active" data-tab="generic">Γενικές Ρυθμίσεις</button>
 <button class="tab-btn" data-tab="orca">Orca Slicer</button>
 <button class="tab-btn" data-tab="calculator">Flow Calculator</button>
+<button class="tab-btn" data-tab="startgcode">Start G-code</button>
 </div>
 <div class="controls">
 <div class="row">
@@ -115,6 +116,142 @@ input[type=number]{width:80px}
 ➜ Βάλε <strong>Flow Ratio = 0.93</strong> στο Material settings → Filament → Flow ratio
 </div>
 </div>
+
+<!-- Tab 4: Start G-code -->
+<div class="tab-content" id="tab-startgcode">
+
+  <p style="font-size:12px;color:var(--muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:0.08em;">⚙️ Αρχικοποίηση</p>
+  <div class="grid">
+    <div class="setting">
+      <h3><code style="color:var(--accent)">M220 S100</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Reset Feedrate</span></h3>
+      <div class="value">Επαναφορά Ταχύτητας → 100%</div>
+      <div class="location">Μηδενίζει οποιοδήποτε override ταχύτητας (feedrate %) είχε μείνει από προηγούμενο print. Χωρίς αυτό ο εκτυπωτής θα ξεκινούσε με λάθος ταχύτητα αν είχες αλλάξει το feedrate mid-print.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">M221 S100</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Reset Flowrate</span></h3>
+      <div class="value">Επαναφορά Ροής Εξώθησης → 100%</div>
+      <div class="location">Επαναφέρει το flow (extrusion multiplier) στο 100%. Αποτρέπει υπο-εξώθηση ή υπερ-εξώθηση στην 1η στρώση αν είχε αλλαχτεί χειροκίνητα στο προηγούμενο print.</div>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted);margin:18px 0 8px;text-transform:uppercase;letter-spacing:0.08em;">🌡️ Προθέρμανση</p>
+  <div class="grid">
+    <div class="setting">
+      <h3><code style="color:var(--accent)">M190 S{material_bed_temperature_layer_0}</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Heat bed and wait</span></h3>
+      <div class="value">Θέρμανση Bed + Αναμονή</div>
+      <div class="location">Θερμαίνει το κρεβάτι στη θερμοκρασία του slicer (π.χ. 60°C για PLA) και <strong>περιμένει</strong> να φτάσει πριν συνεχίσει. Κρίσιμο — αν το bed δεν είναι ζεστό η 1η στρώση δεν κολλάει.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">M104 S150</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Preheat hotend 150°C</span></h3>
+      <div class="value">Προθέρμανση Hotend → 150°C (χωρίς αναμονή)</div>
+      <div class="location">Ξεκινά να ζεσταίνει το hotend στα 150°C αλλά <strong>δεν περιμένει</strong>. Παράλληλα με την προθέρμανση του bed εξοικονομεί χρόνο. Στα 150°C δεν ooζει φιλαμέντο κατά το homing/leveling.</div>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted);margin:18px 0 8px;text-transform:uppercase;letter-spacing:0.08em;">🏠 Homing &amp; Auto Bed Leveling</p>
+  <div class="grid">
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G28</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Home all axes</span></h3>
+      <div class="value">Home X, Y, Z</div>
+      <div class="location">Στέλνει την κεφαλή στις αρχικές θέσεις (endstops) και στους 3 άξονες. Απαραίτητο — χωρίς homing ο εκτυπωτής δεν γνωρίζει πού βρίσκεται και κινδυνεύει να χτυπήσει.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G29</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Auto bed leveling</span></h3>
+      <div class="value">Αυτόματο Bed Leveling (ABL)</div>
+      <div class="location">Εκτελεί mesh bed leveling — ο probe (CR Touch/BLTouch) μετρά πολλά σημεία του bed και δημιουργεί mesh αντιστάθμισης. Γίνεται πάντα σε ζεστό bed για ακριβείς μετρήσεις.</div>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted);margin:18px 0 8px;text-transform:uppercase;letter-spacing:0.08em;">🔥 Τελική Θερμοκρασία Εκτύπωσης</p>
+  <div class="grid">
+    <div class="setting">
+      <h3><code style="color:var(--accent)">M109 S{material_print_temperature_layer_0}</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Wait for full hotend temp</span></h3>
+      <div class="value">Αναμονή για Full Temp Hotend (π.χ. 205°C)</div>
+      <div class="location">Τώρα περιμένει το hotend να φτάσει στη θερμοκρασία εκτύπωσης. Τοποθετείται <strong>μετά</strong> το G29 ώστε το φιλαμέντο να μην στάζει πάνω στο bed κατά το leveling.</div>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--muted);margin:18px 0 8px;text-transform:uppercase;letter-spacing:0.08em;">✏️ Purge Line — Καθαρισμός Nozzle</p>
+  <div class="grid">
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G92 E0</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Reset Extruder (1ο)</span></h3>
+      <div class="value">Μηδενισμός Μετρητή Εξώθησης</div>
+      <div class="location">Ορίζει την τρέχουσα θέση εξώθησης ως E=0. Αποτρέπει τον εκτυπωτή να θυμάται παλιές τιμές E — όλες οι επόμενες εντολές εξώθησης ξεκινούν από μηδέν.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G1 Z2.0 F3000</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Move Z up</span></h3>
+      <div class="value">Ανέβασμα Z στα 2mm</div>
+      <div class="location">Ανεβάζει τον άξονα Z στα 2mm πριν οποιαδήποτε οριζόντια κίνηση. Δίνει εκκαθάριση από το bed για να μην τρίψει η κεφαλή κατά τη μετακίνηση στη θέση εκκίνησης.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G1 X-3 Y20 Z0.28 F5000.0</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Move to start position</span></h3>
+      <div class="value">Μετακίνηση στη Θέση Εκκίνησης Purge</div>
+      <div class="location">Πηγαίνει γρήγορα (5000mm/min, χωρίς εξώθηση) στο X=-3, Y=20, Z=0.28mm — αριστερά εκτός της περιοχής εκτύπωσης. Το X=-3 εξασφαλίζει ότι η purge line τυπώνεται έξω από το αντικείμενο.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G1 X-3 Y100.0 Z0.28 F1500.0 E15</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Draw line 1</span></h3>
+      <div class="value">Πρώτη Γραμμή Purge (εξώθηση 15mm)</div>
+      <div class="location">Εξωθεί 15mm φιλαμέντο σχηματίζοντας κατακόρυφη γραμμή από Y=20 έως Y=100. Αργή ταχύτητα (1500mm/min) για καλό bonding στο bed. Εκκαθαρίζει παλιό ή υποβαθμισμένο φιλαμέντο από το nozzle.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G1 X-2 Y100.0 Z0.28 F5000.0</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Move to side</span></h3>
+      <div class="value">Πλευρική Μετατόπιση 1mm</div>
+      <div class="location">Μετακινείται 1mm δίπλα (X=-2) χωρίς εξώθηση. Η δεύτερη γραμμή θα τυπωθεί παράλληλα στην πρώτη χωρίς overlap — αποφεύγει να κολλήσει η purge line στην κεφαλή.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G1 X-2 Y20 Z0.28 F1500.0 E30</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Draw line 2</span></h3>
+      <div class="value">Δεύτερη Γραμμή Purge (E=30, δηλ. +15mm ακόμα)</div>
+      <div class="location">Εξωθεί άλλα 15mm προς τα κάτω (Y=100 → Y=20). Διπλή purge line = σίγουρο καθαρισμένο nozzle. Μετά το φιλαμέντο εξέρχεται καθαρό και συνεχόμενο, έτοιμο για την 1η στρώση.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G92 E0</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Reset Extruder (2ο)</span></h3>
+      <div class="value">Μηδενισμός Εξώθησης Ξανά</div>
+      <div class="location">Μηδενίζει ξανά τον E μετά την purge line. Από εδώ το slicer αρχίζει να μετράει εξώθηση από 0 για το κανονικό print. Αν παραλειφθεί το slicer υπολογίζει λάθος ποσότητα φιλαμέντου.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G1 E-1.0000 F1800</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Retract</span></h3>
+      <div class="value">Retraction -1mm @ 1800mm/min</div>
+      <div class="location">Τραβάει πίσω 1mm φιλαμέντο πριν το Z-up. Αποτρέπει oozing και stringing κατά τη γρήγορη ανύψωση. Σε συνδυασμό με το retraction του slicer διασφαλίζει καθαρή μετάβαση στο 1ο layer.</div>
+    </div>
+    <div class="setting">
+      <h3><code style="color:var(--accent)">G1 Z2.0 F3000</code> &nbsp;<span style="color:var(--muted);font-size:11px">; Z up — τέλος Start G-code</span></h3>
+      <div class="value">Ανέβασμα Z → 2mm (Τελικό)</div>
+      <div class="location">Ανεβάζει το hotend στα 2mm. Από εδώ αναλαμβάνει πλήρως το G-code του slicer για το κανονικό layer-by-layer printing. Ο εκτυπωτής είναι έτοιμος.</div>
+    </div>
+  </div>
+
+  <div class="tip-box" style="margin-top:18px">
+    <strong>💡 Λογική σειράς:</strong> <code>M190</code> bed αναμονή → <code>M104 S150</code> hotend παράλληλα → <code>G28</code> homing → <code>G29</code> leveling → <code>M109</code> full hotend temp → Purge line → Print.<br>
+    Η σειρά εξοικονομεί χρόνο (bed + hotend θερμαίνονται παράλληλα) και αποτρέπει oozing φιλαμέντου πάνω στο mesh κατά το leveling.
+  </div>
+
+<pre id="codePreview" style="display: block;">
+M220 S100 ; Reset Feedrate
+M221 S100 ; Reset Flowrate
+
+M190 S{material_bed_temperature_layer_0} ; Heat bed and wait
+M104 S150 ; Preheat hotend to 150°C (όχι full temp)
+
+G28 ; Home all axes
+G29 ; Run auto bed leveling
+
+M109 S{material_print_temperature_layer_0} ; NOW wait for hotend full temp
+
+G92 E0 ; Reset Extruder
+G1 Z2.0 F3000 ; Move Z Axis up
+G1 X-3 Y20 Z0.28 F5000.0 ; Move to start position
+G1 X-3 Y100.0 Z0.28 F1500.0 E15 ; Draw the first line
+G1 X-2 Y100.0 Z0.28 F5000.0 ; Move to side a little
+G1 X-2 Y20 Z0.28 F1500.0 E30 ; Draw the second line
+G92 E0 ; Reset Extruder
+G1 E-1.0000 F1800 ; Retract a bit
+G1 Z2.0 F3000 ; Move Z Axis up
+</pre>
+
+
+
+</div>
+
 </div>
 
 <div class="card two-col" style="margin-top:12px">
