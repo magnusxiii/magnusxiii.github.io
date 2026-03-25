@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electronics Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #0f1218;
+    --bg3: #161b24;
+    --bg4: #1c2330;
+    --border: #2a3444;
+    --border-bright: #3d5070;
+    --accent: #00d4ff;
+    --accent2: #0090cc;
+    --accent-dim: rgba(0,212,255,0.12);
+    --accent-glow: rgba(0,212,255,0.25);
+    --green: #39d98a;
+    --yellow: #f5c842;
+    --red: #ff5f5f;
+    --purple: #b07aff;
+    --orange: #ff9f43;
+    --text: #c8d6e8;
+    --text-dim: #6b7f99;
+    --text-bright: #e8f2ff;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Exo 2', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .logo span { color: var(--text-dim); }
+  .stats-bar {
+    display: flex;
+    gap: 20px;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+  .stats-bar b { color: var(--accent); }
+
+  /* ── TABS ── */
+  .tabs-wrapper {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px 18px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-count {
+    background: var(--bg4);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .tab-btn.active .tab-count {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    padding: 16px 24px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+  .search-box input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 8px 12px 8px 36px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus { border-color: var(--accent2); }
+  .search-box input::placeholder { color: var(--text-dim); }
+  .search-icon {
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+  select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    padding: 8px 12px;
+    outline: none;
+    cursor: pointer;
+  }
+  select:focus { border-color: var(--accent2); }
+  .btn {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent2);
+    border-radius: 6px;
+    color: var(--accent);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:hover { background: var(--accent-glow); }
+  .btn.green { background: rgba(57,217,138,0.1); border-color: var(--green); color: var(--green); }
+  .btn.green:hover { background: rgba(57,217,138,0.2); }
+
+  /* ── CONTENT ── */
+  .content { padding: 20px 24px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  thead {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border-bright);
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 12px 14px;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  th:hover { color: var(--accent); }
+  th.sort-asc::after { content: ' ▲'; font-size: 0.6rem; color: var(--accent); }
+  th.sort-desc::after { content: ' ▼'; font-size: 0.6rem; color: var(--accent); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  tbody tr.editing { background: rgba(0,212,255,0.05); outline: 1px solid var(--accent2); }
+
+  td {
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    vertical-align: middle;
+  }
+  td.name-cell {
+    color: var(--text-bright);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  td.box-cell {
+    color: var(--yellow);
+    font-size: 0.78rem;
+  }
+  td.type-cell { color: var(--purple); font-size: 0.78rem; }
+  td.desc-cell {
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    font-family: var(--sans);
+    max-width: 320px;
+  }
+  td.actions-cell { width: 90px; }
+
+  /* type badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .badge-nmos  { background: rgba(0,212,255,0.12); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+  .badge-pmos  { background: rgba(176,122,255,0.12); color: var(--purple); border: 1px solid rgba(176,122,255,0.3); }
+  .badge-npn   { background: rgba(57,217,138,0.12); color: var(--green); border: 1px solid rgba(57,217,138,0.3); }
+  .badge-pnp   { background: rgba(255,159,67,0.12); color: var(--orange); border: 1px solid rgba(255,159,67,0.3); }
+  .badge-vreg  { background: rgba(245,200,66,0.12); color: var(--yellow); border: 1px solid rgba(245,200,66,0.3); }
+  .badge-opamp { background: rgba(255,95,95,0.12); color: var(--red); border: 1px solid rgba(255,95,95,0.3); }
+  .badge-gate  { background: rgba(0,144,204,0.12); color: #5bc8f5; border: 1px solid rgba(0,144,204,0.3); }
+  .badge-driver { background: rgba(176,122,255,0.15); color: #d4a8ff; border: 1px solid rgba(176,122,255,0.3); }
+  .badge-audio { background: rgba(255,159,67,0.15); color: #ffb866; border: 1px solid rgba(255,159,67,0.3); }
+  .badge-scr   { background: rgba(255,95,95,0.15); color: var(--red); border: 1px solid rgba(255,95,95,0.3); }
+  .badge-triac { background: rgba(255,95,95,0.15); color: #ff9090; border: 1px solid rgba(255,95,95,0.3); }
+  .badge-opto  { background: rgba(57,217,138,0.1); color: #80e8b8; border: 1px solid rgba(57,217,138,0.25); }
+  .badge-ic    { background: rgba(100,200,255,0.1); color: #8dd7f7; border: 1px solid rgba(100,200,255,0.25); }
+  .badge-other { background: var(--bg4); color: var(--text-dim); border: 1px solid var(--border); }
+
+  /* inline edit */
+  .edit-input {
+    background: var(--bg);
+    border: 1px solid var(--accent2);
+    border-radius: 4px;
+    color: var(--text-bright);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    padding: 4px 8px;
+    width: 100%;
+    outline: none;
+  }
+  .edit-input.desc { font-family: var(--sans); font-size: 0.78rem; }
+  .edit-input.type-sel { font-size: 0.78rem; }
+
+  .icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+    color: var(--text-dim);
+  }
+  .icon-btn:hover { background: var(--bg4); color: var(--text); }
+  .icon-btn.save { color: var(--green); }
+  .icon-btn.delete { color: var(--red); }
+  .icon-btn.edit { color: var(--accent); }
+  .icon-btn.cancel { color: var(--text-dim); }
+
+  /* ── ADD ROW FORM ── */
+  .add-row-form {
+    display: none;
+    background: var(--bg3);
+    border: 1px solid var(--accent2);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .add-row-form.visible { display: flex; }
+  .form-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
+  .form-field label { font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); }
+  .form-field input, .form-field select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    padding: 7px 10px;
+    outline: none;
+  }
+  .form-field input:focus, .form-field select:focus { border-color: var(--accent2); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+  /* ── RESULT COUNT ── */
+  .result-info {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    padding: 8px 0 12px;
+  }
+  .result-info b { color: var(--accent); }
+
+  /* ── RESISTOR TABLE ── */
+  .r-section-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  td.r-value {
+    color: var(--text-bright);
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+  td.r-check {
+    text-align: center;
+    font-size: 1rem;
+  }
+  .r-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+  .r-dot-smd {
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+  td.r-check.empty { color: var(--border-bright); }
+
+  /* ── EXPORT / SAVE BUTTONS ── */
+  .btn.export { background: rgba(57,217,138,0.08); border-color: var(--green); color: var(--green); }
+  .btn.export:hover { background: rgba(57,217,138,0.18); }
+  .btn.save-local { background: rgba(245,200,66,0.08); border-color: var(--yellow); color: var(--yellow); }
+  .btn.save-local:hover { background: rgba(245,200,66,0.18); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡ <span>//</span> ELECTRONICS INVENTORY</div>
+  <div class="stats-bar" id="globalStats"></div>
+</header>
+
+<div class="tabs-wrapper" id="tabsWrapper"></div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Αναζήτηση component, κουτί, τύπος...">
+  </div>
+  <select id="boxFilter"><option value="">Όλα τα κουτιά</option></select>
+  <select id="typeFilter"><option value="">Όλοι οι τύποι</option></select>
+  <button class="btn green" id="addBtn">＋ Προσθήκη</button>
+  <button class="btn save-local" id="saveBtn">💾 Αποθήκευση</button>
+  <button class="btn export" id="exportBtn">📥 Excel</button>
+</div>
+
+<div class="content" id="mainContent"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+const TYPES = {
+  'N-Ch MOSFET': 'badge-nmos',
+  'P-Ch MOSFET': 'badge-pmos',
+  'NPN BJT': 'badge-npn',
+  'PNP BJT': 'badge-pnp',
+  'Voltage Reg': 'badge-vreg',
+  'Op-Amp': 'badge-opamp',
+  'Logic Gate': 'badge-gate',
+  'Driver IC': 'badge-driver',
+  'Audio IC': 'badge-audio',
+  'SCR/Thyristor': 'badge-scr',
+  'TRIAC': 'badge-triac',
+  'Optocoupler': 'badge-opto',
+  'IC / Other': 'badge-ic',
+  'Other': 'badge-other',
+};
+
+// Component knowledge base: name → [type, description]
+const KB = {
+  // ─── Voltage Regulators ───
+  'LM337':   ['Voltage Reg', 'Adj. αρνητικός ρυθμιστής (-1.2V έως -37V)'],
+  'LM338':   ['Voltage Reg', 'Adj. θετικός ρυθμιστής 5A (1.25V–32V)'],
+  'LM317':   ['Voltage Reg', 'Adj. θετικός ρυθμιστής 1.5A (1.25V–37V)'],
+  'LM1084':  ['Voltage Reg', 'LDO 5A adj/fixed, χαμηλή πτώση τάσης'],
+  'LM1117':  ['Voltage Reg', 'LDO 800mA, adj/fixed — πολύ κοινός σε 3.3V'],
+  '7805':    ['Voltage Reg', '+5V σταθεροποιητής 1A, TO-220'],
+  '7806':    ['Voltage Reg', '+6V σταθεροποιητής 1A'],
+  '7809':    ['Voltage Reg', '+9V σταθεροποιητής 1A'],
+  '7812':    ['Voltage Reg', '+12V σταθεροποιητής 1A'],
+  '7815':    ['Voltage Reg', '+15V σταθεροποιητής 1A'],
+  '7824':    ['Voltage Reg', '+24V σταθεροποιητής 1A'],
+  '7905':    ['Voltage Reg', '-5V αρνητικός σταθεροποιητής 1A'],
+  '7909':    ['Voltage Reg', '-9V αρνητικός σταθεροποιητής 1A'],
+  '7912':    ['Voltage Reg', '-12V αρνητικός σταθεροποιητής 1A'],
+  '78M05':   ['Voltage Reg', '+5V 500mA, TO-252 SMD'],
+  '78M06':   ['Voltage Reg', '+6V 500mA, TO-252 SMD'],
+  '78M08':   ['Voltage Reg', '+8V 500mA, TO-252 SMD'],
+  '78M09':   ['Voltage Reg', '+9V 500mA, TO-252 SMD'],
+  '78M12':   ['Voltage Reg', '+12V 500mA, TO-252 SMD'],
+  '78M15':   ['Voltage Reg', '+15V 500mA, TO-252 SMD'],
+  '78L05':   ['Voltage Reg', '+5V 100mA, TO-92 μικρό'],
+  '79L05':   ['Voltage Reg', '-5V 100mA, TO-92 μικρό'],
+  '78L06':   ['Voltage Reg', '+6V 100mA, TO-92 μικρό'],
+  '78L08':   ['Voltage Reg', '+8V 100mA, TO-92 μικρό'],
+  '78L09':   ['Voltage Reg', '+9V 100mA, TO-92 μικρό'],
+  '78L10':   ['Voltage Reg', '+10V 100mA, TO-92 μικρό'],
+  '78L12':   ['Voltage Reg', '+12V 100mA, TO-92 μικρό'],
+  '78L15':   ['Voltage Reg', '+15V 100mA, TO-92 μικρό'],
+  'LM7810':  ['Voltage Reg', '+10V σταθεροποιητής 1A'],
+  'LM723':   ['Voltage Reg', 'Adj. precision voltage reg, 2–37V, παλαιός κλασικός'],
+  'LM2596S': ['Voltage Reg', 'Step-down (buck) switching reg 3A, adj/fixed'],
+  'AMS1117': ['Voltage Reg', 'LDO 1A adj/fixed — πολύ κοινός σε boards'],
+  'AMS1117 ADJ': ['Voltage Reg', 'LDO 1A adjustable output'],
+  'AMS1117 2,5': ['Voltage Reg', 'LDO 1A fixed 2.5V'],
+  'AMS1117 5':   ['Voltage Reg', 'LDO 1A fixed 5V'],
+  'AMS1117 3,3': ['Voltage Reg', 'LDO 1A fixed 3.3V'],
+  'AMS1117 1,8': ['Voltage Reg', 'LDO 1A fixed 1.8V'],
+  'AMS1117 1,2': ['Voltage Reg', 'LDO 1A fixed 1.2V'],
+  'AMS1117 1,5': ['Voltage Reg', 'LDO 1A fixed 1.5V'],
+
+  // ─── N-Ch MOSFETs ───
+  'IRLZ44N':  ['N-Ch MOSFET', 'Logic-level N-ch, 55V/47A, RDSon=22mΩ — ιδανικό για PWM με μC'],
+  'IRFZ44N':  ['N-Ch MOSFET', 'N-ch 60V/49A, RDSon=17.5mΩ, TO-220 — ισχυρό switching MOSFET'],
+  'IRF1010T': ['N-Ch MOSFET', 'N-ch 55V/84A, RDSon=12mΩ — high current switching'],
+  'IRF510':   ['N-Ch MOSFET', 'N-ch 100V/5.6A, TO-220'],
+  'IRF520':   ['N-Ch MOSFET', 'N-ch 100V/9.2A, TO-220'],
+  'IRF540':   ['N-Ch MOSFET', 'N-ch 100V/28A, TO-220'],
+  'IRF640':   ['N-Ch MOSFET', 'N-ch 200V/18A, TO-220'],
+  'IRF740':   ['N-Ch MOSFET', 'N-ch 400V/10A, TO-220'],
+  'IRF840':   ['N-Ch MOSFET', 'N-ch 500V/8A, TO-220'],
+  'IRF3205':  ['N-Ch MOSFET', 'N-ch 55V/110A, RDSon=8mΩ — high current DC'],
+  'IRF530N':  ['N-Ch MOSFET', 'N-ch 100V/17A, TO-220'],
+  'IRF830':   ['N-Ch MOSFET', 'N-ch 500V/4.5A, TO-220'],
+  'IRF630':   ['N-Ch MOSFET', 'N-ch 200V/9A, TO-220'],
+  'IRF3710':  ['N-Ch MOSFET', 'N-ch 100V/57A, TO-220'],
+  'IRF3708':  ['N-Ch MOSFET', 'N-ch 30V/62A, TO-220'],
+  'IRF2804':  ['N-Ch MOSFET', 'N-ch 40V/75A, TO-220'],
+  'IRF1407':  ['N-Ch MOSFET', 'N-ch 75V/130A, TO-220'],
+  'IRF1404':  ['N-Ch MOSFET', 'N-ch 40V/202A, TO-220'],
+  'IRF730':   ['N-Ch MOSFET', 'N-ch 400V/5.5A, TO-220'],
+  'IRF1405':  ['N-Ch MOSFET', 'N-ch 55V/169A, TO-220'],
+  'IRF3808':  ['N-Ch MOSFET', 'N-ch 75V/140A, TO-220'],
+  'IRF4905':  ['P-Ch MOSFET', 'P-ch 55V/74A, TO-220 — high current P-ch'],
+  'IRF5305':  ['P-Ch MOSFET', 'P-ch 55V/31A, TO-220'],
+  'IRF9530N': ['P-Ch MOSFET', 'P-ch 100V/12A, TO-220'],
+  'IRF9540':  ['P-Ch MOSFET', 'P-ch 100V/19A, TO-220'],
+  'IRFP450':  ['N-Ch MOSFET', 'N-ch 500V/14A, TO-247 — high voltage switching'],
+  'IRFP460':  ['N-Ch MOSFET', 'N-ch 500V/20A, TO-247'],
+  'IRFP250':  ['N-Ch MOSFET', 'N-ch 200V/30A, TO-247'],
+  'IRFP254':  ['N-Ch MOSFET', 'N-ch 250V/23A, TO-247'],
+  'IRFP4227': ['N-Ch MOSFET', 'N-ch 200V/65A, TO-247 — high perf switching'],
+  'IRFP460':  ['N-Ch MOSFET', 'N-ch 500V/20A, TO-247'],
+  '20N60C3':  ['N-Ch MOSFET', 'N-ch 600V/20A, TO-247 — ιδανικό για SMPS/inverter'],
+  'GW30NC60WD':['N-Ch MOSFET','N-ch SiC 600V/30A — high efficiency switching'],
+  'W20NB50':  ['N-Ch MOSFET', 'N-ch 500V/20A, STMicro'],
+  'G4PC40W':  ['N-Ch MOSFET', 'IGBT 600V/25A — χρήσιμο σε inverter/UPS'],
+  'HY1707':   ['N-Ch MOSFET', 'N-ch 75V/80A, TO-220'],
+  'LR7843':   ['N-Ch MOSFET', 'N-ch 30V/161A, SMD — ultra low RDSon'],
+  'IRFZ46N':  ['N-Ch MOSFET', 'N-ch 55V/53A, RDSon=16mΩ, TO-220'],
+  'BS170':    ['N-Ch MOSFET', 'N-ch signal MOSFET 60V/500mA, TO-92 — logic switching'],
+  'P30N06LE': ['N-Ch MOSFET', 'Logic-level N-ch 60V/30A'],
+  'NCE60P10K':['P-Ch MOSFET', 'P-ch 60V/10A, SMD'],
+  'NCE3050K': ['N-Ch MOSFET', 'N-ch 30V/50A, SMD'],
+  'A09T / AO3400':['N-Ch MOSFET','N-ch 30V/5.7A, SOT-23 SMD — logic-level'],
+  'A2SHB / SI2302':['N-Ch MOSFET','N-ch 20V/3A, SOT-23 SMD'],
+  'IRLML6344':['N-Ch MOSFET', 'N-ch logic-level 30V/5A, SOT-23 SMD'],
+  '25K2850':  ['N-Ch MOSFET', 'N-ch 500V/12A, TO-220'],
+  '40L15CW':  ['N-Ch MOSFET', 'N-ch 150V/40A, TO-220'],
+  'D4185':    ['N-Ch MOSFET', 'N-ch 40V/160A, SMD'],
+  'NCE60P10K':['P-Ch MOSFET', 'P-ch 60V/10A, SMD'],
+
+  // ─── NPN BJT ───
+  '2222':    ['NPN BJT', 'NPN GP 40V/0.6A (2N2222), σούπερ κοινό'],
+  '3904':    ['NPN BJT', 'NPN signal 40V/0.2A (2N3904), κλασικό'],
+  '5551':    ['NPN BJT', 'NPN high voltage 160V/0.6A (MPSA42 equiv)'],
+  'A42':     ['NPN BJT', 'NPN high voltage 300V/0.5A'],
+  'BC548':   ['NPN BJT', 'NPN signal 30V/0.1A, low noise'],
+  'BC549':   ['NPN BJT', 'NPN signal 30V/0.1A, low noise'],
+  'BC550':   ['NPN BJT', 'NPN signal 45V/0.1A, low noise'],
+  'BC546B':  ['NPN BJT', 'NPN signal 65V/0.1A'],
+  'BC547':   ['NPN BJT', 'NPN GP signal 45V/0.1A — κλασικό'],
+  'BC639':   ['NPN BJT', 'NPN medium power 80V/1A, TO-92'],
+  'BC517':   ['NPN BJT', 'NPN Darlington 30V/1.2A, TO-92'],
+  'C945':    ['NPN BJT', 'NPN signal 50V/0.15A (2SC945)'],
+  'S8050':   ['NPN BJT', 'NPN 25V/0.7A, TO-92'],
+  'S9013':   ['NPN BJT', 'NPN 25V/0.5A, TO-92'],
+  'S9014':   ['NPN BJT', 'NPN signal 45V/0.1A, low noise'],
+  '2N4401':  ['NPN BJT', 'NPN GP 40V/0.6A, TO-92'],
+  'C1815':   ['NPN BJT', 'NPN 50V/0.15A (2SC1815), κλασικό ιαπωνικό'],
+  'BD139':   ['NPN BJT', 'NPN medium power 80V/1.5A, TO-126'],
+  'BD242':   ['NPN BJT', 'NPN power 100V/3A, TO-220'],
+  'BD244C':  ['NPN BJT', 'NPN power 115V/10A, TO-220'],
+  'TIP31C':  ['NPN BJT', 'NPN power 100V/3A, TO-220'],
+  'TIP41C':  ['NPN BJT', 'NPN power 100V/6A, TO-220'],
+  'TIP3055': ['NPN BJT', 'NPN power 60V/15A, TO-3 — κλασικό audio'],
+  '2N3055':  ['NPN BJT', 'NPN power 60V/15A, TO-3 — εμβληματικό'],
+  'BD712':   ['NPN BJT', 'NPN power 100V/8A, TO-220'],
+  'TIP122':  ['NPN BJT', 'NPN Darlington 100V/5A, TO-220'],
+  'TIP120':  ['NPN BJT', 'NPN Darlington 60V/5A, TO-220'],
+  'TIP35C':  ['NPN BJT', 'NPN power 100V/25A, TO-3 — ισχυρό'],
+  'TOSHIBA 2SC5200': ['NPN BJT', 'NPN audio power 230V/15A — high-end audio amp'],
+  'TOSHIBA C5198': ['NPN BJT', 'NPN audio power 140V/10A — audio amplifier'],
+  'D1047':   ['NPN BJT', 'NPN audio/power 160V/12A, TO-3P'],
+  'D44H11G': ['NPN BJT', 'NPN power 80V/10A, TO-220'],
+  '7000':    ['NPN BJT', 'NPN signal transistor μικρό'],
+  '7002':    ['NPN BJT', 'NPN signal SOT-23 SMD, 60V/115mA'],
+  'BC817':   ['NPN BJT', 'NPN signal SOT-23 SMD, 45V/0.5A'],
+  '9C-BC817':['NPN BJT', 'NPN signal SOT-23 SMD, 45V/0.5A'],
+  '2SC3320L':['NPN BJT', 'NPN medium power, high frequency'],
+  '2SC2625': ['NPN BJT', 'NPN power 400V/10A — SMPS/inverter'],
+  'BDX54C':  ['NPN BJT', 'NPN Darlington 100V/8A, TO-220'],
+  'TIP73C':  ['NPN BJT', 'NPN power 100V/8A, TO-218'],
+
+  // ─── PNP BJT ───
+  '3906':    ['PNP BJT', 'PNP signal 40V/0.2A (2N3906), κλασικό'],
+  '5401':    ['PNP BJT', 'PNP high voltage 150V/0.6A'],
+  'A1015':   ['PNP BJT', 'PNP signal 50V/0.15A (2SA1015), ιαπωνικό'],
+  'S8550':   ['PNP BJT', 'PNP 25V/0.7A, TO-92'],
+  'S9012':   ['PNP BJT', 'PNP 25V/0.5A, TO-92'],
+  'S9015':   ['PNP BJT', 'PNP signal 45V/0.1A, low noise'],
+  'BC327':   ['PNP BJT', 'PNP medium power 45V/0.8A, TO-92'],
+  'DC337':   ['PNP BJT', 'PNP medium power 45V/0.8A'],
+  'BC556':   ['PNP BJT', 'PNP signal 65V/0.1A'],
+  'BC557':   ['PNP BJT', 'PNP signal 45V/0.1A'],
+  'BC558':   ['PNP BJT', 'PNP signal 30V/0.1A'],
+  'BD136':   ['PNP BJT', 'PNP medium power 80V/1.5A, TO-126'],
+  'BD140':   ['PNP BJT', 'PNP medium power 80V/1.5A, TO-126'],
+  'TIP32C':  ['PNP BJT', 'PNP power 100V/3A, TO-220'],
+  'TIP42C':  ['PNP BJT', 'PNP power 100V/6A, TO-220'],
+  'TIP2955': ['PNP BJT', 'PNP power 60V/15A, TO-3 — συμπληρωματικό TIP3055'],
+  'MJ2955':  ['PNP BJT', 'PNP power 60V/15A, TO-3 — συμπληρωματικό 2N3055'],
+  'TIP36C':  ['PNP BJT', 'PNP power 100V/25A, TO-3 — συμπληρωματικό TIP35C'],
+  'TOSHIBA 2SA1943': ['PNP BJT', 'PNP audio power 230V/15A — high-end audio'],
+  'TOSHIBA A1941': ['PNP BJT', 'PNP audio 140V/10A'],
+  'TTA1943': ['PNP BJT', 'PNP audio power 230V/15A — equiv. 2SA1943'],
+  'D4H11G':  ['PNP BJT', 'PNP power 80V/10A, TO-220'],
+  '2907A':   ['PNP BJT', 'PNP GP 60V/0.6A (2N2907A), TO-92'],
+  'BC857B':  ['PNP BJT', 'PNP signal SOT-23 SMD, 45V/0.1A'],
+  'Y1 SS8050':['NPN BJT','NPN 25V/0.7A SOT-23 SMD (SS8050)'],
+
+  // ─── Op-Amps ───
+  'LM386':   ['Audio IC',  'Audio power amp 250mW, βαθμίδα ήχου χαμηλής ισχύος'],
+  'LM358P':  ['Op-Amp',   'Dual op-amp low-power, single supply — κλασικό'],
+  'LM358 SMD':['Op-Amp',  'Dual op-amp SMD version'],
+  'LM324':   ['Op-Amp',   'Quad op-amp single supply — πολύ κοινό'],
+  'UA741':   ['Op-Amp',   'Single op-amp GP, κλασικός'],
+  'LM741':   ['Op-Amp',   'Single op-amp GP, κλασικός (same as UA741)'],
+  'TL072CP': ['Op-Amp',   'Dual JFET input op-amp, low noise — audio/audio'],
+  'TL079CN': ['Op-Amp',   'Quad JFET input op-amp, low noise'],
+  'TL081CP': ['Op-Amp',   'Single JFET input op-amp, high input impedance'],
+  'TL082CP': ['Op-Amp',   'Dual JFET input op-amp'],
+  'OPA2604': ['Op-Amp',   'Dual FET op-amp, audiophile grade, ultra low distortion'],
+  'MCP6002': ['Op-Amp',   'Dual rail-to-rail op-amp 1.8V–6V, SMD — ιδανικό για MCU'],
+  'ADA4077': ['Op-Amp',   'Precision dual op-amp, ultra low noise/offset'],
+  'LT1021':  ['Voltage Reg','Precision voltage reference ±5ppm/°C — metrology grade'],
+
+  // ─── Logic Gates / Digital ───
+  '74HC86N': ['Logic Gate', 'Quad XOR gate, 74HC family'],
+  'CD4011BE':['Logic Gate', 'Quad NAND gate, CMOS 4000 series'],
+  'CD4069BE':['Logic Gate', 'Hex inverter (NOT), CMOS 4000 series'],
+  '74LS08':  ['Logic Gate', 'Quad AND gate, 74LS TTL'],
+  '74LS32N': ['Logic Gate', 'Quad OR gate, 74LS TTL'],
+  'CD4001BE':['Logic Gate', 'Quad NOR gate, CMOS 4000 series'],
+  '74HC164': ['Logic Gate', '8-bit serial-in parallel-out shift register'],
+  '74HC138': ['Logic Gate', '3-to-8 line decoder/demultiplexer'],
+  'SN74LS147':['Logic Gate','10-to-4 priority encoder, TTL'],
+  'CD4047BE':['IC / Other', 'Monostable/astable multivibrator CMOS'],
+  'NE555':   ['IC / Other', 'Timer 555 — ο πιο γνωστός IC timer'],
+  'NE555 SMD':['IC / Other','Timer 555 σε SMD package'],
+  '3845B':   ['IC / Other', 'PWM controller (UC3845) για SMPS'],
+
+  // ─── Driver ICs ───
+  'ULN2003AN':['Driver IC', '7-ch Darlington array, οδηγεί relay/stepper/solenoid'],
+  'TL494CN': ['Driver IC', 'PWM controller για SMPS/switching power supply'],
+  'SLA7032M':['Driver IC', 'Stepper motor driver IC'],
+  'UC3843':  ['Driver IC', 'Current mode PWM controller για SMPS'],
+  'UC3843B': ['Driver IC', 'Current mode PWM controller (improved)'],
+  'UC3845BN':['Driver IC', 'Current mode PWM controller, SMPS'],
+  'TNY267':  ['Driver IC', 'TinySwitch — off-line switcher IC (SMPS)'],
+  'LD7750RGR':['Driver IC','Green mode PWM controller για flyback SMPS'],
+
+  // ─── Audio ICs ───
+  'TDA7388': ['Audio IC', 'Quad bridge 4×25W car audio amplifier'],
+  'TDA2050A':['Audio IC', 'Mono/bridge audio amp 32W/50W'],
+  'TDA2030A':['Audio IC', 'Audio power amp 18W Hi-Fi'],
+  'TDA2003': ['Audio IC', 'Audio power amp 10W, car/portable'],
+  'TDA2822M':['Audio IC', 'Dual audio amp 0.65W, headphone/portable'],
+  'TDA7056A':['Audio IC', 'BTL audio amp 3W single supply'],
+  'TDA7297SA':['Audio IC','Dual bridge audio amp 2×15W'],
+  'TDA1514A':['Audio IC', 'Hi-Fi audio amp 50W, high quality'],
+  'LM1894':  ['Audio IC', 'Noise reduction / dynamic noise filter IC'],
+
+  // ─── SCR / TRIAC ───
+  'TYN612':  ['SCR/Thyristor','SCR 12A/600V, TO-220 — AC power control'],
+  'Z0607':   ['TRIAC', 'TRIAC 0.8A/600V, TO-92 — small AC switch'],
+  'BTA24-800':['TRIAC', 'TRIAC 24A/800V, TO-220 — mains power control'],
+  'BTA16-600':['TRIAC', 'TRIAC 16A/600V, TO-220'],
+  'BTA4 600B':['TRIAC', 'TRIAC 4A/600V'],
+  'PCR406':  ['SCR/Thyristor','SCR 0.8A/400V, TO-92 — μικρή AC εφαρμογή'],
+  'TC4056':  ['IC / Other', 'Li-Ion battery charger IC 1A, TP4056 equiv'],
+  '8205A':   ['IC / Other', 'Dual N-ch MOSFET για battery protection'],
+  'DW01A':   ['IC / Other', 'Li-Ion/LiPo protection IC — overcurrent/overvoltage'],
+
+  // ─── Optocouplers ───
+  '4N35':    ['Optocoupler', 'Phototransistor optocoupler, CTR≥100% — απομόνωση σήματος'],
+  '817':     ['Optocoupler', 'PC817 φωτοτρανζίστορ optocoupler, κοινό'],
+  'MOC3063': ['Optocoupler', 'Triac driver optocoupler με zero-cross — AC loads'],
+  'MOC3041': ['Optocoupler', 'Triac driver optocoupler — AC loads'],
+  'CPC1017N':['Optocoupler', 'PhotoMOS solid state relay optocoupler'],
+  'P521':    ['Optocoupler', 'Phototransistor optocoupler, 4-pin DIP'],
+  'P621':    ['Optocoupler', 'Phototransistor optocoupler, υψηλό CTR'],
+  'PC847':   ['Optocoupler', 'Quad phototransistor optocoupler'],
+
+  // ─── Other ICs ───
+  'CH340':   ['IC / Other', 'USB-to-Serial bridge IC — χρήσιμο σε Arduino clones'],
+  'LM334':   ['IC / Other', 'Adjustable current source/temperature sensor'],
+  'IP6525T': ['IC / Other', 'USB PD/QC power management IC'],
+  'IP6510':  ['IC / Other', 'Boost controller for USB power bank'],
+  'IP6505S': ['IC / Other', 'Multi-protocol fast charge IC'],
+  'STM15F2K60S2':['IC / Other','STM SiC schottky diode/protection IC'],
+  'SPF5189Z':['IC / Other', 'LNA (low noise amplifier) RF, 50Ω — RF front-end'],
+  'A15HB':   ['IC / Other', 'SMD IC — confirm type from datasheet'],
+  'ABS10U':  ['IC / Other', 'Bridge rectifier SMD 1A/1000V'],
+  'SKD503T': ['IC / Other', 'Thyristor module για 3-phase rectification'],
+  'BTS141':  ['Driver IC', 'High-side power switch 40V/5A, overload protection'],
+  'D409':    ['Other', 'Confirm — πιθανώς diode ή BJT'],
+  'D438':    ['Other', 'Confirm — πιθανώς power diode'],
+  'LM1117':  ['Voltage Reg', 'LDO 800mA fixed/adj — κλασικό για 3.3V boards'],
+  'A1212S':  ['IC / Other', 'DC-DC isolated converter module 1W, 12V→12V'],
+  'IA0505S': ['IC / Other', 'DC-DC isolated converter 5V→5V 1W'],
+  'TL431A':  ['Voltage Reg', 'Programmable precision shunt reference — SMPS feedback'],
+  'SL2.1A':  ['IC / Other', 'USB hub controller IC 4-port'],
+  'IRLML6344':['N-Ch MOSFET','Logic-level N-ch 30V/5A SOT-23'],
+};
+
+function normalize(s) {
+  return (s || '').trim().toUpperCase().replace(/\s+/g,' ');
+}
+
+function lookupKB(name) {
+  const n = normalize(name);
+  for (const [k,v] of Object.entries(KB)) {
+    if (normalize(k) === n) return v;
+  }
+  // partial match
+  for (const [k,v] of Object.entries(KB)) {
+    if (n.includes(normalize(k)) || normalize(k).includes(n)) return v;
+  }
+  return ['Other', ''];
+}
+
+// ─── RAW DATA ───
+const rawIC = [
+  ['LM337','a1'],['LM338','A1'],['BD136','A1'],['BD139','A1'],['BD140','A1'],['BD242','A1'],
+  ['BD244C','A1'],['BD712','A1'],['7805','a1'],['7806','I1'],['7809','I1'],['7812','I1'],
+  ['7815','I1'],['7824','I1'],['7905','I1'],['7909','I1'],['7912','I1'],['TYN612','I1'],
+  ['LM1084','I1'],['TIP31C','I1'],['TIP32C','I1'],['TIP41C','I1'],['TIP42C','I1'],
+  ['IRF1010T','I1'],['IRF510','I1'],['IRF520','I1'],['IRF540','I1'],['IRF640','I1'],
+  ['IRF740','I1'],['IRF840','I1'],['IRF3205','I1'],['2222','I1'],['3904','I1'],['3906','I1'],
+  ['5401','I1'],['5551','I1'],['A1015','I1'],['C1815','I1'],['S9014','I1'],
+  ['BC548','tr1'],['BC549','tr1'],['BC550','tr1'],['BC556','tr1'],['C945','tr1'],
+  ['S8050','tr1'],['S8550','tr1'],['S9012','tr1'],['S9015','tr1'],['BC327','tr1'],
+  ['DC337','tr1'],['BC517','tr1'],['BC557','tr1'],['S9013','tr1'],['BC547','tr1'],
+  ['BC558','tr1'],['7550','tr1'],['5088','tr1'],['7000','tr1'],['BS170','tr1'],
+  ['A42','tr1'],['2907A','tr1'],['2N4401','tr1'],['BC857B','a1'],['Z0607','tr1'],
+  ['PCR406','tr1'],['TC4056','tr1'],['8205A','tr1'],['DW01A','tr1'],['IP6525T','tr1'],
+  ['IP6510','tr1'],['IP6505S','tr1'],['LM386','tr1'],['LM334','tr1'],['BC546B','tr1'],
+  ['D438','tr1'],['CH340','tr1'],['C1815','tr1'],['TIP3055','tr1'],['2N3055','tr1'],
+  ['TIP2955','tr1'],['MJ2955','tr1'],['LM317','tr1'],['IRFZ44N','tr1'],
+  ['TOSHIBA 2SC5200','tr1'],['D1047','tr1'],['TIP120','tr1'],['20N60C3','tr1'],
+  ['TL079CN','tr1'],['GW30NC60WD','tr1'],['LM324','tr1'],['TIP35C','tr1'],['TIP36C','tr1'],
+  ['W20NB50','tr1'],['TOSHIBA 2SA1943','tr1'],['TOSHIBA A1941','tr1'],['TOSHIBA C5198','tr1'],
+  ['TDA7388','tr1'],['TDA2050A','s1'],['IRFP4227','s1'],['74HC86N','i2'],['CD4011BE','i2'],
+  ['CD4069BE','i2'],['74LS08','i2'],['74LS32N','i2'],['CD4001BE','i2'],['NE555','s1'],
+  ['4N35','i2'],['817','i2'],['TIP73C','i2'],['LM723','i2'],['LM358P','i2'],
+  ['74HC164','i2'],['74HC138','i2'],['ULN2003AN','i2'],['SN74LS147','i2'],['TIP122','i2'],
+  ['LM2596S','i2'],['UA741-LM741','i2'],['IRF9540','i2'],['BDX54C','i2'],['P30N06LE','i2'],
+  ['20N60C3','i2'],['OPA2604','i2'],['UC3843','i2'],['C1731 MBR','i3'],['TDA2822M','i2'],
+  ['TL072CP','i2'],['C2911','i2'],['LM1894','i2'],['STM15F2K60S2','a1'],['D409','a1'],
+  ['NCE60P10K','a1'],['Y1 SS8050','a1'],['78M05','a1'],['ADA4077','a1'],['IRF9530N','i2'],
+  ['78L05','tr1'],['BC639','tr1'],['MUR3060WT','s1'],['D209L','s1'],['S60SC6M','s1'],
+  ['2SC3320L','s1'],['K2698','s1'],['D92-02','s1'],['S30D406C','s1'],['2SC2625','s1'],
+  ['SBL3040S','s1'],['IRFP450','s1'],['40L15CW','s1'],['25K2850','s1'],['SB30455T','s1'],
+  ['SBL4040PT','s1'],['IRFP460','S1'],['4025WT','S1'],['STTHL506DPI','S1'],['LM1117','I2'],
+  ['MCP6002','I2'],['TDA7056A','S1'],['TDA7297SA','S1'],['TDA1514A','z2'],['TDA2030A','S1'],
+  ['TDA2003','S1'],['BTS141','z2'],['D4H11G','I3'],['TL081CP','I3'],['D44H11G','I3'],
+  ['LT1021','I3'],['TTA1943','S1'],['SPF5189Z','a1'],['A15HB','a1'],['78M06','a1'],
+  ['78M08','a1'],['78M09','a1'],['78M12','a1'],['78M15','a1'],['78L05','a1'],['79L05','a1'],
+  ['78L06','a1'],['78L08','a1'],['78L09','a1'],['78L12','a1'],['78L15','a1'],['IRF530N','I3'],
+  ['IRF830','I3'],['IRF630','I3'],['IRF3710','I3'],['IRF3708','I3'],['IRF2804','I3'],
+  ['IRF1407','I3'],['IRF1404','I3'],['IRF730','I3'],['IRF1405','I3'],['IRF3808','I3'],
+  ['IRF4905','I3'],['IRF5305','I3'],['LM7810','I1'],['HY1707','s1'],['NE555 SMD','a1'],
+  ['LM358 SMD','a1'],['A1212S','i3'],['IA0505S','i3'],['BTA24-800','i3'],['BTA16-600','i3'],
+  ['CD4047BE','i3'],['MOC3063','i3'],['MOC3041','i3'],['SKD503T','i3'],['TL082CP','i3'],
+  ['UC3845BN','z2'],['TNY267','z2'],['CPC1017N','z2'],['G4PC40W','z2'],['A09T-AO3400','a1'],
+  ['A2SHB-SI2302','a1'],['9C-BC817','a1'],['7002','a1'],['D4185','a1'],['PC847','z2'],
+  ['ABS10U','a1'],['BTA4 600B','z2'],['P521','z2'],['P621','z2'],['AMS1117 ADJ','a1'],
+  ['AMS1117 2,5','a1'],['AMS1117 5','a1'],['NCE3050K','a1'],['AMS1117 1,8','a1'],
+  ['AMS1117 3,3','a1'],['AMS1117 1,2','a1'],['AMS1117 1,5','a1'],['TL431A','tr1'],
+  ['SL2.1A','a1'],['78L10','a1'],['3845B','a1'],['UC3843B','z2'],['IRFZ46N','z2'],
+  ['IRFP250','z2'],['IRLML6344','a1'],['A09T AO3400','a1'],['IRFP254','S2'],
+  ['IRLZ44N','S2'],['TL494CN','S2'],['SLA7032M','S2'],['LD7750RGR','a1'],['LR7843','z2'],
+];
+
+// Build data with IDs
+let nextId = 1;
+const TAB_IC = 'ic';
+const TAB_RES = 'resistors';
+
+const icData = rawIC.map(([name, box]) => {
+  const [type, desc] = lookupKB(name);
+  return { id: nextId++, name: name.trim(), box: box.trim().toUpperCase(), type, desc };
+});
+
+// ─── RESISTOR DATA ───
+// Each entry: { value, w025, w1, w2or3, smd }
+// w025/w1/w2or3 = wattage label or '' if absent, smd = bool
+const rawResistors = [
+  // value   1/4W   1W    2W/3W   SMD
+  ['0,1Ω',   '',    '',   '',     true ],
+  ['0,33Ω',  '',    '1W', '',     false],
+  ['0,5Ω',   '',    '',   '',     true ],
+  ['1Ω',     '',    '1W', '',     true ],
+  ['1,5Ω',   '',    '1W', '',     false],
+  ['2,2Ω',   '',    '1W', '',     false],
+  ['2,7Ω',   '',    '1W', '',     false],
+  ['3,3Ω',   '',    '1W', '',     true ],
+  ['3,9Ω',   '',    '1W', '',     false],
+  ['4,7Ω',   '',    '1W', '',     false],
+  ['5,1Ω',   '',    '1W', '',     true ],
+  ['6,2Ω',   '',    '1W', '',     false],
+  ['6,8Ω',   '',    '1W', '',     false],
+  ['7,5Ω',   '',    '1W', '',     false],
+  ['8,2Ω',   '',    '1W', '',     false],
+  ['10Ω',    '1/4W','1W', '2W',   true ],
+  ['12Ω',    '',    '1W', '',     false],
+  ['15Ω',    '',    '1W', '',     false],
+  ['18Ω',    '',    '1W', '',     false],
+  ['20Ω',    '',    '1W', '',     false],
+  ['22Ω',    '1/4W','1W', '2W',   true ],
+  ['24Ω',    '',    '1W', '',     false],
+  ['27Ω',    '',    '1W', '',     false],
+  ['30Ω',    '',    '1W', '',     false],
+  ['33Ω',    '',    '1W', '',     false],
+  ['36Ω',    '',    '1W', '',     false],
+  ['39Ω',    '',    '1W', '',     false],
+  ['43Ω',    '',    '1W', '',     false],
+  ['47Ω',    '1/4W','1W', '',     true ],
+  ['51Ω',    '',    '1W', '',     false],
+  ['56Ω',    '',    '1W', '',     false],
+  ['62Ω',    '',    '1W', '',     true ],
+  ['68Ω',    '',    '1W', '',     false],
+  ['75Ω',    '',    '1W', '',     false],
+  ['82Ω',    '',    '1W', '',     true ],
+  ['91Ω',    '',    '1W', '',     false],
+  ['100Ω',   '1/4W','1W', '3W',   true ],
+  ['120Ω',   '',    '1W', '',     false],
+  ['150Ω',   '1/4W','1W', '',     true ],
+  ['180Ω',   '',    '1W', '',     false],
+  ['200Ω',   '1/4W','1W', '',     false],
+  ['220Ω',   '1/4W','1W', '',     false],
+  ['240Ω',   '',    '1W', '',     false],
+  ['270Ω',   '1/4W','1W', '',     false],
+  ['300Ω',   '',    '1W', '',     false],
+  ['330Ω',   '1/4W','',   '',     true ],
+  ['360Ω',   '',    '1W', '',     false],
+  ['390Ω',   '',    '1W', '',     false],
+  ['430Ω',   '',    '1W', '',     false],
+  ['470Ω',   '1/4W','1W', '',     true ],
+  ['500Ω',   '1/4W','',   '',     false],
+  ['510Ω',   '1/4W','1W', '',     false],
+  ['560Ω',   '',    '1W', '',     false],
+  ['620Ω',   '',    '1W', '',     false],
+  ['680Ω',   '1/4W','1W', '',     true ],
+  ['750Ω',   '',    '1W', '',     false],
+  ['820Ω',   '',    '1W', '',     false],
+  ['910Ω',   '',    '1W', '',     false],
+  ['1K',     '1/4W','1W', '',     true ],
+  ['1,2K',   '',    '1W', '',     false],
+  ['1,5K',   '',    '1W', '',     false],
+  ['1,8K',   '',    '1W', '',     true ],
+  ['2K',     '1/4W','1W', '',     false],
+  ['2,2K',   '1/4W','1W', '',     false],
+  ['2,4K',   '',    '1W', '',     false],
+  ['2,7K',   '',    '1W', '',     false],
+  ['3K',     '',    '1W', '',     true ],
+  ['3,3K',   '1/4W','1W', '',     false],
+  ['3,6K',   '',    '1W', '',     false],
+  ['3,9K',   '',    '1W', '',     false],
+  ['4,3K',   '',    '1W', '',     false],
+  ['4,7K',   '1/4W','1W', '',     true ],
+  ['5,1K',   '1/4W','1W', '',     true ],
+  ['5,6K',   '',    '1W', '',     false],
+  ['6,2K',   '',    '1W', '',     false],
+  ['6,8K',   '1/4W','1W', '',     false],
+  ['7,5K',   '',    '1W', '',     true ],
+  ['8,2K',   '',    '1W', '',     false],
+  ['9,1K',   '',    '1W', '',     false],
+  ['10K',    '1/4W','1W', '',     true ],
+  ['12K',    '',    '1W', '',     true ],
+  ['15K',    '',    '1W', '',     false],
+  ['17K',    '',    '1W', '',     false],
+  ['18K',    '',    '1W', '',     true ],
+  ['20K',    '1/4W','1W', '',     false],
+  ['22K',    '',    '1W', '',     false],
+  ['24K',    '',    '1W', '3W',   false],
+  ['30K',    '',    '1W', '',     false],
+  ['33K',    '',    '1W', '',     true ],
+  ['36K',    '',    '1W', '',     false],
+  ['39K',    '',    '1W', '',     false],
+  ['43K',    '',    '1W', '',     true ],
+  ['47K',    '1/4W','1W', '2W',   false],
+  ['51K',    '1/4W','1W', '',     true ],
+  ['56K',    '',    '1W', '',     false],
+  ['62K',    '',    '1W', '',     false],
+  ['68K',    '1/4W','1W', '',     false],
+  ['75K',    '',    '1W', '',     true ],
+  ['82K',    '',    '1W', '',     false],
+  ['91K',    '',    '1W', '',     false],
+  ['100K',   '1/4W','1W', '2W',   true ],
+  ['120K',   '',    '1W', '',     false],
+  ['150K',   '',    '1W', '',     false],
+  ['180K',   '',    '1W', '',     false],
+  ['200K',   '',    '1W', '',     true ],
+  ['220K',   '1/4W','1W', '',     false],
+  ['240K',   '',    '1W', '',     false],
+  ['270K',   '',    '1W', '',     false],
+  ['300K',   '1/4W','1W', '',     true ],
+  ['330K',   '',    '1W', '',     false],
+  ['360K',   '',    '1W', '',     false],
+  ['390K',   '',    '1W', '',     true ],
+  ['430K',   '',    '1W', '',     false],
+  ['470K',   '1/4W','1W', '',     true ],
+  ['510K',   '',    '1W', '',     false],
+  ['560K',   '',    '1W', '',     false],
+  ['620K',   '',    '1W', '',     false],
+  ['680K',   '1/4W','1W', '',     true ],
+  ['750K',   '',    '1W', '',     false],
+  ['820K',   '',    '1W', '',     false],
+  ['910K',   '',    '1W', '',     false],
+  ['1M',     '1/4W','1W', '',     true ],
+  ['1,5M',   '',    '1W', '',     false],
+  ['2M',     '',    '1W', '',     false],
+  ['2,2M',   '',    '1W', '',     false],
+];
+
+// Shunt resistors (separate section)
+const rawShunts = [
+  ['0,001R (1mΩ)',  '1MR' ],
+  ['0,0025R (2.5mΩ)','2,5MR'],
+  ['0,005R (5mΩ)',  'RMR' ],
+  ['0,01R (10mΩ)',  '10MR'],
+  ['0,1R (100mΩ)', '100MR'],
+];
+
+const resistorData = rawResistors.map(([value, w025, w1, w2, smd]) => ({
+  id: nextId++, value, w025, w1, w2, smd, isShunt: false
+}));
+const shuntData = rawShunts.map(([value, rval]) => ({
+  id: nextId++, value, rval, w025:'', w1:'', w2:'', smd:false, isShunt: true
+}));
+
+// ─── CAPACITOR / POT / TRIMMER DATA ───
+const TAB_CAP = 'capacitors';
+
+// Potentiometers: [value, wattage, note]
+const rawPots = [
+  ['500Ω',  '3W',   'Heavy Duty'],
+  ['1K',    '1/2W', ''],
+  ['5K',    '1/2W', ''],
+  ['10K',   '1/2W', ''],
+  ['20K',   '1/2W', ''],
+  ['50K',   '1/2W', ''],
+  ['100K',  '1/2W', ''],
+  ['250K',  '1/2W', ''],
+  ['500K',  '1/2W', ''],
+  ['1M',    '1/2W', ''],
+];
+
+// Trimmers: [value]
+const rawTrimmers = [
+  '500R','1K','2K','5K','10K','20K','50K','100K','200K','250K','500K','1M',
+];
+
+// Capacitors: [value, unit, lowV, midV, highV, smd, kV]
+// unit: pico | nano | micro
+const rawCaps = [
+  [2,    'pico',  true,  false, false, false, false],
+  [10,   'pico',  true,  false, false, true,  false],
+  [20,   'pico',  true,  false, false, false, false],
+  [22,   'pico',  true,  false, true,  true,  false],
+  [30,   'pico',  true,  false, false, false, false],
+  [33,   'pico',  true,  false, false, true,  false],
+  [47,   'pico',  true,  false, true,  true,  false],
+  [56,   'pico',  true,  false, false, false, false],
+  [68,   'pico',  true,  false, false, false, false],
+  [100,  'pico',  true,  false, true,  false, false],
+  [150,  'pico',  true,  false, false, false, false],
+  [220,  'pico',  true,  false, true,  true,  false],
+  [330,  'pico',  true,  false, true,  false, true ],
+  [470,  'pico',  true,  true,  true,  true,  false],
+  [680,  'pico',  true,  false, false, false, false],
+  [1,    'nano',  true,  false, true,  true,  false],
+  [1.5,  'nano',  true,  false, false, false, false],
+  [1.7,  'nano',  true,  false, true,  false, false],
+  [2.2,  'nano',  true,  true,  true,  true,  false],
+  [3.2,  'nano',  true,  false, true,  false, false],
+  [4.7,  'nano',  true,  true,  true,  false, false],
+  [6.8,  'nano',  true,  false, false, false, false],
+  [10,   'nano',  true,  true,  true,  true,  true ],
+  [22,   'nano',  true,  true,  false, false, false],
+  [33,   'nano',  false, true,  false, false, false],
+  [39,   'nano',  false, true,  false, false, false],
+  [47,   'nano',  true,  true,  false, false, false],
+  [68,   'nano',  true,  false, false, false, false],
+  [100,  'nano',  true,  true,  true,  true,  false],
+  [150,  'nano',  false, true,  false, false, false],
+  [220,  'nano',  false, true,  false, false, false],
+  [330,  'nano',  false, true,  false, false, false],
+  [470,  'nano',  false, true,  false, true,  false],
+  [1,    'micro', false, false, false, true,  false],
+  [2.2,  'micro', false, false, false, true,  false],
+  [4.7,  'micro', false, false, false, true,  false],
+  [10,   'micro', false, false, false, true,  false],
+  [22,   'micro', false, false, false, true,  false],
+];
+
+const potData     = rawPots.map(([value, watt, note]) =>
+  ({ id: nextId++, value, watt, note, kind: 'pot' }));
+const trimmerData = rawTrimmers.map(v =>
+  ({ id: nextId++, value: v, kind: 'trimmer' }));
+const capData     = rawCaps.map(([value, unit, lowV, midV, highV, smd, kV]) =>
+  ({ id: nextId++, value, unit, lowV, midV, highV, smd, kV, kind: 'cap' }));
+
+const TAB_POT = 'potentiometers';
+const allPotData  = [...potData, ...trimmerData];
+const allCapData  = [...capData]; // capacitors only now
+
+// ─── MODULES DATA ───
+const TAB_MOD = 'modules';
+
+// [name, category, description]
+const rawModules = [
+  // ── Microcontrollers / SBCs ──
+  ['Raspberry Pi Pico',     'MCU',        'RP2040 dual-core ARM Cortex-M0+ 133MHz, 264KB RAM, 2MB flash, 26 GPIO, USB'],
+  ['ATtiny T88',            'MCU',        'AVR 8-bit MCU, 8KB flash, 28-pin DIP/SMD — συμβατό με Arduino'],
+  ['STM32F (series)',       'MCU',        'ARM Cortex-M3/M4, high performance, πολλές περιφερειακές — ST Nucleo/Blue Pill'],
+  ['STM32WB55',             'MCU',        'ARM Cortex-M4 + M0, BLE 5.0 & Zigbee, wireless MCU από ST'],
+  ['ESP32 (various)',       'MCU/WiFi',   'Xtensa dual-core 240MHz, WiFi+BT, 520KB SRAM — πολλές εκδόσεις (WROOM, WROVER κλπ.)'],
+  ['ESP32-C3',              'MCU/WiFi',   'RISC-V single-core 160MHz, WiFi+BLE5, compact — ιδανικό για IoT'],
+  ['ESP-01',                'WiFi Mod',   'ESP8266 σε μικρό module 2 GPIO — serial WiFi bridge ή standalone'],
+  ['Wemos D1 R32 (ESP32)',  'MCU/WiFi',   'ESP32 σε Arduino Uno form factor — εύκολο για prototyping'],
+  ['D1 Mini (ESP8266)',     'MCU/WiFi',   'ESP8266 compact board, 4MB flash, USB-C — πολύ δημοφιλές'],
+  ['Arduino Uno',           'MCU',        'ATmega328P 16MHz, 32KB flash, 14 digital / 6 analog GPIO — κλασικό'],
+  ['ESP32/ESP8266 trays (bare chips)', 'MCU', 'Bare chips μόνο, χωρίς module — για custom PCB'],
+
+  // ── Sensors ──
+  ['HC-SR04',               'Sensor',     'Υπερήχων απόστασης 2cm–400cm, 5V, trigger+echo — κλασικό'],
+  ['MQ-7',                  'Sensor',     'Αισθητήρας CO (μονοξείδιο άνθρακα), αναλογική έξοδος'],
+  ['MQ-135',                'Sensor',     'Αισθητήρας αέρα/ποιότητας (NH3, CO2, αλκοόλ, βενζόλιο)'],
+  ['AHT10',                 'Sensor',     'Θερμοκρασία + υγρασία I2C, ±0.3°C / ±2% RH'],
+  ['AHT20',                 'Sensor',     'Αναβαθμισμένο AHT10 — βελτιωμένη ακρίβεια I2C'],
+  ['AHT40',                 'Sensor',     'High-accuracy temp+humidity I2C, ±0.2°C'],
+  ['AHT41',                 'Sensor',     'Βελτιωμένο AHT40 με dual sensing element'],
+  ['BMP280',                'Sensor',     'Πίεση + θερμοκρασία I2C/SPI, ±1hPa — καιρός/υψόμετρο'],
+  ['DS18B20',               'Sensor',     '1-Wire ψηφιακό θερμόμετρο ±0.5°C, -55 έως +125°C, parasitic power'],
+  ['RCWL-0516',             'Sensor',     'Microwave radar motion sensor 3–7m, 3.3–5V — δεν χρειάζεται οπτική επαφή'],
+  ['RTC DS3231M',           'Sensor',     'Real-time clock I2C, ±5ppm ακρίβεια, battery backup'],
+  ['GUVA-S12SD',            'Sensor',     'UV index sensor αναλογικός, 240–370nm — ηλιακή ακτινοβολία'],
+  ['GY-906 (MLX90614)',     'Sensor',     'IR θερμόμετρο χωρίς επαφή I2C, -70 έως +380°C'],
+  ['HW-827 Heart Sensor',   'Sensor',     'Pulse/heart rate αισθητήρας φωτοπληθυσμογράφος (PPG)'],
+  ['TSL2561',               'Sensor',     'Light sensor I2C, lux measurement, IR + visible — auto-range'],
+  ['VEML7700',              'Sensor',     'High accuracy ambient light sensor I2C, 0–120 klux'],
+  ['HX710B',                'Sensor',     'Barometric pressure ADC module, 24-bit'],
+  ['AS608',                 'Sensor',     'Fingerprint sensor UART, 500dpi, library για Arduino/ESP'],
+  ['HW-080 Soil Moisture',  'Sensor',     'Υγρασία χώματος — 2 ηλεκτρόδια + συγκριτής, αναλογική+ψηφιακή έξοδος'],
+  ['HW-390',                'Sensor',     'Αισθητήρας υγρασίας/νερού — επιφανειακός ανιχνευτής'],
+  ['Water Sensor',          'Sensor',     'Ανιχνευτής παρουσίας νερού για μικροελεγκτή, ψηφιακή έξοδος'],
+  ['Touch Sensor (κόκκινο)','Sensor',     'Capacitive touch module (πιθανώς TTP223) — αφής ψηφιακή έξοδος'],
+  ['ZMPT101B',              'Sensor',     'AC voltage sensor module — μετρά 220V AC, αναλογική έξοδος για MCU'],
+  ['ACS712',                'Sensor',     'Hall-effect current sensor ±5/20/30A, αναλογική, isolation'],
+  ['ZMCT103C',              'Sensor',     'Current transformer για AC ρεύμα — clip-on, low power'],
+  ['SCT-013',               'Sensor',     'Split-core current transformer 30–100A AC — non-invasive'],
+  ['CJMCU-8232 Heart Rate', 'Sensor',     'AD8232 ECG/heart rate module — single-lead ECG για MCU'],
+
+  // ── RF / Wireless ──
+  ['nRF24L01',              'RF',         '2.4GHz wireless transceiver SPI, 250Kbps–2Mbps, 100m range'],
+  ['RF modules RX470C / RXB59R / 1514', 'RF', '433/315MHz OOK receivers — για remote control decoding'],
+  ['CC1101 (standard)',     'RF',         'Sub-GHz FSK/OOK transceiver 300–928MHz SPI — ευέλικτο RF module'],
+  ['CC1101 (1.25mm pitch)', 'RF',         'CC1101 με extended header 1.25mm pitch — για custom wiring'],
+  ['RF Amplifier',          'RF',         'RF LNA/PA ενισχυτής για βελτίωση εμβέλειας module'],
+  ['RDM6300',               'RF',         '125KHz RFID reader UART — EM4100 cards/tags'],
+  ['RC522',                 'RF',         '13.56MHz RFID reader/writer SPI (MIFARE) — κλασικό Arduino module'],
+  ['Mini RC522',            'RF',         'RC522 compact version — μικρότερο PCB, ίδια λειτουργία'],
+  ['PN532',                 'RF',         'NFC/RFID reader I2C/SPI/UART 13.56MHz — υποστηρίζει read+write+P2P'],
+
+  // ── ADC / DAC / I/O Expanders ──
+  ['ADS1115',               'ADC/DAC',    '16-bit ADC 4ch I2C, PGA ±256mV–6.144V, 860SPS — precision'],
+  ['MCP4725',               'ADC/DAC',    '12-bit DAC I2C single channel, 0–VCC — analog output για MCU'],
+  ['PCF8574',               'I/O Exp',    'I2C 8-bit GPIO expander, έως 8 συσκευές στο ίδιο bus'],
+  ['PCF8575',               'I/O Exp',    'I2C 16-bit GPIO expander — διπλάσιο από PCF8574'],
+  ['CD74HC4067',            'Multiplexer','16-channel analog multiplexer, SPI-like control — 1 αναλογική γραμμή → 16'],
+
+  // ── Power ──
+  ['INA219',                'Power',      'I2C current/power monitor, 26V/3.2A, 12-bit — power analysis'],
+  ['INA226',                'Power',      'I2C current/voltage/power monitor, υψηλή ακρίβεια 36V'],
+  ['BMS 1S',                'Power',      'Battery Management System 1 κελί Li-Ion, overcharge+overdischarge'],
+  ['BMS 2S',                'Power',      'BMS για 2 κελιά σε σειρά (7.4V), balancing + protection'],
+  ['BMS 3S',                'Power',      'BMS για 3 κελιά (11.1V) — ηλεκτρικά scooter/RC'],
+  ['BMS 5S',                'Power',      'BMS για 5 κελιά (18.5V) — e-bike κλπ.'],
+  ['BMS 6S',                'Power',      'BMS για 6 κελιά (22.2V) — υψηλής ισχύος εφαρμογές'],
+  ['TP4056 / 4056 1S Charger','Power',    'Li-Ion charger module 1A, micro/Type-C, με ή χωρίς protection'],
+  ['MT3608 Step-Up',        'Power',      'Boost converter DC-DC 2–24V→5–28V, 2A — adjustable'],
+  ['MP1584 Step-Down',      'Power',      'Buck converter DC-DC 4.5–28V→0.8–20V, 3A compact'],
+  ['LM2596 Step-Down',      'Power',      'Buck converter 4.5–40V→1.25–37V, 3A — classic module'],
+  ['5V→3.3V LDO (1117)',    'Power',      'AMS1117-3.3 module για level conversion 5V→3.3V'],
+  ['AC 220V→12V DC module', 'Power',      'Isolated AC-DC PSU module 220V in, 12V out — miniature'],
+  ['AC 220V→5V DC module',  'Power',      'Isolated AC-DC PSU module 220V in, 5V out — for IoT'],
+  ['QC HW-298 / IP6505',    'Power',      'Quick Charge module IP6505, multi-protocol fast charge'],
+  ['QC AJ27 TIE',           'Power',      'Quick Charge protocol module'],
+  ['QC LX LISC v2 IP2326',  'Power',      'Fast charge sink controller IP2326'],
+  ['QC XPM52C',             'Power',      'Multi-protocol charge IC module'],
+  ['QC SW3518',             'Power',      'SW3518 140W GaN fast charge module, PD3.0/QC4+/PPS'],
+  ['QC 140W Multi-Protocol','Power',      'Universal 140W fast charge module, πολλά πρωτόκολλα'],
+
+  // ── Motor Drivers ──
+  ['TMC2209',               'Motor',      'Stepper driver UART, 2A, StealthChop — σχεδόν σιωπηλό, για 3D printer'],
+  ['A4988',                 'Motor',      'Stepper driver 2A, microstepping 1/16 — κλασικό για CNC/3D'],
+  ['DRV8825',               'Motor',      'Stepper driver 2.5A, microstepping 1/32 — βελτιωμένο A4988'],
+
+  // ── Display ──
+  ['SSD1306 0.96"',         'Display',    'OLED 128×64 I2C/SPI, μονόχρωμο — πολύ κοινό για MCU projects'],
+  ['GMG12864-06D',          'Display',    'LCD 128×64 graphic με backlight — SPI/parallel interface'],
+  ['TFT 1.8" SPI + SD',     'Display',    'TFT color 160×128, ST7735, SPI + SD card slot'],
+  ['TFT 2.8" SPI + Touch',  'Display',    'TFT color 320×240 ILI9341, SPI, resistive touch + SD'],
+
+  // ── Switches / Mechanical ──
+  ['Limit Switches',        'Switch',     'Micro switches τύπου 3D printer endstop — SPDT, 5A/250V'],
+
+  // ── Audio / BT ──
+  ['TDA2030 Amp Module',    'Audio',      'Audio power amp module ~18W, class AB'],
+  ['CD7379CZ Amp',          'Audio',      'BTL audio amp IC module'],
+  ['BT Audio Module',       'BT Audio',   'Bluetooth audio receiver module, A2DP — για speakers'],
+  ['BT Audio + Mic Module', 'BT Audio',   'Bluetooth audio receiver με ενσωματωμένο μικρόφωνο'],
+  ['HX-M18',                'BT Audio',   'Bluetooth stereo audio module με DSP'],
+  ['KCX-BT0003',            'BT Audio',   'Bluetooth audio receiver module, UART config'],
+
+  // ── Communication / Networking ──
+  ['Ethernet W5500 (8720A)','Network',    'SPI Ethernet module W5500, hardware TCP/IP stack — για ESP/Arduino'],
+  ['ESP8266 WiFi+SD Module','Network',    'ESP8266 + SD card + network — all-in-one IoT module'],
+  ['BT Module HM-12 (NUC029ZA)', 'BT',   'Bluetooth UART module με NUC029ZA MCU — AT commands'],
+
+  // ── Misc ──
+  ['LM358 Op-Amp Module',   'Misc',       'Op-amp comparator/amplifier module με LM358, trimmer ρύθμιση'],
+  ['RGB LED Module K851264','Misc',       'RGB LED module κοινής ανόδου/καθόδου — WS2812 ή discrete'],
+  ['817 Optocoupler Module','Misc',       'PC817 module για galvanic isolation σήματος'],
+  ['Single Relay Module',   'Relay',      '1-channel relay 5V coil, 10A/250VAC, optoisolated'],
+  ['Dual Relay Module',     'Relay',      '2-channel relay module, independent control'],
+  ['4-Channel Relay Module','Relay',      '4-channel relay, 5V coil, για home automation'],
+  ['8-Channel Relay Module','Relay',      '8-channel relay board, 5V, για PLC-like control'],
+  ['IR Sensor MH (IR+LED)', 'Misc',       'IR obstacle sensor με εκπομπό+δέκτη — proximity detection'],
+  ['IR Sensor MH (IR only)','Misc',       'IR receiver μόνο χωρίς LED — για remote decoding'],
+];
+
+const moduleData = rawModules.map(([name, cat, desc]) =>
+  ({ id: nextId++, name, cat, desc, kind: 'module' }));
+
+// ─── DIODE DATA ───
+const TAB_DIODE = 'diodes';
+
+// Diode knowledge base
+const DIODE_KB = {
+  '1N4148':   ['Signal',   'Γρήγορη signal diode 75V/300mA — universal'],
+  'ST4148':   ['Signal',   'Signal diode, ισοδύναμο 1N4148'],
+  '1N4148LL': ['Signal',   'Low-leakage έκδοση 1N4148'],
+  'C4V7':     ['Zener',    'Zener ~4.7V signal'],
+  'DB3':      ['DIAC',     'DIAC trigger 32V — για TRIAC circuits'],
+  'DB4':      ['DIAC',     'DIAC trigger 40V'],
+  '1N4001':   ['Rectifier','Rectifier 50V/1A, DO-41'],
+  '1N4002':   ['Rectifier','Rectifier 100V/1A, DO-41'],
+  '1N4003':   ['Rectifier','Rectifier 200V/1A, DO-41'],
+  '1N4004':   ['Rectifier','Rectifier 400V/1A, DO-41 — πολύ κοινό'],
+  '1N4005':   ['Rectifier','Rectifier 600V/1A, DO-41'],
+  '1N4006':   ['Rectifier','Rectifier 800V/1A, DO-41'],
+  '1N4007':   ['Rectifier','Rectifier 1000V/1A, DO-41 — πολύ κοινό'],
+  '1N5400':   ['Rectifier','Rectifier 50V/3A, DO-201'],
+  '1N5408':   ['Rectifier','Rectifier 1000V/3A, DO-201'],
+  '1N5399':   ['Rectifier','Rectifier 1000V/1.5A, DO-15'],
+  'FR107':    ['Fast Rec.','Fast rectifier 1000V/1A — switching PSU'],
+  'FR207':    ['Fast Rec.','Fast rectifier 1000V/2A — switching PSU'],
+  '10A10':    ['Rectifier','Rectifier 1000V/10A, DO-4'],
+  '1N5817':   ['Schottky', 'Schottky 20V/1A — χαμηλή πτώση τάσης'],
+  '1N5818':   ['Schottky', 'Schottky 30V/1A'],
+  '1N5819':   ['Schottky', 'Schottky 40V/1A — πολύ κοινό'],
+  '1N5822':   ['Schottky', 'Schottky 40V/3A — DC/DC converters'],
+  'IN5822':   ['Schottky', 'Schottky 40V/3A — DC/DC converters'],
+  'SS14':     ['Schottky', 'Schottky SMD 40V/1A, SMA'],
+  'SS24':     ['Schottky', 'Schottky SMD 40V/2A, SMA'],
+  'SS34':     ['Schottky', 'Schottky SMD 40V/3A, SMA'],
+  'US1M':     ['Fast Rec.','SMD fast rectifier 1000V/1A, SMA'],
+  'RS1M':     ['Fast Rec.','SMD fast rectifier 1000V/1A, SMA'],
+  'M1':       ['Rectifier','SMD rectifier 50V/1A, SMA'],
+  'M4':       ['Rectifier','SMD rectifier 400V/1A, SMA'],
+  'M7':       ['Rectifier','SMD rectifier 1000V/1A, SMA — κοινό'],
+  'SMBJ15A':  ['TVS',      'TVS bidirectional 15V clamp — overvoltage protection'],
+  'IN5350B':  ['Zener',    'Zener 27V/5W'],
+  'IN5363':   ['Zener',    'Zener 30V/5W'],
+  'UF4007':   ['Fast Rec.','Ultrafast 1000V/1A — SMPS'],
+  'UF5408':   ['Fast Rec.','Ultrafast 1000V/3A — SMPS'],
+  'BY328':    ['Fast Rec.','Fast rectifier 200V/3A'],
+  'DSEI60':   ['Fast Rec.','FRED 600V/60A — high power inverter'],
+  'HFA25PB60':['Fast Rec.','Hexfred 600V/25A — high freq rectifier'],
+  'EV123-7':  ['Other',    'Rectifier/diode module'],
+  'FULLBRIDGE':['Bridge',  'Full bridge rectifier module'],
+};
+
+// [name, box]
+const rawDiodes = [
+  ['1N4148','ds'],['C4V7','ds'],['ST4148','ds'],
+  ['1N4001','ds'],['1N4002','ds'],['1N4003','ds'],['1N4004','ds'],
+  ['1N4005','ds'],['1N4006','ds'],['1N4007','ds'],
+  ['FR107','ds'],['FR207','ds'],['1N5399','ds'],
+  ['1N5817','ds'],['1N5818','ds'],['1N5819','ds'],['1N5822','ds'],
+  ['1N5822','I3'],['10A10','S1'],['1N5400','S1'],
+  ['DB3 D035','ds'],['DB4 D035','ds'],
+  ['1N5408','I3'],['US1M','DR'],['RS1M','DR'],
+  ['SS14','DR'],['SS34','DR'],['M1','DR'],['M4','DR'],['M7','DR'],
+  ['SS24','DR'],['1N4148LL','DR'],['FULLBRIDGE','DR'],
+  ['SMBJ15A','DR'],['IN5350B','i3'],['IN5363','i3'],
+  ['UF4007','z2'],['UF5408','z2'],['BY328','z2'],
+  ['DSEI60','s1'],['HFA25PB60','s1'],['EV123-7','z2'],
+  ['IN5822','S2'],['1N5819','S2'],
+];
+
+// Zener: [name, volts, watts, smd]
+const rawZeners = [
+  ['1N4727', 3,   1, true ],['1N4728', 3.3, 1, true ],['1N4729', 3.6, 1, true ],
+  ['1N4730', 3.9, 1, false],['1N4731', 4.3, 1, false],['1N4732', 4.7, 1, true ],
+  ['1N4733', 5.1, 1, true ],['1N4734', 5.6, 1, true ],['1N4735', 6.2, 1, true ],
+  ['1N4736', 6.8, 1, false],['1N4737', 7.5, 1, true ],['1N4738', 8.2, 1, false],
+  ['1N4739', 9.1, 1, false],['1N4740',10,   1, true ],['1N4741',11,   1, false],
+  ['1N4742',12,   1, true ],['1N4743',13,   1, false],['1N4744',15,   1, true ],
+  ['1N4745',16,   1, false],['1N4746',18,   1, false],['1N4747',20,   1, true ],
+  ['1N4748',22,   1, false],['1N4749',24,   1, true ],['1N4750',27,   1, false],
+  ['1N4751',30,   1, false],['1N4752',33,   1, false],['1N4753',36,   1, false],
+  ['1N4754',39,   1, true ],['1N4755',43,   1, false],['1N4756',47,   1, false],
+];
+
+// Spare parts: [pos, name]
+const rawSpare = [
+  [1,'ME80N75T'],[2,'16S45T'],[3,'D13007K'],[4,'C5027S'],[5,'B772'],
+  [6,'C2690A'],[7,'L88R05D'],[8,'2576-ADJP'],[9,'PQ1CF1'],[10,'F10L60U'],
+  [11,'BCR16PM'],[12,'J295'],[13,'CEF02N65'],[14,'K2843'],[15,'D2012'],
+  [16,'YG805C04'],[17,'XA2202'],[18,'13007T'],[19,'LM2940CT'],[20,'D880-Y'],
+  [21,'LT6237'],[22,'CT3397'],[23,'TT2194'],[24,'KSH13007A'],[25,'SBL1040CT'],
+  [26,'MBR3045CT'],[27,'STPS41H100CT'],[28,'F16C20C'],[28,'S16C45C'],[28,'S20C100C'],
+  [29,'NS1106'],[29,'MBR1660'],[29,'D5L60'],[29,'SR560FC'],[29,'1G29SD'],
+  [29,'STTHBL06FP'],[29,'D2'],[30,'3866S'],[30,'C4242'],[30,'SBL2045CT LT6239'],
+  [30,'D13007K'],[31,'2N60B'],[31,'HB2060'],[31,'MBR3045CT'],[31,'MBR3060CT'],
+  [32,'FDP238AN'],[33,'STPS2045CT'],[33,'MBR20100CT'],[33,'F12C'],[33,'MBR10100CT'],
+  [34,'MBR2060CT'],[34,'HBR16200'],[34,'GK0V7'],[34,'BYQ2BE PJ0645'],[35,'K2101'],
+  [35,'K3565'],[35,'K3797'],[35,'K12A50'],[36,'K10A50D'],[36,'K22A10N'],
+  [36,'K11A65D'],[37,'YG9D6C2'],[37,'YG902C2'],[37,'YG802C04'],[38,'D2394'],
+  [38,'FCH10A06'],[38,'IRF2N60'],[38,'B1960'],[39,'BR 10N60'],[39,'NEC J649'],
+  [39,'M883'],[39,'BA12T'],[40,'9N50C'],[41,'11N8003'],[41,'18N50'],
+  [41,'JCS2N65FB'],[42,'7N80C'],[42,'SRF20200CT'],[42,'F25NM60N'],[42,'CEF02N6A'],
+  [43,'FCQ10A04'],[44,'S30D60C'],[45,'M1261'],[46,'K1317'],[46,'LM78050'],
+  ['47-48','C5002'],['49-50','NEC K1271'],[51,'LT 316D'],[52,'FMXG12'],
+  [53,'K1349'],[54,'C4153'],[54,'BCR5AM'],
+];
+
+// Spare parts descriptions
+const SPARE_KB = {
+  'ME80N75T':    'N-ch MOSFET 75V/80A',
+  '16S45T':      'N-ch MOSFET 450V/16A',
+  'D13007K':     'NPN power BJT, switching transistor 700V/8A',
+  'C5027S':      'NPN power transistor, audio/switching',
+  'B772':        'PNP power BJT 30V/3A (2SB772)',
+  'C2690A':      'NPN power BJT 60V/3A (2SC2690A)',
+  'L88R05D':     'LDO 5V regulator',
+  '2576-ADJP':   'Step-down switching reg 3A adjustable (LM2576)',
+  'PQ1CF1':      'Low power voltage regulator',
+  'F10L60U':     'Ultrafast rectifier diode 600V/10A',
+  'BCR16PM':     'Triac 16A/600V SMD',
+  'J295':        'P-ch MOSFET/JFET — confirm datasheet',
+  'CEF02N65':    'N-ch MOSFET 650V/2A',
+  'K2843':       'N-ch MOSFET (2SK2843)',
+  'D2012':       'NPN power transistor',
+  'YG805C04':    'Schottky diode module',
+  'XA2202':      'PWM controller IC',
+  '13007T':      'NPN power BJT switching 700V/8A (equiv. D13007)',
+  'LM2940CT':    'LDO 1A low dropout voltage reg',
+  'D880-Y':      'NPN medium power BJT (2SD880)',
+  'LT6237':      'Dual op-amp precision rail-to-rail',
+  'CT3397':      'Power transistor/MOSFET — confirm',
+  'TT2194':      'NPN power BJT audio/switching',
+  'KSH13007A':   'NPN power BJT 700V/8A switching',
+  'SBL1040CT':   'Schottky barrier diode 40V/10A',
+  'MBR3045CT':   'Schottky barrier rectifier 45V/30A',
+  'STPS41H100CT':'Schottky rectifier 100V/40A ST',
+  'F16C20C':     'Fast recovery diode module 200V/16A',
+  'S16C45C':     'Schottky diode module 45V/16A',
+  'S20C100C':    'Schottky diode module 100V/20A',
+  'NS1106':      'Bridge rectifier / diode IC',
+  'MBR1660':     'Schottky rectifier 60V/16A',
+  'D5L60':       'Schottky diode 60V/5A',
+  'SR560FC':     'Schottky rectifier 60V/5A',
+  '1G29SD':      'Fast recovery diode',
+  'STTHBL06FP':  'Ultrafast rectifier 600V/8A ST',
+  'D2':          'Diode — confirm value',
+  '3866S':       'Power transistor NPN',
+  'C4242':       'NPN power BJT (2SC4242)',
+  'SBL2045CT LT6239': 'Schottky 45V/20A + LT6239 op-amp',
+  '2N60B':       'N-ch MOSFET 600V/2A',
+  'HB2060':      'N-ch MOSFET 600V/20A',
+  'MBR3060CT':   'Schottky rectifier 60V/30A',
+  'FDP238AN':    'N-ch MOSFET 60V/40A',
+  'STPS2045CT':  'Schottky rectifier 45V/20A',
+  'MBR20100CT':  'Schottky rectifier 100V/20A',
+  'F12C':        'Fast recovery diode — confirm',
+  'MBR10100CT':  'Schottky rectifier 100V/10A',
+  'MBR2060CT':   'Schottky rectifier 60V/20A',
+  'HBR16200':    'Schottky rectifier 200V/16A',
+  'GK0V7':       'IGBT/MOSFET — confirm datasheet',
+  'BYQ2BE PJ0645':'Fast rectifier diode',
+  'K2101':       'N-ch MOSFET (2SK2101)',
+  'K3565':       'N-ch MOSFET (2SK3565)',
+  'K3797':       'N-ch MOSFET (2SK3797)',
+  'K12A50':      'N-ch MOSFET 500V/12A',
+  'K10A50D':     'N-ch MOSFET 500V/10A',
+  'K22A10N':     'N-ch MOSFET 100V/22A',
+  'K11A65D':     'N-ch MOSFET 650V/11A',
+  'YG9D6C2':     'Schottky diode module',
+  'YG902C2':     'Schottky diode module',
+  'YG802C04':    'Schottky diode module',
+  'D2394':       'NPN power BJT (2SD2394)',
+  'FCH10A06':    'N-ch MOSFET 60V/10A',
+  'IRF2N60':     'N-ch MOSFET 600V/2A',
+  'B1960':       'PNP power BJT (2SB1960)',
+  'BR 10N60':    'N-ch MOSFET 600V/10A',
+  'NEC J649':    'P-ch JFET/MOSFET (2SJ649)',
+  'M883':        'NPN/MOSFET — confirm',
+  'BA12T':       'Voltage regulator/diode IC',
+  '9N50C':       'N-ch MOSFET 500V/9A',
+  '11N8003':     'N-ch MOSFET 800V/11A',
+  '18N50':       'N-ch MOSFET 500V/18A',
+  'JCS2N65FB':   'N-ch MOSFET 650V/2A',
+  '7N80C':       'N-ch MOSFET 800V/7A',
+  'SRF20200CT':  'Schottky rectifier 200V/20A',
+  'F25NM60N':    'N-ch MOSFET 600V/25A ST',
+  'CEF02N6A':    'N-ch MOSFET 650V/2A',
+  'FCQ10A04':    'N-ch MOSFET 40V/10A',
+  'S30D60C':     'Schottky diode 60V/30A',
+  'M1261':       'NPN power BJT (2SM1261)',
+  'K1317':       'N-ch MOSFET (2SK1317)',
+  'LM78050':     'Voltage regulator 5V equiv.',
+  'C5002':       'NPN power BJT (2SC5002)',
+  'NEC K1271':   'N-ch MOSFET (2SK1271)',
+  'LT 316D':     'Schottky/fast diode',
+  'FMXG12':      'IGBT/MOSFET module',
+  'K1349':       'N-ch MOSFET (2SK1349)',
+  'C4153':       'NPN power BJT (2SC4153)',
+  'BCR5AM':      'Triac 5A/600V',
+};
+
+const diodeData  = rawDiodes.map(([name, box]) => {
+  const key = name.toUpperCase().replace(/\s+/g,'');
+  const kb  = Object.entries(DIODE_KB).find(([k])=>k.toUpperCase().replace(/\s+/g,'')=== key);
+  const [dtype, ddesc] = kb ? kb[1] : ['Other',''];
+  return { id: nextId++, name: name.trim(), box: box.trim().toUpperCase(), dtype, ddesc, kind:'diode' };
+});
+
+const zenerData  = rawZeners.map(([name, volts, watts, smd]) =>
+  ({ id: nextId++, name, volts, watts, smd, kind:'zener' }));
+
+const TAB_SPARE = 'spare';
+const spareData  = rawSpare.map(([pos, name]) => {
+  const key = name.toUpperCase().replace(/[\s\-]/g,'');
+  const desc = Object.entries(SPARE_KB).find(([k]) =>
+    k.toUpperCase().replace(/[\s\-]/g,'') === key)?.[1] || '';
+  return { id: nextId++, pos: String(pos), name: name.trim(), desc, kind:'spare' };
+});
+
+const allDiodeData = [...diodeData, ...zenerData];
+const allSpareData = spareData;
+const LS_KEY = 'elec_inventory_v1';
+
+function loadFromLS() {
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return null;
+}
+function saveToLS() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state.data)); } catch(e) {}
+}
+
+const savedData = loadFromLS();
+
+const state = {
+  activeTab: TAB_IC,
+  search: '',
+  boxFilter: '',
+  typeFilter: '',
+  sortCol: 'name',
+  sortDir: 1,
+  editingId: null,
+  data: savedData || {
+    [TAB_IC]:    icData,
+    [TAB_RES]:   [...resistorData, ...shuntData],
+    [TAB_POT]:   allPotData,
+    [TAB_CAP]:   allCapData,
+    [TAB_DIODE]: allDiodeData,
+    [TAB_SPARE]: allSpareData,
+    [TAB_MOD]:   moduleData,
+  }
+};
+
+const TABS = [
+  { id: TAB_IC,    label: 'ICs & Transistors', icon: '🔌' },
+  { id: TAB_RES,   label: 'Αντιστάσεις',       icon: '⚡' },
+  { id: TAB_POT,   label: 'Ποτενσιόμετρα',     icon: '🎛️' },
+  { id: TAB_CAP,   label: 'Πυκνωτές',           icon: '🔋' },
+  { id: TAB_DIODE, label: 'Δίοδοι & Zener',    icon: '➡️' },
+  { id: TAB_SPARE, label: 'Spare Parts',        icon: '🗂️' },
+  { id: TAB_MOD,   label: 'Modules',            icon: '📦' },
+];
+
+// Init empty tabs not already in state
+TABS.forEach(t => { if (!state.data[t.id]) state.data[t.id] = []; });
+
+// ─── RENDER ───
+function getBoxes(tabId) {
+  const boxes = [...new Set(state.data[tabId].map(r => r.box).filter(Boolean))].sort();
+  return boxes;
+}
+function getTypes(tabId) {
+  const types = [...new Set(state.data[tabId].map(r => r.type).filter(Boolean))].sort();
+  return types;
+}
+
+function filtered(tabId) {
+  let rows = state.data[tabId] || [];
+  const q = state.search.toLowerCase();
+  if (q) rows = rows.filter(r =>
+    r.name.toLowerCase().includes(q) ||
+    r.box.toLowerCase().includes(q) ||
+    r.type.toLowerCase().includes(q) ||
+    r.desc.toLowerCase().includes(q)
+  );
+  if (state.boxFilter) rows = rows.filter(r => r.box.toUpperCase() === state.boxFilter.toUpperCase());
+  if (state.typeFilter) rows = rows.filter(r => r.type === state.typeFilter);
+  rows = [...rows].sort((a,b) => {
+    const av = (a[state.sortCol]||'').toLowerCase();
+    const bv = (b[state.sortCol]||'').toLowerCase();
+    return av < bv ? -state.sortDir : av > bv ? state.sortDir : 0;
+  });
+  return rows;
+}
+
+function renderAll() {
+  renderTabs();
+  renderFilters();
+  renderContent();
+  renderStats();
+}
+
+function renderStats() {
+  const ic    = (state.data[TAB_IC]   ||[]).length;
+  const res   = (state.data[TAB_RES]  ||[]).filter(r=>!r.isShunt).length;
+  const pot   = (state.data[TAB_POT]  ||[]).length;
+  const cap   = (state.data[TAB_CAP]  ||[]).length;
+  const diode = (state.data[TAB_DIODE]||[]).filter(r=>r.kind==='diode').length;
+  const zener = (state.data[TAB_DIODE]||[]).filter(r=>r.kind==='zener').length;
+  const mod   = (state.data[TAB_MOD]  ||[]).length;
+  document.getElementById('globalStats').innerHTML =
+    `<span>ICs:<b>${ic}</b></span><span>R:<b>${res}</b></span><span>Pot:<b>${pot}</b></span><span>C:<b>${cap}</b></span><span>D:<b>${diode}</b></span><span>Z:<b>${zener}</b></span><span>Mod:<b>${mod}</b></span>`;
+}
+
+function renderTabs() {
+  const wrap = document.getElementById('tabsWrapper');
+  wrap.innerHTML = TABS.map(t => {
+    const count = state.data[t.id].length;
+    const active = state.activeTab === t.id ? 'active' : '';
+    return `<button class="tab-btn ${active}" onclick="switchTab('${t.id}')">
+      ${t.icon} ${t.label} <span class="tab-count">${count}</span>
+    </button>`;
+  }).join('');
+}
+
+function renderFilters() {
+  const tab = state.activeTab;
+  const boxSel = document.getElementById('boxFilter');
+  const typeSel = document.getElementById('typeFilter');
+  const boxes = getBoxes(tab);
+  const types = getTypes(tab);
+
+  boxSel.innerHTML = '<option value="">Όλα τα κουτιά</option>' +
+    boxes.map(b => `<option value="${b}" ${state.boxFilter===b?'selected':''}>${b}</option>`).join('');
+  typeSel.innerHTML = '<option value="">Όλοι οι τύποι</option>' +
+    types.map(t => `<option value="${t}" ${state.typeFilter===t?'selected':''}>${t}</option>`).join('');
+}
+
+function renderContent() {
+  const tab = state.activeTab;
+  if (tab === TAB_RES)   { renderResistors();    return; }
+  if (tab === TAB_POT)   { renderPotTab();        return; }
+  if (tab === TAB_CAP)   { renderCapacitors();    return; }
+  if (tab === TAB_DIODE) { renderDiodes();        return; }
+  if (tab === TAB_SPARE) { renderSpare();         return; }
+  if (tab === TAB_MOD)   { renderModules();       return; }
+
+  const content = document.getElementById('mainContent');
+  const rows = filtered(tab);
+  const isIC = tab === TAB_IC;
+  const hasData = state.data[tab].length > 0;
+
+  let html = '';
+
+  // Add form
+  html += `<div class="add-row-form" id="addForm">
+    <div class="form-field"><label>Όνομα</label><input id="af-name" placeholder="π.χ. IRF540N"></div>
+    <div class="form-field"><label>Κουτί</label><input id="af-box" placeholder="π.χ. S1"></div>
+    ${isIC ? `<div class="form-field"><label>Τύπος</label><select id="af-type">${Object.keys(TYPES).map(t=>`<option>${t}</option>`).join('')}</select></div>
+    <div class="form-field" style="flex:2"><label>Περιγραφή</label><input id="af-desc" placeholder="Σύντομη περιγραφή..."></div>` : ''}
+    <button class="btn green" onclick="saveNewRow()" style="align-self:flex-end">✓ Αποθήκευση</button>
+    <button class="btn" onclick="toggleAddForm()" style="align-self:flex-end;border-color:var(--border);color:var(--text-dim)">✕</button>
+  </div>`;
+
+  html += `<div class="result-info">Εμφανίζονται <b>${rows.length}</b> από <b>${state.data[tab].length}</b> components</div>`;
+
+  if (!hasData) {
+    html += `<div class="empty-state"><div class="icon">📦</div>Δεν υπάρχουν εγγραφές ακόμα.<br>Πάτα <b>+ Προσθήκη</b> για να ξεκινήσεις.</div>`;
+  } else if (rows.length === 0) {
+    html += `<div class="empty-state"><div class="icon">🔍</div>Δεν βρέθηκαν αποτελέσματα.</div>`;
+  } else {
+    html += `<div class="table-wrap"><table>
+      <thead><tr>
+        <th onclick="sortBy('name')" class="${sortClass('name')}">Όνομα</th>
+        <th onclick="sortBy('box')" class="${sortClass('box')}">Κουτί</th>
+        ${isIC ? `<th onclick="sortBy('type')" class="${sortClass('type')}">Τύπος</th>
+        <th onclick="sortBy('desc')" class="${sortClass('desc')}">Περιγραφή</th>` : ''}
+        <th>Ενέργειες</th>
+      </tr></thead>
+      <tbody>`;
+
+    rows.forEach(r => {
+      const editing = state.editingId === r.id;
+      html += `<tr class="${editing?'editing':''}" id="row-${r.id}">`;
+      if (editing) {
+        html += `<td><input class="edit-input" id="e-name-${r.id}" value="${esc(r.name)}"></td>`;
+        html += `<td><input class="edit-input" id="e-box-${r.id}" value="${esc(r.box)}" style="width:70px"></td>`;
+        if (isIC) {
+          html += `<td><select class="edit-input type-sel" id="e-type-${r.id}">${Object.keys(TYPES).map(t=>`<option ${r.type===t?'selected':''}>${t}</option>`).join('')}</select></td>`;
+          html += `<td><input class="edit-input desc" id="e-desc-${r.id}" value="${esc(r.desc)}"></td>`;
+        }
+        html += `<td class="actions-cell">
+          <button class="icon-btn save" onclick="saveEdit(${r.id})" title="Αποθήκευση">✓</button>
+          <button class="icon-btn cancel" onclick="cancelEdit()" title="Ακύρωση">✕</button>
+        </td>`;
+      } else {
+        html += `<td class="name-cell">${esc(r.name)}</td>`;
+        html += `<td class="box-cell">${esc(r.box)}</td>`;
+        if (isIC) {
+          const badgeClass = TYPES[r.type] || 'badge-other';
+          html += `<td class="type-cell"><span class="badge ${badgeClass}">${esc(r.type)}</span></td>`;
+          html += `<td class="desc-cell">${esc(r.desc) || '<span style="color:var(--border-bright)">—</span>'}</td>`;
+        }
+        html += `<td class="actions-cell">
+          <button class="icon-btn edit" onclick="startEdit(${r.id})" title="Επεξεργασία">✎</button>
+          <button class="icon-btn delete" onclick="deleteRow(${r.id})" title="Διαγραφή">✕</button>
+        </td>`;
+      }
+      html += `</tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+  }
+
+  content.innerHTML = html;
+}
+
+function dot(val, isSmd) {
+  if (!val && !isSmd) return `<span style="color:var(--border)">·</span>`;
+  if (isSmd) return `<span class="r-dot r-dot-smd" title="SMD"></span>`;
+  return `<span class="r-dot" title="${val}"></span>`;
+}
+
+function renderResistors() {
+  const content = document.getElementById('mainContent');
+  const q = state.search.toLowerCase();
+  const allRows = state.data[TAB_RES] || [];
+  const normal = allRows.filter(r => !r.isShunt);
+  const shunts = allRows.filter(r => r.isShunt);
+
+  const filtered_r = q ? normal.filter(r => r.value.toLowerCase().includes(q)) : normal;
+  const filtered_s = q ? shunts.filter(r => r.value.toLowerCase().includes(q)) : shunts;
+
+  let html = `<div class="result-info">
+    <b>${filtered_r.length}</b> αντιστάσεις + <b>${filtered_s.length}</b> shunts εμφανίζονται
+  </div>`;
+
+  // Add form for resistors
+  html += `<div class="add-row-form" id="addForm">
+    <div class="form-field"><label>Τιμή</label><input id="af-name" placeholder="π.χ. 4,7K"></div>
+    <div class="form-field"><label>1/4W</label><input id="af-w025" placeholder="1/4W ή κενό"></div>
+    <div class="form-field"><label>1W</label><input id="af-w1" placeholder="1W ή κενό"></div>
+    <div class="form-field"><label>2W/3W</label><input id="af-w2" placeholder="2W/3W ή κενό"></div>
+    <div class="form-field"><label>SMD</label><select id="af-smd"><option value="">Όχι</option><option value="1">Ναι</option></select></div>
+    <button class="btn green" onclick="saveNewResistor()" style="align-self:flex-end">✓ Αποθήκευση</button>
+    <button class="btn" onclick="toggleAddForm()" style="align-self:flex-end;border-color:var(--border);color:var(--text-dim)">✕</button>
+  </div>`;
+
+  html += `<div class="table-wrap"><table>
+    <thead><tr>
+      <th style="width:130px">Τιμή</th>
+      <th style="text-align:center;width:80px">¼W</th>
+      <th style="text-align:center;width:80px">1W</th>
+      <th style="text-align:center;width:80px">2W/3W</th>
+      <th style="text-align:center;width:80px">SMD</th>
+      <th style="width:80px">Ενέργειες</th>
+    </tr></thead>
+    <tbody>`;
+
+  if (filtered_r.length > 0) {
+    html += `<tr><td colspan="6" class="r-section-header">── ΑΝΤΙΣΤΑΣΕΙΣ (${filtered_r.length})</td></tr>`;
+    filtered_r.forEach(r => {
+      const editing = state.editingId === r.id;
+      if (editing) {
+        html += `<tr class="editing" id="row-${r.id}">
+          <td><input class="edit-input" id="e-val-${r.id}" value="${esc(r.value)}" style="width:100px"></td>
+          <td style="text-align:center"><input class="edit-input" id="e-w025-${r.id}" value="${esc(r.w025)}" style="width:55px;text-align:center"></td>
+          <td style="text-align:center"><input class="edit-input" id="e-w1-${r.id}" value="${esc(r.w1)}" style="width:55px;text-align:center"></td>
+          <td style="text-align:center"><input class="edit-input" id="e-w2-${r.id}" value="${esc(r.w2)}" style="width:55px;text-align:center"></td>
+          <td style="text-align:center"><select class="edit-input" id="e-smd-${r.id}" style="width:60px"><option value="">Όχι</option><option value="1" ${r.smd?'selected':''}>Ναι</option></select></td>
+          <td><button class="icon-btn save" onclick="saveResEdit(${r.id})">✓</button><button class="icon-btn cancel" onclick="cancelEdit()">✕</button></td>
+        </tr>`;
+      } else {
+        html += `<tr id="row-${r.id}">
+          <td class="r-value">${esc(r.value)}</td>
+          <td class="r-check">${r.w025 ? `<span class="r-dot" title="1/4W"></span>` : `<span style="color:var(--border)">·</span>`}</td>
+          <td class="r-check">${r.w1  ? `<span class="r-dot" title="1W"></span>`  : `<span style="color:var(--border)">·</span>`}</td>
+          <td class="r-check">${r.w2  ? `<span class="r-dot" title="${esc(r.w2)}"></span>` : `<span style="color:var(--border)">·</span>`}</td>
+          <td class="r-check">${r.smd ? `<span class="r-dot r-dot-smd" title="SMD"></span>` : `<span style="color:var(--border)">·</span>`}</td>
+          <td class="actions-cell">
+            <button class="icon-btn edit" onclick="startEdit(${r.id})">✎</button>
+            <button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button>
+          </td>
+        </tr>`;
+      }
+    });
+  }
+
+  if (filtered_s.length > 0) {
+    html += `<tr><td colspan="6" class="r-section-header">── SHUNT RESISTORS (${filtered_s.length})</td></tr>`;
+    filtered_s.forEach(r => {
+      html += `<tr id="row-${r.id}">
+        <td class="r-value">${esc(r.value)}</td>
+        <td colspan="3" style="color:var(--yellow);font-family:var(--mono);font-size:0.78rem">R = ${esc(r.rval)}</td>
+        <td></td>
+        <td class="actions-cell">
+          <button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button>
+        </td>
+      </tr>`;
+    });
+  }
+
+  if (filtered_r.length === 0 && filtered_s.length === 0) {
+    html += `<tr><td colspan="6"><div class="empty-state"><div class="icon">🔍</div>Δεν βρέθηκαν αποτελέσματα.</div></td></tr>`;
+  }
+
+  html += `</tbody></table></div>`;
+
+  // Legend
+  html += `<div style="margin-top:12px;display:flex;gap:20px;font-family:var(--mono);font-size:0.72rem;color:var(--text-dim)">
+    <span><span class="r-dot" style="display:inline-block;margin-right:5px;width:8px;height:8px"></span>Through-hole</span>
+    <span><span class="r-dot r-dot-smd" style="display:inline-block;margin-right:5px;width:8px;height:8px"></span>SMD</span>
+    <span style="margin-left:10px">· = δεν υπάρχει αυτό το wattage</span>
+  </div>`;
+
+  content.innerHTML = html;
+}
+
+// ── helper for cap/resistor dot cells ──
+function cdot(active, color, title) {
+  if (!active) return `<span style="color:var(--border)">·</span>`;
+  const c = color || 'var(--green)';
+  return `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c};box-shadow:0 0 5px ${c}" title="${title||''}"></span>`;
+}
+
+function fmtCap(value, unit) {
+  // Format display: e.g. 1.7 nano → "1,7 nF"
+  const unitMap = { pico:'pF', nano:'nF', micro:'μF' };
+  const v = String(value).replace('.',',');
+  return `${v} ${unitMap[unit]||unit}`;
+}
+
+function renderPotTab() {
+  const content = document.getElementById('mainContent');
+  const q = state.search.toLowerCase();
+  const all = state.data[TAB_POT] || [];
+  const fq = r => !q || JSON.stringify(r).toLowerCase().includes(q);
+  const pots     = all.filter(r => r.kind === 'pot').filter(fq);
+  const trimmers = all.filter(r => r.kind === 'trimmer').filter(fq);
+
+  let html = `<div class="result-info"><b>${pots.length}</b> potentiometers + <b>${trimmers.length}</b> trimmers</div>`;
+
+  html += `<div class="add-row-form" id="addForm">
+    <div class="form-field"><label>Τιμή</label><input id="af-name" placeholder="π.χ. 10K"></div>
+    <div class="form-field"><label>Wattage</label><input id="af-watt" placeholder="1/2W"></div>
+    <div class="form-field"><label>Τύπος</label><select id="af-pkind"><option value="pot">Potentiometer</option><option value="trimmer">Trimmer</option></select></div>
+    <div class="form-field"><label>Σημείωση</label><input id="af-desc" placeholder="π.χ. Heavy Duty"></div>
+    <button class="btn green" onclick="saveNewPot()" style="align-self:flex-end">✓ Αποθήκευση</button>
+    <button class="btn" onclick="toggleAddForm()" style="align-self:flex-end;border-color:var(--border);color:var(--text-dim)">✕</button>
+  </div>`;
+
+  if (pots.length) {
+    html += `<div class="table-wrap" style="margin-bottom:20px"><table>
+      <thead>
+        <tr><td colspan="4" class="r-section-header">── POTENTIOMETERS (${pots.length})</td></tr>
+        <tr><th>Τιμή</th><th style="text-align:center;width:100px">Wattage</th><th>Σημείωση</th><th style="width:80px">Ενέργειες</th></tr>
+      </thead><tbody>`;
+    pots.forEach(r => {
+      const ed = state.editingId === r.id;
+      if (ed) {
+        html += `<tr class="editing" id="row-${r.id}">
+          <td><input class="edit-input" id="e-pval-${r.id}" value="${esc(r.value)}" style="width:80px"></td>
+          <td><input class="edit-input" id="e-pwatt-${r.id}" value="${esc(r.watt)}" style="width:70px;text-align:center"></td>
+          <td><input class="edit-input desc" id="e-pnote-${r.id}" value="${esc(r.note)}"></td>
+          <td><button class="icon-btn save" onclick="savePotEdit(${r.id})">✓</button>
+              <button class="icon-btn cancel" onclick="cancelEdit()">✕</button></td>
+        </tr>`;
+      } else {
+        html += `<tr id="row-${r.id}">
+          <td class="r-value">${esc(r.value)}</td>
+          <td style="text-align:center"><span class="badge badge-vreg" style="font-size:0.72rem">${esc(r.watt)}</span></td>
+          <td class="desc-cell">${esc(r.note)||'<span style="color:var(--border-bright)">—</span>'}</td>
+          <td class="actions-cell">
+            <button class="icon-btn edit" onclick="startEdit(${r.id})">✎</button>
+            <button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button>
+          </td>
+        </tr>`;
+      }
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  if (trimmers.length) {
+    html += `<div class="table-wrap"><table>
+      <thead>
+        <tr><td colspan="2" class="r-section-header">── TRIMMERS (${trimmers.length})</td></tr>
+        <tr><th>Τιμή</th><th style="width:80px">Ενέργειες</th></tr>
+      </thead><tbody>`;
+    trimmers.forEach(r => {
+      html += `<tr id="row-${r.id}">
+        <td class="r-value">${esc(r.value)}</td>
+        <td class="actions-cell"><button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  if (!pots.length && !trimmers.length) {
+    html += `<div class="empty-state"><div class="icon">🔍</div>Δεν βρέθηκαν αποτελέσματα.</div>`;
+  }
+  content.innerHTML = html;
+}
+
+function savePotEdit(id) {
+  const row = (state.data[TAB_POT]||[]).find(r => r.id === id);
+  if (!row) return;
+  row.value = document.getElementById(`e-pval-${id}`)?.value.trim() || row.value;
+  row.watt  = document.getElementById(`e-pwatt-${id}`)?.value.trim() || row.watt;
+  row.note  = document.getElementById(`e-pnote-${id}`)?.value.trim() || '';
+  state.editingId = null;
+  saveToLS(); renderAll();
+}
+function saveNewPot() {
+  const value = document.getElementById('af-name')?.value.trim();
+  const watt  = document.getElementById('af-watt')?.value.trim();
+  const kind  = document.getElementById('af-pkind')?.value || 'pot';
+  const note  = document.getElementById('af-desc')?.value.trim() || '';
+  if (!value) { alert('Βάλε τιμή'); return; }
+  state.data[TAB_POT].push({ id: nextId++, value, watt, note, kind });
+  document.getElementById('addForm').classList.remove('visible');
+  saveToLS(); renderAll();
+}
+
+function renderCapacitors() {
+  const content = document.getElementById('mainContent');
+  const q = state.search.toLowerCase();
+  const all = state.data[TAB_CAP] || [];
+  const fq = r => !q || JSON.stringify(r).toLowerCase().includes(q);
+  const fc = all.filter(r => r.kind === 'cap').filter(fq);
+
+  let html = `<div class="result-info"><b>${fc.length}</b> πυκνωτές</div>`;
+
+  html += `<div class="add-row-form" id="addForm">
+    <div class="form-field"><label>Τιμή</label><input id="af-name" placeholder="π.χ. 100"></div>
+    <div class="form-field"><label>Μονάδα</label><select id="af-cunit"><option>pico</option><option>nano</option><option>micro</option></select></div>
+    ${['af-lowV:Low V','af-midV:Mid V','af-highV:High V','af-smd:SMD','af-kV:kV'].map(f=>{
+      const [id,lbl]=f.split(':');
+      return `<div class="form-field"><label>${lbl}</label><select id="${id}"><option value="">Όχι</option><option value="1">Ναι</option></select></div>`;
+    }).join('')}
+    <button class="btn green" onclick="saveNewCap()" style="align-self:flex-end">✓ Αποθήκευση</button>
+    <button class="btn" onclick="toggleAddForm()" style="align-self:flex-end;border-color:var(--border);color:var(--text-dim)">✕</button>
+  </div>`;
+
+  if (!fc.length) {
+    html += `<div class="empty-state"><div class="icon">🔍</div>Δεν βρέθηκαν αποτελέσματα.</div>`;
+    content.innerHTML = html; return;
+  }
+
+  html += `<div class="table-wrap" style="margin-bottom:12px"><table>
+    <thead><tr>
+      <th style="width:120px">Τιμή</th>
+      <th style="text-align:center;width:75px" title="Χαμηλή τάση">Low V</th>
+      <th style="text-align:center;width:75px" title="~50V">Mid V</th>
+      <th style="text-align:center;width:75px" title=">50V">High V</th>
+      <th style="text-align:center;width:75px">SMD</th>
+      <th style="text-align:center;width:75px">kV</th>
+      <th style="width:80px">Ενέργειες</th>
+    </tr></thead><tbody>`;
+
+  let lastUnit = null;
+  fc.forEach(r => {
+    if (r.unit !== lastUnit) {
+      const unitLabel = { pico:'── pF (pico)', nano:'── nF (nano)', micro:'── μF (micro)' }[r.unit] || r.unit;
+      html += `<tr><td colspan="7" style="background:var(--bg4);padding:6px 14px;font-family:var(--mono);font-size:0.68rem;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase">${unitLabel}</td></tr>`;
+      lastUnit = r.unit;
+    }
+    const ed = state.editingId === r.id;
+    if (ed) {
+      html += `<tr class="editing" id="row-${r.id}">
+        <td><input class="edit-input" id="e-cval-${r.id}" value="${esc(r.value)}" style="width:55px">
+            <select class="edit-input" id="e-cunit-${r.id}" style="width:65px">
+              ${['pico','nano','micro'].map(u=>`<option ${r.unit===u?'selected':''}>${u}</option>`).join('')}
+            </select></td>
+        ${['lowV','midV','highV','smd','kV'].map(k=>`
+        <td style="text-align:center"><select class="edit-input" id="e-c${k}-${r.id}" style="width:55px">
+          <option value="">Όχι</option><option value="1" ${r[k]?'selected':''}>Ναι</option>
+        </select></td>`).join('')}
+        <td><button class="icon-btn save" onclick="saveCapEdit(${r.id})">✓</button>
+            <button class="icon-btn cancel" onclick="cancelEdit()">✕</button></td>
+      </tr>`;
+    } else {
+      html += `<tr id="row-${r.id}">
+        <td class="r-value">${fmtCap(r.value, r.unit)}</td>
+        <td class="r-check">${cdot(r.lowV,  'var(--green)',  'Low Voltage')}</td>
+        <td class="r-check">${cdot(r.midV,  'var(--yellow)', 'Mid ~50V')}</td>
+        <td class="r-check">${cdot(r.highV, 'var(--orange)', 'High >50V')}</td>
+        <td class="r-check">${cdot(r.smd,   'var(--accent)', 'SMD')}</td>
+        <td class="r-check">${cdot(r.kV,    'var(--red)',    'kV range')}</td>
+        <td class="actions-cell">
+          <button class="icon-btn edit" onclick="startEdit(${r.id})">✎</button>
+          <button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button>
+        </td>
+      </tr>`;
+    }
+  });
+  html += `</tbody></table></div>`;
+  html += `<div style="display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:0.7rem;color:var(--text-dim);margin-top:4px">
+    ${[['var(--green)','Low V'],['var(--yellow)','Mid V (~50V)'],['var(--orange)','High V (>50V)'],['var(--accent)','SMD'],['var(--red)','kV range']]
+      .map(([c,l])=>`<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:5px;vertical-align:middle"></span>${l}</span>`).join('')}
+    <span style="margin-left:8px">· = δεν υπάρχει</span>
+  </div>`;
+  content.innerHTML = html;
+}
+
+function saveNewCap() {
+  const value = parseFloat(document.getElementById('af-name')?.value.replace(',','.'));
+  const unit  = document.getElementById('af-cunit')?.value || 'pico';
+  if (!value) { alert('Βάλε τιμή'); return; }
+  const r = { id: nextId++, value, unit, kind:'cap' };
+  ['lowV','midV','highV','smd','kV'].forEach(k => {
+    r[k] = document.getElementById(`af-${k}`)?.value === '1';
+  });
+  state.data[TAB_CAP].push(r);
+  document.getElementById('addForm').classList.remove('visible');
+  saveToLS(); renderAll();
+}
+
+function saveCapEdit(id) {
+  const row = (state.data[TAB_CAP]||[]).find(r => r.id === id);
+  if (!row) return;
+  row.value = parseFloat(document.getElementById(`e-cval-${id}`)?.value.replace(',','.')) || row.value;
+  row.unit  = document.getElementById(`e-cunit-${id}`)?.value || row.unit;
+  ['lowV','midV','highV','smd','kV'].forEach(k => {
+    row[k] = document.getElementById(`e-c${k}-${id}`)?.value === '1';
+  });
+  state.editingId = null;
+  saveToLS(); renderAll();
+}
+
+// ─── MODULES RENDER ───
+const MOD_CAT_BADGE = {
+  'MCU':        'badge-npn',
+  'MCU/WiFi':   'badge-nmos',
+  'WiFi Mod':   'badge-nmos',
+  'Sensor':     'badge-green',
+  'RF':         'badge-purple',
+  'ADC/DAC':    'badge-vreg',
+  'I/O Exp':    'badge-driver',
+  'Multiplexer':'badge-gate',
+  'Power':      'badge-yellow',
+  'Motor':      'badge-orange',
+  'Display':    'badge-opto',
+  'Switch':     'badge-other',
+  'Audio':      'badge-audio',
+  'BT Audio':   'badge-audio',
+  'BT':         'badge-audio',
+  'Network':    'badge-ic',
+  'Relay':      'badge-scr',
+  'Misc':       'badge-other',
+};
+// add missing badge classes
+const extraCSS = `.badge-green{background:rgba(57,217,138,.12);color:var(--green);border:1px solid rgba(57,217,138,.3)}
+.badge-yellow{background:rgba(245,200,66,.12);color:var(--yellow);border:1px solid rgba(245,200,66,.3)}
+.badge-orange{background:rgba(255,159,67,.12);color:var(--orange);border:1px solid rgba(255,159,67,.3)}
+.badge-purple{background:rgba(176,122,255,.12);color:var(--purple);border:1px solid rgba(176,122,255,.3)}`;
+if (!document.getElementById('extra-badge-css')) {
+  const s = document.createElement('style');
+  s.id = 'extra-badge-css';
+  s.textContent = extraCSS;
+  document.head.appendChild(s);
+}
+
+function renderModules() {
+  const content = document.getElementById('mainContent');
+  const q = state.search.toLowerCase();
+  const all = state.data[TAB_MOD] || [];
+  const fq = r => !q || JSON.stringify(r).toLowerCase().includes(q);
+  const rows = all.filter(fq);
+
+  // Group by category
+  const cats = {};
+  rows.forEach(r => {
+    if (!cats[r.cat]) cats[r.cat] = [];
+    cats[r.cat].push(r);
+  });
+
+  let html = `<div class="result-info"><b>${rows.length}</b> modules εμφανίζονται</div>`;
+
+  html += `<div class="add-row-form" id="addForm">
+    <div class="form-field"><label>Όνομα</label><input id="af-name" placeholder="π.χ. BME280"></div>
+    <div class="form-field"><label>Κατηγορία</label><select id="af-cat">${Object.keys(MOD_CAT_BADGE).map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div class="form-field" style="flex:3"><label>Περιγραφή</label><input id="af-desc" placeholder="Τι κάνει..."></div>
+    <button class="btn green" onclick="saveNewModule()" style="align-self:flex-end">✓ Αποθήκευση</button>
+    <button class="btn" onclick="toggleAddForm()" style="align-self:flex-end;border-color:var(--border);color:var(--text-dim)">✕</button>
+  </div>`;
+
+  if (!rows.length) {
+    html += `<div class="empty-state"><div class="icon">🔍</div>Δεν βρέθηκαν αποτελέσματα.</div>`;
+    content.innerHTML = html; return;
+  }
+
+  Object.entries(cats).forEach(([cat, items]) => {
+    html += `<div class="table-wrap" style="margin-bottom:16px"><table>
+      <thead>
+        <tr><td colspan="3" class="r-section-header">── ${cat.toUpperCase()} (${items.length})</td></tr>
+        <tr><th>Όνομα</th><th style="width:110px">Κατηγορία</th><th>Περιγραφή</th><th style="width:80px">Ενέργειες</th></tr>
+      </thead><tbody>`;
+    items.forEach(r => {
+      const ed = state.editingId === r.id;
+      if (ed) {
+        html += `<tr class="editing" id="row-${r.id}">
+          <td><input class="edit-input" id="e-mname-${r.id}" value="${esc(r.name)}"></td>
+          <td><select class="edit-input" id="e-mcat-${r.id}" style="width:100px">${Object.keys(MOD_CAT_BADGE).map(c=>`<option ${r.cat===c?'selected':''}>${c}</option>`).join('')}</select></td>
+          <td><input class="edit-input desc" id="e-mdesc-${r.id}" value="${esc(r.desc)}"></td>
+          <td><button class="icon-btn save" onclick="saveModEdit(${r.id})">✓</button>
+              <button class="icon-btn cancel" onclick="cancelEdit()">✕</button></td>
+        </tr>`;
+      } else {
+        const bc = MOD_CAT_BADGE[r.cat] || 'badge-other';
+        html += `<tr id="row-${r.id}">
+          <td class="name-cell">${esc(r.name)}</td>
+          <td><span class="badge ${bc}" style="font-size:0.68rem">${esc(r.cat)}</span></td>
+          <td class="desc-cell" style="max-width:500px">${esc(r.desc)}</td>
+          <td class="actions-cell">
+            <button class="icon-btn edit" onclick="startEdit(${r.id})">✎</button>
+            <button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button>
+          </td>
+        </tr>`;
+      }
+    });
+    html += `</tbody></table></div>`;
+  });
+
+  content.innerHTML = html;
+}
+
+function saveModEdit(id) {
+  const row = (state.data[TAB_MOD]||[]).find(r => r.id === id);
+  if (!row) return;
+  row.name = document.getElementById(`e-mname-${id}`)?.value.trim() || row.name;
+  row.cat  = document.getElementById(`e-mcat-${id}`)?.value  || row.cat;
+  row.desc = document.getElementById(`e-mdesc-${id}`)?.value.trim() || '';
+  state.editingId = null;
+  saveToLS(); renderAll();
+}
+function saveNewModule() {
+  const name = document.getElementById('af-name')?.value.trim();
+  const cat  = document.getElementById('af-cat')?.value || 'Misc';
+  const desc = document.getElementById('af-desc')?.value.trim() || '';
+  if (!name) { alert('Βάλε όνομα module'); return; }
+  state.data[TAB_MOD].push({ id: nextId++, name, cat, desc, kind:'module' });
+  document.getElementById('addForm').classList.remove('visible');
+  saveToLS(); renderAll();
+}
+
+// ─── DIODES & ZENER RENDER ───
+const DTYPE_BADGE = {
+  'Signal':    'badge-npn',
+  'Rectifier':'badge-vreg',
+  'Schottky':  'badge-nmos',
+  'Fast Rec.': 'badge-driver',
+  'Zener':     'badge-pmos',
+  'TVS':       'badge-audio',
+  'DIAC':      'badge-scr',
+  'Bridge':    'badge-opto',
+  'Other':     'badge-other',
+};
+
+function renderDiodes() {
+  const content = document.getElementById('mainContent');
+  const q = state.search.toLowerCase();
+  const all = state.data[TAB_DIODE] || [];
+  const diodes = all.filter(r => r.kind === 'diode');
+  const zeners = all.filter(r => r.kind === 'zener');
+
+  const fq = r => !q || JSON.stringify(r).toLowerCase().includes(q);
+  const fd = diodes.filter(fq);
+  const fz = zeners.filter(fq);
+
+  let html = `<div class="result-info"><b>${fd.length}</b> δίοδοι + <b>${fz.length}</b> zener</div>`;
+
+  // Add form
+  html += `<div class="add-row-form" id="addForm">
+    <div class="form-field"><label>Όνομα</label><input id="af-name" placeholder="π.χ. 1N4007"></div>
+    <div class="form-field"><label>Κουτί</label><input id="af-box" placeholder="π.χ. DS"></div>
+    <div class="form-field"><label>Τύπος</label><select id="af-dtype">
+      ${Object.keys(DTYPE_BADGE).map(t=>`<option>${t}</option>`).join('')}
+    </select></div>
+    <div class="form-field" style="flex:2"><label>Περιγραφή</label><input id="af-desc" placeholder="Σύντομη περιγραφή..."></div>
+    <button class="btn green" onclick="saveNewDiode()" style="align-self:flex-end">✓ Αποθήκευση</button>
+    <button class="btn" onclick="toggleAddForm()" style="align-self:flex-end;border-color:var(--border);color:var(--text-dim)">✕</button>
+  </div>`;
+
+  // Diodes table
+  if (fd.length) {
+    html += `<div class="table-wrap" style="margin-bottom:20px"><table>
+      <thead>
+        <tr><td colspan="5" class="r-section-header">── ΔΙΟΔΟΙ (${fd.length})</td></tr>
+        <tr>
+          <th onclick="sortBy('name')" class="${sortClass('name')}">Όνομα</th>
+          <th onclick="sortBy('box')" class="${sortClass('box')}">Κουτί</th>
+          <th>Τύπος</th>
+          <th>Περιγραφή</th>
+          <th style="width:80px">Ενέργειες</th>
+        </tr>
+      </thead><tbody>`;
+    fd.forEach(r => {
+      const ed = state.editingId === r.id;
+      if (ed) {
+        html += `<tr class="editing" id="row-${r.id}">
+          <td><input class="edit-input" id="e-dname-${r.id}" value="${esc(r.name)}"></td>
+          <td><input class="edit-input" id="e-dbox-${r.id}" value="${esc(r.box)}" style="width:60px"></td>
+          <td><select class="edit-input" id="e-dtype-${r.id}">${Object.keys(DTYPE_BADGE).map(t=>`<option ${r.dtype===t?'selected':''}>${t}</option>`).join('')}</select></td>
+          <td><input class="edit-input desc" id="e-ddesc-${r.id}" value="${esc(r.ddesc)}"></td>
+          <td><button class="icon-btn save" onclick="saveDiodeEdit(${r.id})">✓</button>
+              <button class="icon-btn cancel" onclick="cancelEdit()">✕</button></td>
+        </tr>`;
+      } else {
+        const bc = DTYPE_BADGE[r.dtype] || 'badge-other';
+        html += `<tr id="row-${r.id}">
+          <td class="name-cell">${esc(r.name)}</td>
+          <td class="box-cell">${esc(r.box)}</td>
+          <td><span class="badge ${bc}">${esc(r.dtype)}</span></td>
+          <td class="desc-cell">${esc(r.ddesc)||'<span style="color:var(--border-bright)">—</span>'}</td>
+          <td class="actions-cell">
+            <button class="icon-btn edit" onclick="startEdit(${r.id})">✎</button>
+            <button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button>
+          </td>
+        </tr>`;
+      }
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  // Zener table
+  if (fz.length) {
+    html += `<div class="table-wrap"><table>
+      <thead>
+        <tr><td colspan="5" class="r-section-header">── ZENER DIODES (${fz.length})</td></tr>
+        <tr>
+          <th>Όνομα</th>
+          <th style="text-align:center;width:80px">Volt</th>
+          <th style="text-align:center;width:80px">Watt</th>
+          <th style="text-align:center;width:80px">SMD</th>
+          <th style="width:80px">Ενέργειες</th>
+        </tr>
+      </thead><tbody>`;
+    fz.forEach(r => {
+      html += `<tr id="row-${r.id}">
+        <td class="name-cell">${esc(r.name)}</td>
+        <td style="text-align:center;color:var(--yellow);font-family:var(--mono)">${r.volts}V</td>
+        <td style="text-align:center;color:var(--text-dim);font-family:var(--mono)">${r.watts}W</td>
+        <td class="r-check">${r.smd ? `<span class="r-dot r-dot-smd"></span>` : `<span style="color:var(--border)">·</span>`}</td>
+        <td class="actions-cell">
+          <button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button>
+        </td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  if (!fd.length && !fz.length) {
+    html += `<div class="empty-state"><div class="icon">🔍</div>Δεν βρέθηκαν αποτελέσματα.</div>`;
+  }
+  content.innerHTML = html;
+}
+
+function saveDiodeEdit(id) {
+  const row = (state.data[TAB_DIODE]||[]).find(r => r.id === id);
+  if (!row) return;
+  row.name  = document.getElementById(`e-dname-${id}`)?.value.trim() || row.name;
+  row.box   = (document.getElementById(`e-dbox-${id}`)?.value.trim() || row.box).toUpperCase();
+  row.dtype = document.getElementById(`e-dtype-${id}`)?.value || row.dtype;
+  row.ddesc = document.getElementById(`e-ddesc-${id}`)?.value.trim() || '';
+  state.editingId = null;
+  saveToLS(); renderAll();
+}
+function saveNewDiode() {
+  const name  = document.getElementById('af-name')?.value.trim();
+  const box   = document.getElementById('af-box')?.value.trim().toUpperCase();
+  const dtype = document.getElementById('af-dtype')?.value || 'Other';
+  const ddesc = document.getElementById('af-desc')?.value.trim() || '';
+  if (!name || !box) { alert('Συμπλήρωσε Όνομα και Κουτί'); return; }
+  state.data[TAB_DIODE].push({ id: nextId++, name, box, dtype, ddesc, kind:'diode' });
+  document.getElementById('addForm').classList.remove('visible');
+  saveToLS(); renderAll();
+}
+
+// ─── SPARE PARTS RENDER ───
+function renderSpare() {
+  const content = document.getElementById('mainContent');
+  const q = state.search.toLowerCase();
+  const all = state.data[TAB_SPARE] || [];
+  const rows = q ? all.filter(r => JSON.stringify(r).toLowerCase().includes(q)) : all;
+
+  let html = `<div class="result-info"><b>${rows.length}</b> spare parts</div>`;
+
+  html += `<div class="add-row-form" id="addForm">
+    <div class="form-field"><label>Θέση</label><input id="af-pos" placeholder="π.χ. 29"></div>
+    <div class="form-field"><label>Όνομα</label><input id="af-name" placeholder="π.χ. IRF540N"></div>
+    <div class="form-field" style="flex:2"><label>Περιγραφή</label><input id="af-desc" placeholder="Σύντομη περιγραφή..."></div>
+    <button class="btn green" onclick="saveNewSpare()" style="align-self:flex-end">✓ Αποθήκευση</button>
+    <button class="btn" onclick="toggleAddForm()" style="align-self:flex-end;border-color:var(--border);color:var(--text-dim)">✕</button>
+  </div>`;
+
+  if (!rows.length) {
+    html += `<div class="empty-state"><div class="icon">🔍</div>Δεν βρέθηκαν αποτελέσματα.</div>`;
+    content.innerHTML = html; return;
+  }
+
+  html += `<div class="table-wrap"><table>
+    <thead><tr>
+      <th style="width:70px">Θέση</th>
+      <th onclick="sortBy('name')" class="${sortClass('name')}">Component</th>
+      <th>Περιγραφή</th>
+      <th style="width:80px">Ενέργειες</th>
+    </tr></thead><tbody>`;
+
+  rows.forEach(r => {
+    const ed = state.editingId === r.id;
+    if (ed) {
+      html += `<tr class="editing" id="row-${r.id}">
+        <td><input class="edit-input" id="e-spos-${r.id}" value="${esc(r.pos)}" style="width:50px"></td>
+        <td><input class="edit-input" id="e-sname-${r.id}" value="${esc(r.name)}"></td>
+        <td><input class="edit-input desc" id="e-sdesc-${r.id}" value="${esc(r.desc)}"></td>
+        <td><button class="icon-btn save" onclick="saveSpareEdit(${r.id})">✓</button>
+            <button class="icon-btn cancel" onclick="cancelEdit()">✕</button></td>
+      </tr>`;
+    } else {
+      html += `<tr id="row-${r.id}">
+        <td style="text-align:center;color:var(--yellow);font-family:var(--mono);font-weight:700">${esc(r.pos)}</td>
+        <td class="name-cell">${esc(r.name)}</td>
+        <td class="desc-cell">${esc(r.desc)||'<span style="color:var(--border-bright)">—</span>'}</td>
+        <td class="actions-cell">
+          <button class="icon-btn edit" onclick="startEdit(${r.id})">✎</button>
+          <button class="icon-btn delete" onclick="deleteRow(${r.id})">✕</button>
+        </td>
+      </tr>`;
+    }
+  });
+  html += `</tbody></table></div>`;
+  content.innerHTML = html;
+}
+function saveSpareEdit(id) {
+  const row = (state.data[TAB_SPARE]||[]).find(r => r.id === id);
+  if (!row) return;
+  row.pos  = document.getElementById(`e-spos-${id}`)?.value.trim()  || row.pos;
+  row.name = document.getElementById(`e-sname-${id}`)?.value.trim() || row.name;
+  row.desc = document.getElementById(`e-sdesc-${id}`)?.value.trim() || '';
+  state.editingId = null;
+  saveToLS(); renderAll();
+}
+function saveNewSpare() {
+  const pos  = document.getElementById('af-pos')?.value.trim();
+  const name = document.getElementById('af-name')?.value.trim();
+  const desc = document.getElementById('af-desc')?.value.trim() || '';
+  if (!name) { alert('Βάλε όνομα component'); return; }
+  state.data[TAB_SPARE].push({ id: nextId++, pos: pos||'?', name, desc, kind:'spare' });
+  document.getElementById('addForm').classList.remove('visible');
+  saveToLS(); renderAll();
+}
+function sortClass(col) {
+  if (state.sortCol !== col) return '';
+  return state.sortDir === 1 ? 'sort-asc' : 'sort-desc';
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── ACTIONS ───
+function switchTab(id) {
+  state.activeTab = id;
+  state.editingId = null;
+  state.boxFilter = '';
+  state.typeFilter = '';
+  renderAll();
+}
+function sortBy(col) {
+  if (state.sortCol === col) state.sortDir *= -1;
+  else { state.sortCol = col; state.sortDir = 1; }
+  renderContent();
+}
+function toggleAddForm() {
+  const f = document.getElementById('addForm');
+  f.classList.toggle('visible');
+  if (f.classList.contains('visible')) document.getElementById('af-name')?.focus();
+}
+function saveNewRow() {
+  const name = document.getElementById('af-name')?.value.trim();
+  const box = document.getElementById('af-box')?.value.trim().toUpperCase();
+  const type = document.getElementById('af-type')?.value || 'Other';
+  const desc = document.getElementById('af-desc')?.value.trim() || '';
+  if (!name || !box) { alert('Συμπλήρωσε τουλάχιστον Όνομα και Κουτί'); return; }
+  state.data[state.activeTab].push({ id: nextId++, name, box, type, desc });
+  document.getElementById('addForm').classList.remove('visible');
+  saveToLS();
+  renderAll();
+}
+function startEdit(id) {
+  state.editingId = id;
+  renderContent();
+  document.getElementById(`e-name-${id}`)?.focus();
+}
+function cancelEdit() {
+  state.editingId = null;
+  renderContent();
+}
+function saveEdit(id) {
+  const row = state.data[state.activeTab].find(r => r.id === id);
+  if (!row) return;
+  row.name = document.getElementById(`e-name-${id}`)?.value.trim() || row.name;
+  row.box  = (document.getElementById(`e-box-${id}`)?.value.trim() || row.box).toUpperCase();
+  row.type = document.getElementById(`e-type-${id}`)?.value || row.type;
+  row.desc = document.getElementById(`e-desc-${id}`)?.value.trim() || row.desc;
+  state.editingId = null;
+  saveToLS();
+  renderAll();
+}
+function deleteRow(id) {
+  if (!confirm('Διαγραφή;')) return;
+  const tab = state.activeTab;
+  state.data[tab] = state.data[tab].filter(r => r.id !== id);
+  saveToLS();
+  renderAll();
+}
+function saveNewResistor() {
+  const value = document.getElementById('af-name')?.value.trim();
+  const w025  = document.getElementById('af-w025')?.value.trim();
+  const w1    = document.getElementById('af-w1')?.value.trim();
+  const w2    = document.getElementById('af-w2')?.value.trim();
+  const smd   = document.getElementById('af-smd')?.value === '1';
+  if (!value) { alert('Βάλε τιμή αντίστασης'); return; }
+  state.data[TAB_RES].push({ id: nextId++, value, w025, w1, w2, smd, isShunt: false });
+  document.getElementById('addForm').classList.remove('visible');
+  saveToLS();
+  renderAll();
+}
+function saveResEdit(id) {
+  const row = state.data[TAB_RES].find(r => r.id === id);
+  if (!row) return;
+  row.value = document.getElementById(`e-val-${id}`)?.value.trim() || row.value;
+  row.w025  = document.getElementById(`e-w025-${id}`)?.value.trim();
+  row.w1    = document.getElementById(`e-w1-${id}`)?.value.trim();
+  row.w2    = document.getElementById(`e-w2-${id}`)?.value.trim();
+  row.smd   = document.getElementById(`e-smd-${id}`)?.value === '1';
+  state.editingId = null;
+  saveToLS();
+  renderAll();
+}
+
+// ─── EXCEL EXPORT ───
+function exportToExcel() {
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: ICs
+  const icRows = [['Όνομα','Κουτί','Τύπος','Περιγραφή']];
+  (state.data[TAB_IC]||[]).forEach(r => icRows.push([r.name, r.box, r.type, r.desc]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(icRows), 'ICs & Transistors');
+
+  // Sheet 2: Resistors
+  const resRows = [['Τιμή','1/4W','1W','2W-3W','SMD','Shunt R']];
+  (state.data[TAB_RES]||[]).forEach(r => resRows.push([
+    r.value, r.w025||'', r.w1||'', r.w2||'', r.smd?'✔':'', r.isShunt?r.rval:''
+  ]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resRows), 'Αντιστάσεις');
+
+  // Sheet 3: Potentiometers & Trimmers
+  const potRows = [['Τύπος','Τιμή','Wattage','Σημείωση']];
+  (state.data[TAB_POT]||[]).forEach(r =>
+    potRows.push([r.kind==='pot'?'Potentiometer':'Trimmer', r.value, r.watt||'', r.note||'']));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(potRows), 'Ποτενσιόμετρα');
+
+  // Sheet 4: Capacitors
+  const capRows = [['Τιμή','Μονάδα','Low V','Mid V','High V','SMD','kV']];
+  (state.data[TAB_CAP]||[]).forEach(r =>
+    capRows.push([fmtCap(r.value,r.unit), r.unit,
+      r.lowV?'✔':'', r.midV?'✔':'', r.highV?'✔':'', r.smd?'✔':'', r.kV?'✔':'']));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(capRows), 'Πυκνωτές');
+
+  // Sheet 4: Diodes
+  const diodeRows = [['Όνομα','Κουτί','Τύπος','Περιγραφή']];
+  (state.data[TAB_DIODE]||[]).filter(r=>r.kind==='diode').forEach(r =>
+    diodeRows.push([r.name, r.box, r.dtype, r.ddesc]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(diodeRows), 'Δίοδοι');
+
+  // Sheet 5: Zener
+  const zenerRows = [['Όνομα','Volt','Watt','SMD']];
+  (state.data[TAB_DIODE]||[]).filter(r=>r.kind==='zener').forEach(r =>
+    zenerRows.push([r.name, r.volts+'V', r.watts+'W', r.smd?'✔':'']));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(zenerRows), 'Zener');
+
+  // Sheet 6: Spare Parts
+  const spareRows = [['Θέση','Component','Περιγραφή']];
+  (state.data[TAB_SPARE]||[]).forEach(r =>
+    spareRows.push([r.pos, r.name, r.desc]));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(spareRows), 'Spare Parts');
+
+  // Sheet 8: Modules
+  const modRows = [['Όνομα','Κατηγορία','Περιγραφή']];
+  (state.data[TAB_MOD]||[]).forEach(r => modRows.push([r.name, r.cat, r.desc]));
+  if (modRows.length > 1) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(modRows), 'Modules');
+
+  XLSX.writeFile(wb, 'electronics_inventory.xlsx');
+}
+
+// ─── EVENT LISTENERS ───
+document.getElementById('searchInput').addEventListener('input', e => {
+  state.search = e.target.value;
+  renderContent();
+  document.querySelector('.result-info') && null;
+  renderContent();
+});
+document.getElementById('boxFilter').addEventListener('change', e => {
+  state.boxFilter = e.target.value;
+  renderContent();
+});
+document.getElementById('typeFilter').addEventListener('change', e => {
+  state.typeFilter = e.target.value;
+  renderContent();
+});
+document.getElementById('addBtn').addEventListener('click', toggleAddForm);
+document.getElementById('saveBtn').addEventListener('click', () => { saveToLS(); document.getElementById('saveBtn').textContent = '✓ Αποθηκεύτηκε!'; setTimeout(()=>{ document.getElementById('saveBtn').textContent='💾 Αποθήκευση'; },1500); });
+document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+
+// ─── INIT ───
+renderAll();
+</script>
+</body>
+</html>
