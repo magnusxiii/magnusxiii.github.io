@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ΟικονομΙΚΑ — Εξοδολόγιο</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0c10;
+    --surface:   #111318;
+    --surface2:  #181c24;
+    --border:    rgba(255,255,255,0.07);
+    --accent:    #c9a84c;
+    --accent2:   #e8c97a;
+    --text:      #e8e4dc;
+    --muted:     #7a7d86;
+    --danger:    #e05c5c;
+    --green:     #4caf82;
+    --blue:      #4c8fce;
+    --purple:    #9b6fce;
+    --cat-reyma:   #4c8fce;
+    --cat-nero:    #4caf82;
+    --cat-super:   #c9a84c;
+    --cat-phone:   #9b6fce;
+    --cat-kapsi:   #e05c5c;
+    --cat-loipa:   #e07d3c;
+    --cat-diakop:  #4cc9f0;
+    --r: 12px;
+    --r2: 8px;
+    --shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND PATTERN ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(76,143,206,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,12,16,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .logo span { color: var(--accent); }
+
+  .header-actions { display: flex; align-items: center; gap: 1rem; }
+
+  /* ── YEAR FILTER ── */
+  .year-filter {
+    display: flex;
+    gap: 0.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 4px;
+  }
+
+  .year-btn {
+    padding: 0.3rem 0.9rem;
+    border-radius: 50px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .year-btn:hover { color: var(--text); }
+  .year-btn.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 500;
+  }
+
+  /* ── CSV UPLOAD ZONE ── */
+  #upload-zone {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 4rem auto;
+    text-align: center;
+    padding: 3rem 2rem;
+    border: 2px dashed rgba(201,168,76,0.3);
+    border-radius: var(--r);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  #upload-zone:hover, #upload-zone.drag {
+    border-color: var(--accent);
+    background: rgba(201,168,76,0.05);
+  }
+  #upload-zone .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+  #upload-zone h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  #upload-zone p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  #upload-zone input[type=file] { display: none; }
+  .btn-upload {
+    display: inline-block;
+    padding: 0.6rem 1.8rem;
+    background: var(--accent);
+    color: #000;
+    border-radius: 50px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+  .btn-upload:hover { background: var(--accent2); }
+  .csv-hint { margin-top: 1rem; font-size: 0.78rem; color: var(--muted); }
+
+  /* ── MAIN DASHBOARD ── */
+  #dashboard {
+    display: none;
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 4rem;
+  }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1.4rem 1.6rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+  .kpi-card.blue::before { background: var(--blue); }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.purple::before { background: var(--purple); }
+  .kpi-card.red::before { background: var(--danger); }
+
+  .kpi-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; }
+  .kpi-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kpi-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; }
+  .kpi-icon { position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%); font-size: 2rem; opacity: 0.15; }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--accent2);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── CHART GRID ── */
+  .chart-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .chart-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .chart-grid-full {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1.4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-card .card-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .chart-wrapper {
+    position: relative;
+  }
+
+  /* ── CATEGORY LEGEND BARS ── */
+  .cat-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+  .cat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.82rem;
+  }
+  .cat-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .cat-name { flex: 1; color: var(--text); }
+  .cat-amount { font-weight: 500; color: var(--accent2); white-space: nowrap; }
+  .cat-pct { color: var(--muted); font-size: 0.75rem; min-width: 36px; text-align: right; }
+  .cat-bar-bg {
+    position: relative;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    flex: 1;
+    overflow: hidden;
+  }
+  .cat-bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    border-radius: 2px;
+    transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  /* ── MONTHLY TABLE ── */
+  .table-wrapper { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-amount { font-weight: 500; color: var(--accent2); text-align: right; }
+  .td-cat {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 500;
+  }
+  .td-month { color: var(--muted); font-size: 0.78rem; }
+
+  /* ── HEATMAP ── */
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: 60px repeat(12, 1fr);
+    gap: 4px;
+    font-size: 0.72rem;
+  }
+  .hm-label { color: var(--muted); display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+  .hm-month-label { color: var(--muted); text-align: center; padding-bottom: 4px; font-size: 0.68rem; }
+  .hm-cell {
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: rgba(0,0,0,0.7);
+    font-weight: 500;
+    transition: transform 0.15s;
+    cursor: default;
+    position: relative;
+  }
+  .hm-cell:hover { transform: scale(1.08); z-index: 2; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .chart-grid-2, .chart-grid-3 { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    header { padding: 0 1rem; }
+    #dashboard { padding: 1rem; }
+  }
+  @media (max-width: 480px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .year-filter { flex-wrap: wrap; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .kpi-card, .chart-card {
+    animation: fadeUp 0.5s ease both;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+
+  /* ── TOOLTIP ── */
+  .custom-tooltip {
+    position: fixed;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+    box-shadow: var(--shadow);
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Οικονομ<span>ΙΚΑ</span></div>
+  <div class="header-actions">
+    <div class="year-filter" id="yearFilter"></div>
+    <label class="btn-upload" for="csvInput" style="padding:0.35rem 1rem;font-size:0.8rem;">
+      🔄 Ενημέρωση CSV
+      <input type="file" id="csvInput" accept=".csv">
+    </label>
+  </div>
+</header>
+
+<!-- UPLOAD ZONE — εμφανίζεται ΜΟΝΟ αν αποτύχει το auto-fetch -->
+<div id="upload-zone" style="display:none">
+  <div class="upload-icon">⏳</div>
+  <h2 id="uzTitle">Φόρτωση…</h2>
+  <p id="uzMsg" style="color:var(--muted);margin-top:0.5rem"></p>
+  <div id="uzManual" style="display:none">
+    <div style="margin-top:1.2rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <label class="btn-upload" for="csvMain" style="font-size:1rem;padding:0.8rem 2rem">
+        📂 Επιλογή CSV
+        <input type="file" id="csvMain" accept=".csv">
+      </label>
+    </div>
+    <div class="csv-hint" style="margin-top:1rem">
+      Μορφή CSV: <code>date, category, description, amount</code><br>
+      Κατηγορίες: Ρεύμα · Νερό · Σούπερ Μάρκετ · Τηλέφωνο · Καύσιμα · Λοιπά Έξοδα · Διακοπές
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+
+  <!-- KPI ROW -->
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- ROW 1: Line + Donut -->
+  <div class="section-title">📈 Χρονική Εξέλιξη</div>
+  <div class="chart-grid-full">
+    <div class="chart-card">
+      <div class="card-title">Μηνιαία Έξοδα — Εξέλιξη ανά Κατηγορία</div>
+      <div class="chart-wrapper" style="height:260px">
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Bar stacked + Donut -->
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="card-title">Μηνιαία Σύγκριση (Stacked Bar)</div>
+      <div class="chart-wrapper" style="height:260px">
+        <canvas id="barStackedChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Κατανομή Εξόδων ανά Κατηγορία</div>
+      <div style="display:flex;gap:1.5rem;align-items:center;">
+        <div class="chart-wrapper" style="height:200px;width:200px;flex-shrink:0">
+          <canvas id="donutChart"></canvas>
+        </div>
+        <div class="cat-legend" id="catLegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Radar + Bar horizontal -->
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="card-title">Radar — Κατηγορίες vs Μέσος Όρος</div>
+      <div class="chart-wrapper" style="height:260px">
+        <canvas id="radarChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Κορυφαίες Κατηγορίες (Οριζόντιο Bar)</div>
+      <div class="chart-wrapper" style="height:260px">
+        <canvas id="hbarChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Heatmap -->
+  <div class="section-title">🗓 Heatmap Εξόδων</div>
+  <div class="chart-card" style="margin-bottom:1rem">
+    <div class="card-title">Έντασση Εξόδων ανά Μήνα / Κατηγορία</div>
+    <div id="heatmap"></div>
+  </div>
+
+  <!-- ROW 5: Scatter + Area -->
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="card-title">Σωρευτικά Έξοδα Έτους</div>
+      <div class="chart-wrapper" style="height:220px">
+        <canvas id="areaChart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Μηνιαία Διαφορά από Μέσο Όρο</div>
+      <div class="chart-wrapper" style="height:220px">
+        <canvas id="diffChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 6: Full transactions table -->
+  <div class="section-title">🧾 Κατάσταση Συναλλαγών</div>
+  <div class="chart-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Ημερομηνία</th>
+            <th>Κατηγορία</th>
+            <th>Περιγραφή</th>
+            <th style="text-align:right">Ποσό</th>
+          </tr>
+        </thead>
+        <tbody id="txTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="custom-tooltip" id="tooltip"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA & UTILS
+═══════════════════════════════════════════════ */
+const CAT_COLORS = {
+  'Ρεύμα':          '#4c8fce',
+  'Νερό':           '#4caf82',
+  'Σούπερ Μάρκετ':  '#c9a84c',
+  'Τηλέφωνο':       '#9b6fce',
+  'Καύσιμα':        '#e05c5c',
+  'Λοιπά Έξοδα':    '#e07d3c',
+  'Διακοπές':       '#4cc9f0',
+};
+const CAT_ICONS = {
+  'Ρεύμα':'⚡','Νερό':'💧','Σούπερ Μάρκετ':'🛒',
+  'Τηλέφωνο':'📱','Καύσιμα':'⛽','Λοιπά Έξοδα':'🏷️','Διακοπές':'✈️'
+};
+const MONTHS_EL = ['Ιαν','Φεβ','Μαρ','Απρ','Μάι','Ιούν','Ιούλ','Αύγ','Σεπ','Οκτ','Νοε','Δεκ'];
+
+let allData = [];
+let filteredData = [];
+let charts = {};
+let activeYear = 'all';
+
+function fmt(n){ return n.toLocaleString('el-GR',{minimumFractionDigits:2,maximumFractionDigits:2})+'€'; }
+function fmtShort(n){ return n>=1000?(n/1000).toFixed(1)+'k€':n.toFixed(0)+'€'; }
+
+/* ═══════════════════════════════════════════════
+   CSV PARSER
+═══════════════════════════════════════════════ */
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  const header = lines[0].split(',').map(h=>h.trim().toLowerCase());
+  const rows = [];
+  for(let i=1;i<lines.length;i++){
+    const cells = lines[i].split(',').map(c=>c.trim());
+    if(cells.length<4) continue;
+    const obj = {};
+    header.forEach((h,idx)=>obj[h]=cells[idx]||'');
+    const d = new Date(obj.date||obj['date']);
+    if(isNaN(d)) continue;
+    const amount = parseFloat((obj.amount||obj['amount']||'0').replace(',','.'));
+    if(!isFinite(amount)||amount<=0) continue;
+    rows.push({
+      date: d,
+      year: d.getFullYear(),
+      month: d.getMonth(),
+      category: obj.category||'Λοιπά Έξοδα',
+      description: obj.description||'',
+      amount
+    });
+  }
+  return rows;
+}
+
+/* ═══════════════════════════════════════════════
+   DATA LOADING — fetch expenses.csv αυτόματα
+═══════════════════════════════════════════════ */
+const CSV_FILENAME = 'expenses.csv';
+
+function startDashboard(){
+  buildYearFilter();
+  applyFilter('all');
+  document.getElementById('upload-zone').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+}
+
+function showError(msg){
+  document.getElementById('upload-zone').style.display='block';
+  document.querySelector('#upload-zone .upload-icon').textContent='⚠️';
+  document.getElementById('uzTitle').textContent='Δεν βρέθηκε το expenses.csv';
+  document.getElementById('uzMsg').innerHTML = msg || 'Βεβαιώσου ότι το <code>expenses.csv</code> είναι στον ίδιο φάκελο.';
+  document.getElementById('uzManual').style.display='block';
+}
+
+function handleFileManual(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    allData = parseCSV(e.target.result);
+    if(!allData.length){ alert('Δεν βρέθηκαν έγκυρα δεδομένα.'); return; }
+    startDashboard();
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+async function autoLoad(){
+  document.getElementById('upload-zone').style.display='block';
+  try {
+    const resp = await fetch(CSV_FILENAME, {cache:'no-cache'});
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    // Έλεγξε αν πήρε πραγματικό CSV ή HTML error page
+    if(text.trim().startsWith('<!') || text.trim().startsWith('<html')){
+      throw new Error('Got HTML instead of CSV');
+    }
+    allData = parseCSV(text);
+    if(!allData.length) throw new Error('No valid data');
+    startDashboard();
+  } catch(e) {
+    console.warn('Auto-load failed:', e.message);
+    showError('Σφάλμα: ' + e.message + '<br>Επίλεξε το αρχείο χειροκίνητα:');
+  }
+}
+
+// Header update button — reload CSV
+document.getElementById('csvInput').addEventListener('change', e => {
+  handleFileManual(e.target.files[0]);
+});
+
+// Manual file input in upload zone
+document.addEventListener('DOMContentLoaded', () => {
+  const csvMain = document.getElementById('csvMain');
+  if(csvMain) csvMain.addEventListener('change', e => handleFileManual(e.target.files[0]));
+  
+  // Drag & drop on upload zone
+  const uz = document.getElementById('upload-zone');
+  uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag'); });
+  uz.addEventListener('dragleave', () => uz.classList.remove('drag'));
+  uz.addEventListener('drop', e => { e.preventDefault(); uz.classList.remove('drag'); handleFileManual(e.dataTransfer.files[0]); });
+});
+
+// ── AUTO-LOAD on page open ──
+window.addEventListener('load', autoLoad);
+
+/* ═══════════════════════════════════════════════
+   YEAR FILTER
+═══════════════════════════════════════════════ */
+function buildYearFilter(){
+  const years = [...new Set(allData.map(d=>d.year))].sort();
+  const container = document.getElementById('yearFilter');
+  container.innerHTML='';
+  const allBtn = document.createElement('button');
+  allBtn.className='year-btn active'; allBtn.textContent='Όλα';
+  allBtn.onclick=()=>applyFilter('all');
+  container.appendChild(allBtn);
+  years.forEach(y=>{
+    const b=document.createElement('button');
+    b.className='year-btn'; b.textContent=y;
+    b.onclick=()=>applyFilter(y);
+    container.appendChild(b);
+  });
+}
+
+function applyFilter(year){
+  activeYear=year;
+  document.querySelectorAll('.year-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent===(year==='all'?'Όλα':String(year)));
+  });
+  filteredData = year==='all' ? allData : allData.filter(d=>d.year===year);
+  renderAll();
+}
+
+/* ═══════════════════════════════════════════════
+   AGGREGATE HELPERS
+═══════════════════════════════════════════════ */
+function byCategory(){
+  const m={};
+  filteredData.forEach(d=>{ m[d.category]=(m[d.category]||0)+d.amount; });
+  return m;
+}
+
+function byMonthCategory(){
+  // returns { monthKey: { category: total } }
+  const m={};
+  filteredData.forEach(d=>{
+    const key=`${d.year}-${String(d.month+1).padStart(2,'0')}`;
+    if(!m[key]) m[key]={};
+    m[key][d.category]=(m[key][d.category]||0)+d.amount;
+  });
+  return m;
+}
+
+function sortedMonthKeys(){
+  return Object.keys(byMonthCategory()).sort();
+}
+
+/* ═══════════════════════════════════════════════
+   KPI CARDS
+═══════════════════════════════════════════════ */
+function renderKPI(){
+  const total = filteredData.reduce((s,d)=>s+d.amount,0);
+  const months = sortedMonthKeys().length || 1;
+  const avg = total/months;
+  const catTotals = byCategory();
+  const topCat = Object.entries(catTotals).sort((a,b)=>b[1]-a[1])[0];
+  const txCount = filteredData.length;
+
+  const cards = [
+    {label:'Συνολικά Έξοδα', value:fmt(total), sub:`${months} μήνες καταγραφής`, icon:'💰', cls:''},
+    {label:'Μέσος Μηνιαίος', value:fmt(avg), sub:'Μέσος όρος ανά μήνα', icon:'📊', cls:'blue'},
+    {label:'Κορυφαία Κατηγορία', value:topCat?topCat[0]:'—', sub:topCat?fmt(topCat[1]):'', icon:topCat?CAT_ICONS[topCat[0]]||'🏷️':'', cls:'purple'},
+    {label:'Συναλλαγές', value:txCount, sub:'Εγγραφές στο αρχείο', icon:'🧾', cls:'green'},
+  ];
+
+  const g = document.getElementById('kpiGrid');
+  g.innerHTML='';
+  cards.forEach((c,i)=>{
+    g.innerHTML+=`
+      <div class="kpi-card ${c.cls}" style="animation-delay:${i*0.08}s">
+        <div class="kpi-label">${c.label}</div>
+        <div class="kpi-value">${c.value}</div>
+        <div class="kpi-sub">${c.sub}</div>
+        <div class="kpi-icon">${c.icon}</div>
+      </div>`;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   CHART HELPERS
+═══════════════════════════════════════════════ */
+const CHART_DEFAULTS = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{ display:false }, tooltip:{ backgroundColor:'#181c24', titleColor:'#e8e4dc', bodyColor:'#7a7d86', borderColor:'rgba(255,255,255,0.07)', borderWidth:1, padding:10, callbacks:{label:ctx=>` ${fmt(ctx.raw)}`} } },
+  scales:{}
+};
+
+function axisStyle(){ return { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#7a7d86',font:{size:10,family:"'DM Sans'"}} }; }
+
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+/* ═══════════════════════════════════════════════
+   LINE CHART — Monthly by Category
+═══════════════════════════════════════════════ */
+function renderLine(){
+  destroyChart('line');
+  const mbc = byMonthCategory();
+  const keys = Object.keys(mbc).sort();
+  const cats = Object.keys(CAT_COLORS);
+  const labels = keys.map(k=>{ const [y,m]=k.split('-'); return MONTHS_EL[+m-1]+(activeYear==='all'?`'${y.slice(2)}`:''); });
+
+  const datasets = cats.map(cat=>({
+    label:cat,
+    data: keys.map(k=>(mbc[k]&&mbc[k][cat])||0),
+    borderColor: CAT_COLORS[cat],
+    backgroundColor: CAT_COLORS[cat]+'22',
+    borderWidth: 2,
+    pointRadius: 3,
+    pointHoverRadius: 6,
+    tension: 0.4,
+    fill: false,
+  })).filter(ds=>ds.data.some(v=>v>0));
+
+  charts.line = new Chart(document.getElementById('lineChart'), {
+    type:'line',
+    data:{ labels, datasets },
+    options:{ ...CHART_DEFAULTS, scales:{ x:axisStyle(), y:axisStyle() },
+      plugins:{
+        ...CHART_DEFAULTS.plugins,
+        legend:{ display:true, labels:{ color:'#7a7d86', font:{size:10}, boxWidth:12, padding:12 } }
+      }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   STACKED BAR CHART
+═══════════════════════════════════════════════ */
+function renderBarStacked(){
+  destroyChart('barStacked');
+  const mbc = byMonthCategory();
+  const keys = Object.keys(mbc).sort();
+  const cats = Object.keys(CAT_COLORS);
+  const labels = keys.map(k=>{ const [y,m]=k.split('-'); return MONTHS_EL[+m-1]+(activeYear==='all'?`'${y.slice(2)}`:''); });
+
+  const datasets = cats.map(cat=>({
+    label:cat,
+    data: keys.map(k=>(mbc[k]&&mbc[k][cat])||0),
+    backgroundColor: CAT_COLORS[cat]+'cc',
+    borderRadius: 2,
+  })).filter(ds=>ds.data.some(v=>v>0));
+
+  charts.barStacked = new Chart(document.getElementById('barStackedChart'),{
+    type:'bar',
+    data:{ labels, datasets },
+    options:{
+      ...CHART_DEFAULTS,
+      scales:{ x:{...axisStyle(), stacked:true}, y:{...axisStyle(), stacked:true} },
+      plugins:{
+        ...CHART_DEFAULTS.plugins,
+        legend:{ display:true, labels:{color:'#7a7d86',font:{size:9},boxWidth:10,padding:8} }
+      }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   DONUT CHART + LEGEND
+═══════════════════════════════════════════════ */
+function renderDonut(){
+  destroyChart('donut');
+  const ct = byCategory();
+  const total = Object.values(ct).reduce((s,v)=>s+v,0);
+  const sorted = Object.entries(ct).sort((a,b)=>b[1]-a[1]);
+
+  charts.donut = new Chart(document.getElementById('donutChart'),{
+    type:'doughnut',
+    data:{
+      labels: sorted.map(e=>e[0]),
+      datasets:[{ data: sorted.map(e=>e[1]), backgroundColor: sorted.map(e=>CAT_COLORS[e[0]]||'#888'), borderWidth:0, hoverOffset:8 }]
+    },
+    options:{
+      cutout:'68%', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#181c24', titleColor:'#e8e4dc', bodyColor:'#7a7d86', borderColor:'rgba(255,255,255,0.07)', borderWidth:1, callbacks:{label:ctx=>` ${fmt(ctx.raw)} (${(ctx.raw/total*100).toFixed(1)}%)`} } }
+    }
+  });
+
+  const leg = document.getElementById('catLegend');
+  leg.innerHTML='';
+  sorted.forEach(([cat,val])=>{
+    const pct=(val/total*100).toFixed(1);
+    leg.innerHTML+=`
+      <div class="cat-row">
+        <div class="cat-dot" style="background:${CAT_COLORS[cat]||'#888'}"></div>
+        <div class="cat-name">${CAT_ICONS[cat]||''} ${cat}</div>
+        <div class="cat-amount">${fmt(val)}</div>
+        <div class="cat-pct">${pct}%</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding:0 0 4px 18px">
+        <div class="cat-bar-bg" style="flex:1">
+          <div class="cat-bar-fill" style="width:${pct}%;background:${CAT_COLORS[cat]||'#888'}"></div>
+        </div>
+      </div>`;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   RADAR CHART
+═══════════════════════════════════════════════ */
+function renderRadar(){
+  destroyChart('radar');
+  const ct = byCategory();
+  const cats = Object.keys(CAT_COLORS).filter(c=>ct[c]);
+  const months = sortedMonthKeys().length||1;
+  const vals = cats.map(c=>(ct[c]||0)/months);
+  const maxV = Math.max(...vals)*1.2;
+
+  charts.radar = new Chart(document.getElementById('radarChart'),{
+    type:'radar',
+    data:{
+      labels: cats.map(c=>CAT_ICONS[c]+' '+c),
+      datasets:[{
+        data:vals,
+        borderColor:'#c9a84c',
+        backgroundColor:'rgba(201,168,76,0.1)',
+        pointBackgroundColor:'#c9a84c',
+        borderWidth:2, pointRadius:4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{ r:{ min:0, max:maxV, grid:{color:'rgba(255,255,255,0.05)'}, angleLines:{color:'rgba(255,255,255,0.05)'}, pointLabels:{color:'#7a7d86',font:{size:10}}, ticks:{display:false} }},
+      plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#181c24', titleColor:'#e8e4dc', bodyColor:'#7a7d86', borderColor:'rgba(255,255,255,0.07)', borderWidth:1, callbacks:{label:ctx=>` ${fmt(ctx.raw)}/μήνα`} } }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   HORIZONTAL BAR
+═══════════════════════════════════════════════ */
+function renderHBar(){
+  destroyChart('hbar');
+  const ct = byCategory();
+  const sorted = Object.entries(ct).sort((a,b)=>b[1]-a[1]);
+
+  charts.hbar = new Chart(document.getElementById('hbarChart'),{
+    type:'bar',
+    data:{
+      labels: sorted.map(e=>CAT_ICONS[e[0]]+' '+e[0]),
+      datasets:[{
+        data: sorted.map(e=>e[1]),
+        backgroundColor: sorted.map(e=>(CAT_COLORS[e[0]]||'#888')+'cc'),
+        borderRadius: 4,
+        barThickness: 22,
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        x:{...axisStyle()},
+        y:{...axisStyle(), grid:{display:false}}
+      },
+      plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#181c24', titleColor:'#e8e4dc', bodyColor:'#7a7d86', borderColor:'rgba(255,255,255,0.07)', borderWidth:1, callbacks:{label:ctx=>` ${fmt(ctx.raw)}`} } }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   HEATMAP
+═══════════════════════════════════════════════ */
+function renderHeatmap(){
+  const mbc = byMonthCategory();
+  const cats = Object.keys(CAT_COLORS).filter(c=>filteredData.some(d=>d.category===c));
+  const years = [...new Set(filteredData.map(d=>d.year))].sort();
+
+  // Build per cat per month
+  const data={}; // cat -> month(0..11) -> total
+  cats.forEach(c=>{ data[c]=Array(12).fill(0); });
+  filteredData.forEach(d=>{ if(data[d.category]) data[d.category][d.month]+=d.amount; });
+
+  // max per cat
+  const hm = document.getElementById('heatmap');
+  hm.innerHTML='';
+
+  const grid = document.createElement('div');
+  grid.className='heatmap-grid';
+
+  // Header row (empty + month labels)
+  grid.innerHTML+='<div></div>';
+  MONTHS_EL.forEach(m=>{ grid.innerHTML+=`<div class="hm-month-label">${m}</div>`; });
+
+  cats.forEach(cat=>{
+    const maxVal = Math.max(...data[cat],1);
+    grid.innerHTML+=`<div class="hm-label">${CAT_ICONS[cat]||''} ${cat.split(' ')[0]}</div>`;
+    data[cat].forEach((val,mi)=>{
+      const intensity = val/maxVal;
+      const color = CAT_COLORS[cat]||'#888';
+      const alpha = val===0 ? 0 : 0.08+intensity*0.82;
+      const textColor = intensity>0.5?'rgba(0,0,0,0.8)':'rgba(255,255,255,0.5)';
+      grid.innerHTML+=`
+        <div class="hm-cell" style="background:${color};opacity:${alpha<0.05?0.05:alpha.toFixed(2)};color:${textColor}"
+          title="${MONTHS_EL[mi]}: ${fmt(val)}">
+          ${val>0?fmtShort(val):''}
+        </div>`;
+    });
+  });
+
+  hm.appendChild(grid);
+}
+
+/* ═══════════════════════════════════════════════
+   AREA CHART — Cumulative
+═══════════════════════════════════════════════ */
+function renderArea(){
+  destroyChart('area');
+  const mbc = byMonthCategory();
+  const keys = Object.keys(mbc).sort();
+  const labels = keys.map(k=>{ const [y,m]=k.split('-'); return MONTHS_EL[+m-1]+(activeYear==='all'?`'${y.slice(2)}`:''); });
+  let cumulative=0;
+  const data = keys.map(k=>{ cumulative+=Object.values(mbc[k]).reduce((s,v)=>s+v,0); return cumulative; });
+
+  charts.area = new Chart(document.getElementById('areaChart'),{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:'Σωρευτικά',
+        data,
+        borderColor:'#c9a84c',
+        backgroundColor:'rgba(201,168,76,0.1)',
+        fill:true, tension:0.4, borderWidth:2, pointRadius:3, pointHoverRadius:6,
+      }]
+    },
+    options:{
+      ...CHART_DEFAULTS,
+      scales:{ x:axisStyle(), y:{...axisStyle(),ticks:{...axisStyle().ticks,callback:v=>fmtShort(v)}} },
+      plugins:{ ...CHART_DEFAULTS.plugins, legend:{display:false}, tooltip:{...CHART_DEFAULTS.plugins.tooltip, callbacks:{label:ctx=>` ${fmt(ctx.raw)}`}} }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   DIFF CHART — Monthly vs Average
+═══════════════════════════════════════════════ */
+function renderDiff(){
+  destroyChart('diff');
+  const mbc = byMonthCategory();
+  const keys = Object.keys(mbc).sort();
+  const totals = keys.map(k=>Object.values(mbc[k]).reduce((s,v)=>s+v,0));
+  const avg = totals.reduce((s,v)=>s+v,0)/(totals.length||1);
+  const labels = keys.map(k=>{ const [y,m]=k.split('-'); return MONTHS_EL[+m-1]+(activeYear==='all'?`'${y.slice(2)}`:''); });
+  const diffs = totals.map(v=>+(v-avg).toFixed(2));
+
+  charts.diff = new Chart(document.getElementById('diffChart'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[{
+        label:'Διαφορά',
+        data:diffs,
+        backgroundColor: diffs.map(v=>v>=0?'rgba(224,92,92,0.7)':'rgba(76,175,130,0.7)'),
+        borderRadius:4, barThickness:18,
+      }]
+    },
+    options:{
+      ...CHART_DEFAULTS,
+      scales:{ x:axisStyle(), y:{...axisStyle(),ticks:{...axisStyle().ticks,callback:v=>(v>=0?'+':'')+fmtShort(v)}} },
+      plugins:{ ...CHART_DEFAULTS.plugins, legend:{display:false}, tooltip:{...CHART_DEFAULTS.plugins.tooltip, callbacks:{label:ctx=>` ${(ctx.raw>=0?'+':'')+fmt(ctx.raw)} vs μέσο`}} }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   TRANSACTIONS TABLE
+═══════════════════════════════════════════════ */
+function renderTable(){
+  const sorted = [...filteredData].sort((a,b)=>b.date-a.date);
+  const tbody = document.getElementById('txTable');
+  tbody.innerHTML='';
+  sorted.forEach(d=>{
+    const color = CAT_COLORS[d.category]||'#888';
+    const dateStr = d.date.toLocaleDateString('el-GR',{day:'2-digit',month:'short',year:'numeric'});
+    tbody.innerHTML+=`
+      <tr>
+        <td class="td-month">${dateStr}</td>
+        <td><span class="td-cat" style="background:${color}22;color:${color}">${CAT_ICONS[d.category]||''} ${d.category}</span></td>
+        <td>${d.description}</td>
+        <td class="td-amount">${fmt(d.amount)}</td>
+      </tr>`;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER ALL
+═══════════════════════════════════════════════ */
+function renderAll(){
+  renderKPI();
+  renderLine();
+  renderBarStacked();
+  renderDonut();
+  renderRadar();
+  renderHBar();
+  renderHeatmap();
+  renderArea();
+  renderDiff();
+  renderTable();
+}
+</script>
+</body>
+</html>
