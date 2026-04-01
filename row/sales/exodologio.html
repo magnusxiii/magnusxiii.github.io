@@ -561,6 +561,9 @@
     <button class="btn-upload" onclick="openAddModal()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--green);">
       ➕ Νέο Έξοδο
     </button>
+    <button class="btn-upload" onclick="exportCSV()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--blue);">
+      📥 Excel
+    </button>
     <button class="btn-upload" onclick="openSettingsModal()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border);">
       ⚙️
     </button>
@@ -1700,6 +1703,36 @@ async function submitExpense(){
 }
 
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModals(); });
+
+/* ═══════════════════════════════════════════════
+   EXPORT CSV — με BOM για σωστά ελληνικά στο Excel
+═══════════════════════════════════════════════ */
+function exportCSV(){
+  if(!allData.length){ alert('Δεν υπάρχουν δεδομένα.'); return; }
+  
+  // Header
+  let csv = 'date,category,description,amount\n';
+  
+  // Data — χρήση filteredData αν υπάρχει φίλτρο
+  const data = [...filteredData].sort((a,b)=>a.date-b.date);
+  data.forEach(d => {
+    const dateStr = d.date.toISOString().split('T')[0];
+    csv += `${dateStr},${d.category},${d.description},${d.amount.toFixed(2)}\n`;
+  });
+  
+  // BOM + UTF-8 encoding
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8' });
+  
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const suffix = activeYear==='all' ? 'all' : activeYear;
+  a.download = `expenses_${suffix}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
 
 /* ═══════════════════════════════════════════════
    UTF-8 SAFE BASE64 HELPERS
