@@ -361,9 +361,41 @@
     header { padding: 0 1rem; }
     #dashboard { padding: 1rem; }
   }
+  @media (max-width: 680px) {
+    header {
+      height: auto;
+      flex-wrap: wrap;
+      padding: 0.6rem 0.8rem;
+      gap: 0.5rem;
+    }
+    .logo { font-size: 1.1rem; }
+    .header-actions {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      justify-content: center;
+    }
+    .year-filter {
+      width: 100%;
+      justify-content: center;
+      order: -1;
+    }
+    .year-btn { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+    .header-actions .btn-upload {
+      padding: 0.3rem 0.7rem !important;
+      font-size: 0.72rem !important;
+    }
+    /* Κρύψε κείμενα κουμπιών, κράτα μόνο emoji */
+    .header-actions .btn-upload .btn-label { display: none; }
+    .detail-kpis { grid-template-columns: 1fr 1fr; }
+    .cat-filters { gap: 0.3rem; }
+    .cat-pill { padding: 0.3rem 0.6rem; font-size: 0.72rem; }
+    .modal { padding: 1.5rem 1rem; }
+  }
   @media (max-width: 480px) {
     .kpi-grid { grid-template-columns: 1fr; }
     .year-filter { flex-wrap: wrap; }
+    .detail-kpis { grid-template-columns: 1fr; }
   }
 
   /* ── ANIMATIONS ── */
@@ -555,14 +587,14 @@
   <div class="header-actions">
     <div class="year-filter" id="yearFilter"></div>
     <label class="btn-upload" for="csvInput" style="padding:0.35rem 1rem;font-size:0.8rem;">
-      🔄 Ενημέρωση CSV
+      🔄 <span class="btn-label">Ενημέρωση CSV</span>
       <input type="file" id="csvInput" accept=".csv">
     </label>
     <button class="btn-upload" onclick="openAddModal()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--green);">
-      ➕ Νέο Έξοδο
+      ➕ <span class="btn-label">Νέο Έξοδο</span>
     </button>
     <button class="btn-upload" onclick="exportCSV()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--blue);">
-      📥 Excel
+      📥 <span class="btn-label">Excel</span>
     </button>
     <button class="btn-upload" onclick="openSettingsModal()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border);">
       ⚙️

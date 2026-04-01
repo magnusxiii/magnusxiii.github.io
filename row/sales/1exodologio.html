@@ -561,6 +561,9 @@
     <button class="btn-upload" onclick="openAddModal()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--green);">
       ➕ Νέο Έξοδο
     </button>
+    <button class="btn-upload" onclick="exportCSV()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--blue);">
+      📥 Excel
+    </button>
     <button class="btn-upload" onclick="openSettingsModal()" style="padding:0.35rem 1rem;font-size:0.8rem;background:var(--surface2);color:var(--muted);border:1px solid var(--border);">
       ⚙️
     </button>
@@ -708,6 +711,7 @@
             <th>Κατηγορία</th>
             <th>Περιγραφή</th>
             <th style="text-align:right">Ποσό</th>
+            <th style="width:40px"></th>
           </tr>
         </thead>
         <tbody id="txTable"></tbody>
@@ -1297,15 +1301,20 @@ function renderTable(){
   const sorted = [...filteredData].sort((a,b)=>b.date-a.date);
   const tbody = document.getElementById('txTable');
   tbody.innerHTML='';
-  sorted.forEach(d=>{
+  sorted.forEach((d,i)=>{
     const color = CAT_COLORS[d.category]||'#888';
     const dateStr = d.date.toLocaleDateString('el-GR',{day:'2-digit',month:'short',year:'numeric'});
+    // Βρες πραγματικό index στο allData
+    const realIdx = allData.indexOf(d);
     tbody.innerHTML+=`
       <tr>
         <td class="td-month">${dateStr}</td>
         <td><span class="td-cat" style="background:${color}22;color:${color}">${CAT_ICONS[d.category]||''} ${d.category}</span></td>
         <td>${d.description}</td>
         <td class="td-amount">${fmt(d.amount)}</td>
+        <td style="text-align:center">
+          <button onclick="deleteExpense(${realIdx})" title="Διαγραφή" style="background:none;border:none;cursor:pointer;font-size:0.9rem;opacity:0.4;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.4">🗑️</button>
+        </td>
       </tr>`;
   });
 }
@@ -1566,13 +1575,22 @@ function renderAll(){
 /* ═══════════════════════════════════════════════
    GITHUB INTEGRATION
 ═══════════════════════════════════════════════ */
+// ── Default ρυθμίσεις — αλλάζεις μόνο εδώ ──
+const GH_DEFAULTS = {
+  user:   'magnusxiii',
+  repo:   'magnusxiii.github.io',
+  token:  '',  // ← ΒΑΛΕ ΤΟ TOKEN ΣΟΥ ΕΔΩ μέσα σε quotes
+  path:   'row/sales/expenses.csv',
+  branch: 'master'
+};
+
 function getGHSettings(){
   return {
-    user:  localStorage.getItem('gh_user')  || '',
-    repo:  localStorage.getItem('gh_repo')  || '',
-    token: localStorage.getItem('gh_token') || '',
-    path:  localStorage.getItem('gh_path')  || 'expenses.csv',
-    branch:localStorage.getItem('gh_branch')|| 'main'
+    user:   localStorage.getItem('gh_user')   || GH_DEFAULTS.user,
+    repo:   localStorage.getItem('gh_repo')   || GH_DEFAULTS.repo,
+    token:  localStorage.getItem('gh_token')  || GH_DEFAULTS.token,
+    path:   localStorage.getItem('gh_path')   || GH_DEFAULTS.path,
+    branch: localStorage.getItem('gh_branch') || GH_DEFAULTS.branch
   };
 }
 
@@ -1657,48 +1675,16 @@ async function submitExpense(){
   status.innerHTML = '<span style="color:var(--accent)">Σύνδεση στο GitHub...</span>';
   
   try {
-    // 1. Πάρε το τρέχον αρχείο (χρειάζεται το SHA)
-    const apiUrl = `https://api.github.com/repos/${s.user}/${s.repo}/contents/${s.path}?ref=${s.branch}`;
-    const getResp = await fetch(apiUrl, {
-      headers: { 'Authorization': `token ${s.token}`, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    
-    if(!getResp.ok){
-      if(getResp.status === 401) throw new Error('Token λάθος ή expired — πάτα ⚙️');
-      if(getResp.status === 404) throw new Error('Repo ή αρχείο δεν βρέθηκε — έλεγξε ⚙️');
-      throw new Error('GitHub error: ' + getResp.status);
-    }
-    
-    const fileData = await getResp.json();
-    const sha = fileData.sha;
-    const currentContent = decodeURIComponent(escape(atob(fileData.content.replace(/\n/g, ''))));
+    // 1. Πάρε το τρέχον αρχείο
+    const file = await ghGetFile();
     
     // 2. Πρόσθεσε νέα γραμμή
     const newLine = `${date},${cat},${desc},${amount.toFixed(2)}`;
-    const updatedContent = currentContent.trimEnd() + '\n' + newLine + '\n';
+    const updatedContent = file.content.trimEnd() + '\n' + newLine + '\n';
     
     // 3. Push στο GitHub
     status.innerHTML = '<span style="color:var(--accent)">Αποθήκευση...</span>';
-    
-    const putResp = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${s.token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: `➕ ${cat} ${amount.toFixed(2)}€ — ${desc}`,
-        content: btoa(unescape(encodeURIComponent(updatedContent))),
-        sha: sha,
-        branch: s.branch
-      })
-    });
-    
-    if(!putResp.ok){
-      const err = await putResp.json().catch(()=>({}));
-      throw new Error(err.message || 'Push failed: ' + putResp.status);
-    }
+    await ghPutFile(updatedContent, file.sha, `➕ ${cat} ${amount.toFixed(2)}€ — ${desc}`);
     
     // 4. Ενημέρωσε το dashboard αμέσως
     const d = new Date(date);
@@ -1717,6 +1703,145 @@ async function submitExpense(){
 }
 
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModals(); });
+
+/* ═══════════════════════════════════════════════
+   EXPORT CSV — με BOM για σωστά ελληνικά στο Excel
+═══════════════════════════════════════════════ */
+function exportCSV(){
+  if(!allData.length){ alert('Δεν υπάρχουν δεδομένα.'); return; }
+  
+  // Header
+  let csv = 'date,category,description,amount\n';
+  
+  // Data — χρήση filteredData αν υπάρχει φίλτρο
+  const data = [...filteredData].sort((a,b)=>a.date-b.date);
+  data.forEach(d => {
+    const dateStr = d.date.toISOString().split('T')[0];
+    csv += `${dateStr},${d.category},${d.description},${d.amount.toFixed(2)}\n`;
+  });
+  
+  // BOM + UTF-8 encoding
+  const BOM = '\uFEFF';
+  const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8' });
+  
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const suffix = activeYear==='all' ? 'all' : activeYear;
+  a.download = `expenses_${suffix}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+/* ═══════════════════════════════════════════════
+   UTF-8 SAFE BASE64 HELPERS
+═══════════════════════════════════════════════ */
+function b64Decode(str){
+  const binStr = atob(str.replace(/\n/g,''));
+  const bytes = new Uint8Array(binStr.length);
+  for(let i=0;i<binStr.length;i++) bytes[i]=binStr.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+function b64Encode(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin='';
+  bytes.forEach(b=> bin+=String.fromCharCode(b));
+  return btoa(bin);
+}
+
+/* ═══════════════════════════════════════════════
+   GITHUB — Read CSV content
+═══════════════════════════════════════════════ */
+async function ghGetFile(){
+  const s = getGHSettings();
+  const apiUrl = `https://api.github.com/repos/${s.user}/${s.repo}/contents/${s.path}?ref=${s.branch}`;
+  const resp = await fetch(apiUrl, {
+    headers: { 'Authorization': `token ${s.token}`, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if(!resp.ok){
+    if(resp.status===401) throw new Error('Token λάθος ή expired — πάτα ⚙️');
+    if(resp.status===404) throw new Error('Αρχείο δεν βρέθηκε — έλεγξε ⚙️');
+    throw new Error('GitHub error: '+resp.status);
+  }
+  const data = await resp.json();
+  return { sha: data.sha, content: b64Decode(data.content) };
+}
+
+async function ghPutFile(content, sha, message){
+  const s = getGHSettings();
+  const apiUrl = `https://api.github.com/repos/${s.user}/${s.repo}/contents/${s.path}?ref=${s.branch}`;
+  const resp = await fetch(apiUrl, {
+    method:'PUT',
+    headers:{
+      'Authorization':`token ${s.token}`,
+      'Accept':'application/vnd.github.v3+json',
+      'Content-Type':'application/json'
+    },
+    body: JSON.stringify({ message, content:b64Encode(content), sha, branch:s.branch })
+  });
+  if(!resp.ok){
+    const err = await resp.json().catch(()=>({}));
+    throw new Error(err.message || 'Push failed: '+resp.status);
+  }
+  return resp.json();
+}
+
+/* ═══════════════════════════════════════════════
+   DELETE EXPENSE
+═══════════════════════════════════════════════ */
+async function deleteExpense(idx){
+  const item = allData[idx];
+  if(!item) return;
+  
+  const dateStr = item.date.toLocaleDateString('el-GR');
+  if(!confirm(`Διαγραφή;\n\n${dateStr} — ${item.category}\n${item.description}: ${fmt(item.amount)}`)) return;
+  
+  if(!ghConfigured()){
+    alert('Ρύθμισε πρώτα το GitHub (⚙️) για να μπορείς να διαγράψεις.');
+    return;
+  }
+  
+  try {
+    // 1. Πάρε τρέχον CSV από GitHub
+    const file = await ghGetFile();
+    const lines = file.content.trim().split(/\r?\n/);
+    
+    // 2. Βρες ποια γραμμή αντιστοιχεί (ταίριαξε date+category+amount)
+    const targetDate = item.date.toISOString().split('T')[0];
+    const targetAmount = item.amount.toFixed(2);
+    let deletedLine = -1;
+    
+    for(let i=1; i<lines.length; i++){
+      const cells = lines[i].split(',').map(c=>c.trim());
+      if(cells.length<4) continue;
+      if(cells[0]===targetDate && cells[1]===item.category && cells[3]===targetAmount){
+        deletedLine = i;
+        break;
+      }
+    }
+    
+    if(deletedLine === -1){
+      alert('Δεν βρέθηκε η εγγραφή στο CSV.');
+      return;
+    }
+    
+    // 3. Αφαίρεσε τη γραμμή
+    lines.splice(deletedLine, 1);
+    const updatedContent = lines.join('\n') + '\n';
+    
+    // 4. Push
+    await ghPutFile(updatedContent, file.sha, `🗑️ Διαγραφή: ${item.category} ${targetAmount}€ — ${item.description}`);
+    
+    // 5. Ενημέρωσε τοπικά
+    allData.splice(idx, 1);
+    filteredData = activeYear==='all' ? allData : allData.filter(r=>r.year===activeYear);
+    renderAll();
+    
+  } catch(e){
+    alert('❌ Σφάλμα: ' + e.message);
+  }
+}
 </script>
 </body>
 </html>
