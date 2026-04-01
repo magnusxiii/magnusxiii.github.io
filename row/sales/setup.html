@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Εξοδολόγιο — Setup</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Arial,sans-serif;background:#0a0c10;color:#e8e4dc;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .box{background:#111318;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:2rem;max-width:460px;width:100%;text-align:center}
+  h1{color:#c9a84c;font-size:1.4rem;margin-bottom:0.5rem}
+  .sub{color:#7a7d86;font-size:0.85rem;margin-bottom:1.5rem}
+  .form-group{margin-bottom:1rem;text-align:left}
+  label{display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#7a7d86;margin-bottom:0.3rem}
+  input{width:100%;padding:0.65rem 0.8rem;background:#181c24;border:1px solid rgba(255,255,255,0.07);border-radius:8px;color:#e8e4dc;font-size:0.9rem;outline:none}
+  input:focus{border-color:#c9a84c}
+  button{width:100%;padding:0.8rem;background:#c9a84c;color:#000;border:none;border-radius:8px;font-size:1rem;font-weight:bold;cursor:pointer;margin-top:1rem;transition:background 0.2s}
+  button:hover{background:#e8c97a}
+  .status{margin-top:1rem;font-size:0.9rem;min-height:1.5em}
+  a{color:#c9a84c;text-decoration:none;display:inline-block;margin-top:1rem;padding:0.7rem 2rem;border:2px solid #c9a84c;border-radius:50px;font-weight:bold;transition:all 0.2s}
+  a:hover{background:#c9a84c;color:#000}
+  .check{display:none;margin-top:1.5rem}
+  .hint{font-size:0.75rem;color:#7a7d86;margin-top:0.3rem;line-height:1.4}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>⚙️ Εξοδολόγιο Setup</h1>
+  <div class="sub">Μία φορά ανά συσκευή — αποθηκεύεται στον browser</div>
+
+  <div class="form-group">
+    <label>Personal Access Token</label>
+    <input id="token" type="password" placeholder="ghp_xxxxxxxxxxxx">
+    <div class="hint">Αυτό είναι το μόνο που χρειάζεται. Τα υπόλοιπα είναι ήδη ρυθμισμένα.</div>
+  </div>
+
+  <details style="text-align:left;margin-top:0.5rem">
+    <summary style="color:#7a7d86;cursor:pointer;font-size:0.8rem">Προχωρημένες ρυθμίσεις</summary>
+    <div style="margin-top:0.8rem">
+      <div class="form-group">
+        <label>GitHub Username</label>
+        <input id="user" value="magnusxiii">
+      </div>
+      <div class="form-group">
+        <label>Repository</label>
+        <input id="repo" value="magnusxiii.github.io">
+      </div>
+      <div class="form-group">
+        <label>CSV Path</label>
+        <input id="path" value="row/sales/expenses.csv">
+      </div>
+      <div class="form-group">
+        <label>Branch</label>
+        <input id="branch" value="master">
+      </div>
+    </div>
+  </details>
+
+  <button onclick="save()">💾 Αποθήκευση</button>
+  <div class="status" id="status"></div>
+
+  <div class="check" id="done">
+    <a href="exodologio.html">🚀 Άνοιξε το Εξοδολόγιο</a>
+  </div>
+</div>
+
+<script>
+window.addEventListener('load', () => {
+  const t = localStorage.getItem('gh_token');
+  if(t) {
+    document.getElementById('token').value = t;
+    document.getElementById('status').innerHTML = '<span style="color:#4caf82">ℹ️ Υπάρχουν ήδη ρυθμίσεις αποθηκευμένες.</span>';
+    document.getElementById('done').style.display = 'block';
+  }
+});
+
+function save(){
+  const token = document.getElementById('token').value.trim();
+  const user = document.getElementById('user').value.trim();
+  const repo = document.getElementById('repo').value.trim();
+  const path = document.getElementById('path').value.trim();
+  const branch = document.getElementById('branch').value.trim();
+
+  if(!token){
+    document.getElementById('status').innerHTML = '<span style="color:#e05c5c">❌ Βάλε το Token</span>';
+    return;
+  }
+
+  localStorage.setItem('gh_user', user);
+  localStorage.setItem('gh_repo', repo);
+  localStorage.setItem('gh_token', token);
+  localStorage.setItem('gh_path', path);
+  localStorage.setItem('gh_branch', branch);
+
+  document.getElementById('status').innerHTML = '<span style="color:#4caf82">✅ Αποθηκεύτηκε!</span>';
+  document.getElementById('done').style.display = 'block';
+}
+</script>
+</body>
+</html>
