@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Greek Courier Tracker</title>
+  <title>XIII Greek Courier Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -192,7 +192,7 @@
 <div class="c">
   <div class="hdr">
     <div class="ico">GR</div>
-    <h1>Greek <b>Courier</b> Tracker</h1>
+    <h1><b>XIII</b> Greek <b>Courier</b> Tracker</h1>
     <p class="sub" id="status"><span class="live"></span>Σύνδεση...</p>
   </div>
 
@@ -205,7 +205,7 @@
       <button class="courier-btn" onclick="setCourier('speedex')" id="c-speedex">Speedex</button>
       <button class="courier-btn" onclick="setCourier('geniki')" id="c-geniki">Γενική</button>
       <button class="courier-btn" onclick="setCourier('boxnow')" id="c-boxnow">BOX NOW</button>
-      <button class="courier-btn" onclick="setCourier('intex')" id="c-intex">INTEX</button>
+      
     </div>
 
     <label>Tracking Number</label>
@@ -235,7 +235,7 @@
     <div class="chips" id="chips"></div>
   </div>
 
-  <div class="ft">ΕΛΤΑ · ACS · Speedex · Γενική Ταχυδρομική · BOX NOW · INTEX</div>
+ 
 </div>
 
 <script>
@@ -281,7 +281,7 @@ function detect(num) {
       body: JSON.stringify({ courier: 'boxnow', code: '1287821477' }),
       signal: c.signal
     });
-    el.innerHTML = '<span class="live"></span>Online — ΕΛΤΑ · ACS · Speedex · Γενική · BOX NOW · INTEX';
+    el.innerHTML = '';
   } catch(e) {
     el.innerHTML = '⚠ Offline';
     el.style.color = 'var(--err)';
@@ -491,7 +491,7 @@ function addCard(tn, courier, badgeText, badgeClass, events, out, subtitle = '')
     speedex: '<span class="courier-tag tag-spx">SPEEDEX</span>',
     geniki: '<span class="courier-tag tag-geniki">ΓΕΝΙΚΗ</span>',
     boxnow: '<span class="courier-tag tag-boxnow">BOX NOW</span>',
-    intex: '<span class="courier-tag tag-intex">INTEX</span>'
+    //intex: '<span class="courier-tag tag-intex">INTEX</span>'//
   };
 
   const d = document.createElement('div');
