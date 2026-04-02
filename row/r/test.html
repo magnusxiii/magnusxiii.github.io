@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Courier Tracker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    .wrap {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 28px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    select, input, button {
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      padding: 0 12px;
+      font-size: 15px;
+    }
+    select, input {
+      flex: 1;
+      min-width: 180px;
+      background: #fff;
+    }
+    button {
+      border: 0;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      min-width: 130px;
+      font-weight: 700;
+    }
+    .status {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #eef2ff;
+      display: none;
+      white-space: pre-wrap;
+    }
+    .error {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+    .success {
+      background: #ecfdf5;
+      color: #065f46;
+    }
+    .muted {
+      color: #6b7280;
+    }
+    .timeline {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+    .event {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fafafa;
+    }
+    .event-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .small {
+      font-size: 13px;
+    }
+    pre {
+      overflow: auto;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Courier Tracker</h1>
+      <div class="muted">BOX NOW tracking</div>
+
+      <div class="row" style="margin-top:16px;">
+        <select id="courier">
+          <option value="boxnow">BOX NOW</option>
+        </select>
+        <input id="tracking" type="text" placeholder="Βάλε αριθμό αποστολής" value="1287821477">
+        <button id="trackBtn">Αναζήτηση</button>
+      </div>
+
+      <div id="statusBox" class="status"></div>
+    </div>
+
+    <div id="resultCard" class="card" style="display:none;">
+      <h2 style="margin-top:0;">Αποτέλεσμα</h2>
+      <div id="summary"></div>
+      <div id="timeline" class="timeline"></div>
+    </div>
+
+    <div id="rawCard" class="card" style="display:none;">
+      <h2 style="margin-top:0;">Raw JSON</h2>
+      <pre id="rawJson"></pre>
+    </div>
+  </div>
+
+  <script>
+    const courierEl = document.getElementById("courier");
+    const trackingEl = document.getElementById("tracking");
+    const trackBtn = document.getElementById("trackBtn");
+    const statusBox = document.getElementById("statusBox");
+    const resultCard = document.getElementById("resultCard");
+    const rawCard = document.getElementById("rawCard");
+    const summaryEl = document.getElementById("summary");
+    const timelineEl = document.getElementById("timeline");
+    const rawJsonEl = document.getElementById("rawJson");
+
+    trackBtn.addEventListener("click", doTrack);
+
+    async function doTrack() {
+      const courier = courierEl.value.trim();
+      const code = trackingEl.value.trim();
+
+      if (!code) {
+        showStatus("Βάλε tracking number", true);
+        return;
+      }
+
+      showStatus("Γίνεται αναζήτηση...", false);
+      resultCard.style.display = "none";
+      rawCard.style.display = "none";
+
+      try {
+        const res = await fetch("https://TO-WORKER-SOU.workers.dev/track", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            courier: courier,
+            code: code
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || "Αποτυχία αναζήτησης");
+        }
+
+        renderResult(data);
+        showStatus("Η αναζήτηση ολοκληρώθηκε", false, true);
+      } catch (err) {
+        showStatus("Σφάλμα: " + (err.message || "Failed to fetch"), true);
+      }
+    }
+
+    function showStatus(message, isError, isSuccess) {
+      statusBox.style.display = "block";
+      statusBox.textContent = message;
+      statusBox.className = "status " + (isError ? "error" : (isSuccess ? "success" : ""));
+    }
+
+    function renderResult(data) {
+      const result = data.result || {};
+      const summary = result.summary || {};
+      const history = Array.isArray(result.history) ? result.history : [];
+      const raw = result.raw || {};
+
+      summaryEl.innerHTML =
+        "<div><strong>Courier:</strong> " + escapeHtml(data.courier || "") + "</div>" +
+        "<div><strong>Tracking:</strong> " + escapeHtml(data.trackingNumber || "") + "</div>" +
+        "<div><strong>Κατάσταση:</strong> " + escapeHtml(summary.status || "-") + "</div>" +
+        "<div><strong>Locker:</strong> " + escapeHtml(summary.locker || "-") + "</div>" +
+        "<div><strong>Τελευταία ενημέρωση:</strong> " + escapeHtml(summary.updatedAt || "-") + "</div>";
+
+      timelineEl.innerHTML = "";
+
+      if (history.length === 0) {
+        timelineEl.innerHTML = '<div class="event"><div class="event-title">Δεν βρέθηκε ιστορικό</div></div>';
+      } else {
+        for (const item of history) {
+          const extra = item.details ? '<div class="small muted" style="margin-top:6px;">' + escapeHtml(item.details) + '</div>' : "";
+          const html =
+            '<div class="event">' +
+              '<div class="event-title">' + escapeHtml(item.status || "Άγνωστο στάδιο") + '</div>' +
+              '<div class="small muted">' + escapeHtml(item.date || "-") + '</div>' +
+              extra +
+            '</div>';
+          timelineEl.insertAdjacentHTML("beforeend", html);
+        }
+      }
+
+      rawJsonEl.textContent = JSON.stringify(raw, null, 2);
+      resultCard.style.display = "block";
+      rawCard.style.display = "block";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
