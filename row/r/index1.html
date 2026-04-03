@@ -1,337 +1,608 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Greek Courier Tracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root{--bg:#0a0c10;--bg2:#181c26;--bg3:#1e2230;--brd:#2a2f3e;--t:#e8ecf4;--t2:#8892a6;--t3:#565e72;--ac:#e8a838;--acd:#c4872a;--gl:rgba(232,168,56,.15);--ok:#34d399;--inf:#60a5fa;--wrn:#fbbf24;--err:#f87171;--acs:#ff6b35;--elta:#2196f3;--spx:#0074bb;--gen:#e53935}
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex;flex-direction:column;align-items:center}
-        body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(232,168,56,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(232,168,56,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
-        .c{position:relative;z-index:1;width:100%;max-width:820px;padding:40px 20px}
-        .hdr{text-align:center;margin-bottom:36px}
-        .hdr .ico{display:inline-flex;width:48px;height:48px;background:var(--ac);border-radius:12px;align-items:center;justify-content:center;font:700 20px 'JetBrains Mono',monospace;color:var(--bg);box-shadow:0 0 24px var(--gl);margin-bottom:16px}
-        .hdr h1{font-size:28px;font-weight:700;letter-spacing:-.5px}.hdr h1 b{color:var(--ac)}
-        .hdr .sub{color:var(--t2);font-size:14px;margin-top:6px}
-        .hdr .live{display:inline-block;width:8px;height:8px;background:var(--ok);border-radius:50%;box-shadow:0 0 8px var(--ok);margin-right:6px;animation:pulse 2s infinite}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-        .card{background:var(--bg2);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:20px}
-        label{display:block;font:600 11px/1 'JetBrains Mono',monospace;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
-        .courier-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-        .courier-btn{flex:1;min-width:80px;background:var(--bg3);border:1.5px solid var(--brd);border-radius:8px;padding:10px 8px;color:var(--t2);font:600 11px 'JetBrains Mono',monospace;cursor:pointer;transition:.2s;text-align:center}
-        .courier-btn:hover{border-color:var(--t2);color:var(--t)}
-        .courier-btn.active{border-color:var(--ac);color:var(--ac);background:var(--gl)}
-        .row{display:flex;gap:10px}
-        textarea{flex:1;background:var(--bg3);border:1.5px solid var(--brd);border-radius:8px;padding:14px 16px;color:var(--t);font:15px 'JetBrains Mono',monospace;resize:vertical;min-height:50px;max-height:150px;outline:none;transition:.2s}
-        textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--gl)}
-        textarea::placeholder{color:var(--t3);font-size:13px}
-        .btn{background:var(--ac);color:var(--bg);border:none;border-radius:8px;padding:14px 28px;font:700 14px 'Manrope',sans-serif;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:8px}
-        .btn:hover{background:var(--acd);transform:translateY(-1px);box-shadow:0 4px 16px var(--gl)}
-        .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-        .btn svg{width:18px;height:18px}
-        .hint{margin-top:10px;font:12px 'JetBrains Mono',monospace;color:var(--t3)}
-        .spin-wrap{display:none;text-align:center;padding:36px}.spin-wrap.on{display:block}
-        .spin{width:36px;height:36px;border:3px solid var(--brd);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 14px}
-        @keyframes sp{to{transform:rotate(360deg)}}.spin-wrap p{color:var(--t2);font-size:14px}
-        #out{display:flex;flex-direction:column;gap:18px}
-        .res{background:var(--bg2);border:1px solid var(--brd);border-radius:12px;overflow:hidden;animation:up .3s ease-out}
-        @keyframes up{from{opacity:0;transform:translateY(10px)}}
-        .res-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--brd);flex-wrap:wrap;gap:8px}
-        .res-hd .tn{font:600 15px 'JetBrains Mono',monospace;color:var(--ac)}
-        .courier-tag{font:700 10px 'JetBrains Mono',monospace;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px}
-        .tag-elta{background:rgba(33,150,243,.15);color:var(--elta)}
-        .tag-acs{background:rgba(255,107,53,.15);color:var(--acs)}
-        .tag-spx{background:rgba(0,116,187,.15);color:var(--spx)}
-        .tag-geniki{background:rgba(229,57,53,.15);color:var(--gen)}
-        .badge{font:600 11px 'JetBrains Mono',monospace;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
-        .b-transit{background:rgba(96,165,250,.15);color:var(--inf)}.b-ok{background:rgba(52,211,153,.15);color:var(--ok)}.b-new{background:rgba(251,191,36,.15);color:var(--wrn)}.b-err{background:rgba(248,113,113,.15);color:var(--err)}
-        table{width:100%;border-collapse:collapse}
-        th{text-align:left;padding:10px 20px;font:600 11px 'JetBrains Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:1px;background:rgba(0,0,0,.15);border-bottom:1px solid var(--brd)}
-        td{padding:12px 20px;font-size:13px;color:var(--t2);border-bottom:1px solid rgba(42,47,62,.4)}
-        tr:last-child td{border-bottom:none}tbody tr:first-child td{color:var(--t);font-weight:600}
-        td:first-child{color:var(--t);font-weight:500}td:nth-child(2),td:nth-child(3){font:12px 'JetBrains Mono',monospace;white-space:nowrap}td:nth-child(4){font-size:12px;color:var(--t3)}
-        .err-msg{padding:20px;text-align:center;font-size:14px;line-height:1.6;color:var(--err)}
-        .res-ft{display:flex;justify-content:center;gap:8px;padding:10px;background:rgba(0,0,0,.08);border-top:1px solid var(--brd)}
-        .lnk{background:0;border:1px solid var(--brd);border-radius:6px;padding:5px 14px;color:var(--t2);font:12px 'JetBrains Mono',monospace;cursor:pointer;transition:.15s;text-decoration:none}.lnk:hover{border-color:var(--ac);color:var(--ac)}
-        .hist{margin-top:18px}.hist h3{font:600 11px 'JetBrains Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-        .chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:5px 12px;font:12px 'JetBrains Mono',monospace;color:var(--t2);cursor:pointer;transition:.15s}.chip:hover{border-color:var(--ac);color:var(--ac)}
-        .clr{background:0;border:0;color:var(--t3);font:11px 'JetBrains Mono',monospace;cursor:pointer;margin-left:8px}.clr:hover{color:var(--err)}
-        .ft{text-align:center;margin-top:36px;font:11px 'JetBrains Mono',monospace;color:var(--t3)}.ft a{color:var(--ac);text-decoration:none}
-        .sub-info{padding:8px 20px;font:12px 'JetBrains Mono',monospace;color:var(--t3);border-bottom:1px solid var(--brd)}
-        @media(max-width:600px){.c{padding:20px 12px}.card{padding:18px}.row{flex-direction:column}.btn{width:100%;justify-content:center}.hdr h1{font-size:22px}th,td{padding:9px 12px}.courier-row{flex-direction:column}}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XIII Greek Courier Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0c10;--bg2:#181c26;--bg3:#1e2230;--brd:#2a2f3e;
+      --t:#e8ecf4;--t2:#8892a6;--t3:#565e72;
+      --ac:#e8a838;--acd:#c4872a;--gl:rgba(232,168,56,.15);
+      --ok:#34d399;--inf:#60a5fa;--wrn:#fbbf24;--err:#f87171;
+      --acs:#ff6b35;--elta:#2196f3;--spx:#0074bb;--gen:#e53935;
+      --box:#8b5cf6;--intex:#14b8a6;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Manrope',sans-serif;background:var(--bg);color:var(--t);
+      min-height:100vh;display:flex;flex-direction:column;align-items:center
+    }
+    body::before{
+      content:'';position:fixed;inset:0;
+      background-image:
+        linear-gradient(rgba(232,168,56,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(232,168,56,.03) 1px,transparent 1px);
+      background-size:60px 60px;pointer-events:none
+    }
+    .c{position:relative;z-index:1;width:100%;max-width:940px;padding:40px 20px}
+    .hdr{text-align:center;margin-bottom:36px}
+    .hdr .ico{
+      display:inline-flex;width:48px;height:48px;background:var(--ac);border-radius:12px;
+      align-items:center;justify-content:center;font:700 20px 'JetBrains Mono',monospace;
+      color:var(--bg);box-shadow:0 0 24px var(--gl);margin-bottom:16px
+    }
+    .hdr h1{font-size:28px;font-weight:700;letter-spacing:-.5px}
+    .hdr h1 b{color:var(--ac)}
+    .hdr .sub{color:var(--t2);font-size:14px;margin-top:6px}
+    .hdr .live{
+      display:inline-block;width:8px;height:8px;background:var(--ok);border-radius:50%;
+      box-shadow:0 0 8px var(--ok);margin-right:6px;animation:pulse 2s infinite
+    }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+    .card{
+      background:var(--bg2);border:1px solid var(--brd);
+      border-radius:12px;padding:24px;margin-bottom:20px
+    }
+    label{
+      display:block;font:600 11px/1 'JetBrains Mono',monospace;color:var(--t2);
+      text-transform:uppercase;letter-spacing:1px;margin-bottom:10px
+    }
+
+    .courier-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .courier-btn{
+      flex:1;min-width:92px;background:var(--bg3);border:1.5px solid var(--brd);
+      border-radius:8px;padding:10px 8px;color:var(--t2);
+      font:600 11px 'JetBrains Mono',monospace;cursor:pointer;transition:.2s;text-align:center
+    }
+    .courier-btn:hover{border-color:var(--t2);color:var(--t)}
+    .courier-btn.active{border-color:var(--ac);color:var(--ac);background:var(--gl)}
+
+    .row{display:flex;gap:10px}
+    textarea{
+      flex:1;background:var(--bg3);border:1.5px solid var(--brd);border-radius:8px;
+      padding:14px 16px;color:var(--t);font:15px 'JetBrains Mono',monospace;
+      resize:vertical;min-height:58px;max-height:180px;outline:none;transition:.2s
+    }
+    textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--gl)}
+    textarea::placeholder{color:var(--t3);font-size:13px}
+
+    .btn{
+      background:var(--ac);color:var(--bg);border:none;border-radius:8px;padding:14px 28px;
+      font:700 14px 'Manrope',sans-serif;text-transform:uppercase;letter-spacing:1px;
+      cursor:pointer;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:8px
+    }
+    .btn:hover{background:var(--acd);transform:translateY(-1px);box-shadow:0 4px 16px var(--gl)}
+    .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .btn svg{width:18px;height:18px}
+
+    .hint{margin-top:10px;font:12px 'JetBrains Mono',monospace;color:var(--t3)}
+
+    .spin-wrap{display:none;text-align:center;padding:36px}
+    .spin-wrap.on{display:block}
+    .spin{
+      width:36px;height:36px;border:3px solid var(--brd);
+      border-top-color:var(--ac);border-radius:50%;
+      animation:sp .7s linear infinite;margin:0 auto 14px
+    }
+    @keyframes sp{to{transform:rotate(360deg)}}
+    .spin-wrap p{color:var(--t2);font-size:14px}
+
+    #out{display:flex;flex-direction:column;gap:18px}
+
+    .res{
+      background:var(--bg2);border:1px solid var(--brd);border-radius:12px;
+      overflow:hidden;animation:up .3s ease-out
+    }
+    @keyframes up{from{opacity:0;transform:translateY(10px)}}
+
+    .res-hd{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 20px;border-bottom:1px solid var(--brd);
+      flex-wrap:wrap;gap:8px
+    }
+    .res-hd .tn{font:600 15px 'JetBrains Mono',monospace;color:var(--ac)}
+
+    .courier-tag{
+      font:700 10px 'JetBrains Mono',monospace;padding:3px 8px;border-radius:4px;
+      text-transform:uppercase;letter-spacing:.5px
+    }
+    .tag-elta{background:rgba(33,150,243,.15);color:var(--elta)}
+    .tag-acs{background:rgba(255,107,53,.15);color:var(--acs)}
+    .tag-spx{background:rgba(0,116,187,.15);color:var(--spx)}
+    .tag-geniki{background:rgba(229,57,53,.15);color:var(--gen)}
+    .tag-boxnow{background:rgba(139,92,246,.15);color:var(--box)}
+    .tag-intex{background:rgba(20,184,166,.15);color:var(--intex)}
+
+    .badge{
+      font:600 11px 'JetBrains Mono',monospace;padding:4px 10px;border-radius:20px;
+      text-transform:uppercase;letter-spacing:.5px
+    }
+    .b-transit{background:rgba(96,165,250,.15);color:var(--inf)}
+    .b-ok{background:rgba(52,211,153,.15);color:var(--ok)}
+    .b-new{background:rgba(251,191,36,.15);color:var(--wrn)}
+    .b-err{background:rgba(248,113,113,.15);color:var(--err)}
+
+    .sub-info{
+      padding:8px 20px;font:12px 'JetBrains Mono',monospace;color:var(--t3);
+      border-bottom:1px solid var(--brd)
+    }
+
+    table{width:100%;border-collapse:collapse}
+    th{
+      text-align:left;padding:10px 20px;font:600 11px 'JetBrains Mono',monospace;
+      color:var(--t3);text-transform:uppercase;letter-spacing:1px;
+      background:rgba(0,0,0,.15);border-bottom:1px solid var(--brd)
+    }
+    td{
+      padding:12px 20px;font-size:13px;color:var(--t2);
+      border-bottom:1px solid rgba(42,47,62,.4)
+    }
+    tr:last-child td{border-bottom:none}
+    tbody tr:first-child td{color:var(--t);font-weight:600}
+    td:first-child{color:var(--t);font-weight:500}
+    td:nth-child(2),td:nth-child(3){font:12px 'JetBrains Mono',monospace;white-space:nowrap}
+    td:nth-child(4){font-size:12px;color:var(--t3)}
+
+    .err-msg{padding:20px;text-align:center;font-size:14px;line-height:1.6;color:var(--err)}
+    .res-ft{
+      display:flex;justify-content:center;gap:8px;padding:10px;
+      background:rgba(0,0,0,.08);border-top:1px solid var(--brd);flex-wrap:wrap
+    }
+    .lnk{
+      background:0;border:1px solid var(--brd);border-radius:6px;padding:5px 14px;
+      color:var(--t2);font:12px 'JetBrains Mono',monospace;cursor:pointer;
+      transition:.15s;text-decoration:none
+    }
+    .lnk:hover{border-color:var(--ac);color:var(--ac)}
+
+    .hist{margin-top:18px}
+    .hist h3{
+      font:600 11px 'JetBrains Mono',monospace;color:var(--t3);
+      text-transform:uppercase;letter-spacing:1px;margin-bottom:8px
+    }
+    .chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{
+      background:var(--bg3);border:1px solid var(--brd);border-radius:6px;
+      padding:5px 12px;font:12px 'JetBrains Mono',monospace;color:var(--t2);
+      cursor:pointer;transition:.15s
+    }
+    .chip:hover{border-color:var(--ac);color:var(--ac)}
+    .clr{
+      background:0;border:0;color:var(--t3);font:11px 'JetBrains Mono',monospace;
+      cursor:pointer;margin-left:8px
+    }
+    .clr:hover{color:var(--err)}
+    .ft{text-align:center;margin-top:36px;font:11px 'JetBrains Mono',monospace;color:var(--t3)}
+
+    @media(max-width:600px){
+      .c{padding:20px 12px}
+      .card{padding:18px}
+      .row{flex-direction:column}
+      .btn{width:100%;justify-content:center}
+      .hdr h1{font-size:22px}
+      th,td{padding:9px 12px}
+      .courier-row{flex-direction:column}
+    }
+  </style>
 </head>
 <body>
 <div class="c">
-    <div class="hdr">
-        <div class="ico">GR</div>
-        <h1>Greek <b>Courier</b> Tracker</h1>
-        <p class="sub" id="status"><span class="live"></span>Σύνδεση...</p>
+  <div class="hdr">
+    <div class="ico">GR</div>
+    <h1><b>XIII</b> Greek <b>Courier</b> Tracker</h1>
+    <p class="sub" id="status"><span class="live"></span>Σύνδεση...</p>
+  </div>
+
+  <div class="card">
+    <label>Courier</label>
+    <div class="courier-row">
+      <button class="courier-btn active" onclick="setCourier('auto')" id="c-auto">Auto</button>
+      <button class="courier-btn" onclick="setCourier('elta')" id="c-elta">ΕΛΤΑ</button>
+      <button class="courier-btn" onclick="setCourier('acs')" id="c-acs">ACS</button>
+      <button class="courier-btn" onclick="setCourier('speedex')" id="c-speedex">Speedex</button>
+      <button class="courier-btn" onclick="setCourier('geniki')" id="c-geniki">Γενική</button>
+      <button class="courier-btn" onclick="setCourier('boxnow')" id="c-boxnow">BOX NOW</button>
+      
     </div>
-    <div class="card">
-        <label>Courier</label>
-        <div class="courier-row">
-            <button class="courier-btn active" onclick="setCourier('auto')" id="c-auto">Auto</button>
-            <button class="courier-btn" onclick="setCourier('elta')" id="c-elta">ΕΛΤΑ</button>
-            <button class="courier-btn" onclick="setCourier('acs')" id="c-acs">ACS</button>
-            <button class="courier-btn" onclick="setCourier('speedex')" id="c-speedex">Speedex</button>
-            <button class="courier-btn" onclick="setCourier('geniki')" id="c-geniki">Γενική</button>
-        </div>
-        <label>Tracking Number</label>
-        <div class="row">
-            <textarea id="inp" placeholder="π.χ. SE102285731GR, 2408613631, 050090622329&#10;Πολλαπλά χωρισμένα με Enter..." rows="2"></textarea>
-            <button class="btn" onclick="go()" id="btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                ΑΝΑΖΗΤΗΣΗ
-            </button>
-        </div>
-        <div class="hint">ΕΛΤΑ: XX000000000XX · ACS: 10ψήφιο · Speedex: 12ψήφιο (0500...) · Γενική: συνήθως 10ψήφιο</div>
+
+    <label>Tracking Number</label>
+    <div class="row">
+      <textarea id="inp" placeholder="π.χ. SE102285731GR, 2408613631, 050090622329, 1287821477&#10;Πολλαπλά χωρισμένα με Enter..." rows="2"></textarea>
+      <button class="btn" onclick="go()" id="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        ΑΝΑΖΗΤΗΣΗ
+      </button>
     </div>
-    <div class="spin-wrap" id="spin"><div class="spin"></div><p id="spinTxt">Αναζήτηση...</p></div>
-    <div id="out"></div>
-    <div class="hist" id="histSec" style="display:none">
-        <h3>Πρόσφατα <button class="clr" onclick="clrH()">[X]</button></h3>
-        <div class="chips" id="chips"></div>
+    <div class="hint">
+      ΕΛΤΑ: XX000000000XX · ACS: 10ψήφιο · Speedex: 12ψήφιο (0500...) · Γενική: συνήθως 10ψήφιο · BOX NOW: 10ψήφιο
     </div>
-    <div class="ft">ΕΛΤΑ · ACS · Speedex · Γενική Ταχυδρομική</div>
+  </div>
+
+  <div class="spin-wrap" id="spin">
+    <div class="spin"></div>
+    <p id="spinTxt">Αναζήτηση...</p>
+  </div>
+
+  <div id="out"></div>
+
+  <div class="hist" id="histSec" style="display:none">
+    <h3>Πρόσφατα <button class="clr" onclick="clrH()">[X]</button></h3>
+    <div class="chips" id="chips"></div>
+  </div>
+
+ 
 </div>
+
 <script>
 const W = 'https://xiii.tristaniaa2.workers.dev';
-let sel = 'auto', hist = [];
-try { const s = localStorage.getItem('gct_h'); if (s) hist = JSON.parse(s); } catch(e) {}
+let sel = 'auto';
+let hist = [];
+
+try {
+  const s = localStorage.getItem('gct_h');
+  if (s) hist = JSON.parse(s);
+} catch(e) {}
 showH();
 
 function setCourier(c) {
-    sel = c;
-    document.querySelectorAll('.courier-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('c-' + c).classList.add('active');
+  sel = c;
+  document.querySelectorAll('.courier-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('c-' + c);
+  if (el) el.classList.add('active');
 }
 
 function detect(num) {
-    if (sel !== 'auto') return sel;
-    if (/^[A-Za-z]{2}\d{9}[A-Za-z]{2}$/.test(num)) return 'elta';
-    if (/^\d{12}$/.test(num) || num.startsWith('05')) return 'speedex';
-    if (/^\d{10}$/.test(num)) return 'auto10';
-    return 'elta';
+  if (sel !== 'auto') return sel;
+
+  if (/^[A-Za-z]{2}\d{9}[A-Za-z]{2}$/.test(num)) return 'elta';
+  if (/^\d{12}$/.test(num) || num.startsWith('05')) return 'speedex';
+
+  if (/^\d{10}$/.test(num)) {
+    if (num.startsWith('12')) return 'boxnow';
+    return 'auto10';
+  }
+
+  return 'elta';
 }
 
 (async function() {
-    const el = document.getElementById('status');
-    try {
-        const c = new AbortController(); setTimeout(() => c.abort(), 6000);
-        await fetch(W + '/elta', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'number=TEST&s=0', signal: c.signal });
-        el.innerHTML = '<span class="live"></span>Online — ΕΛΤΑ · ACS · Speedex · Γενική';
-    } catch(e) { el.innerHTML = '⚠ Offline'; el.style.color = 'var(--err)'; }
+  const el = document.getElementById('status');
+  try {
+    const c = new AbortController();
+    setTimeout(() => c.abort(), 5000);
+    await fetch(W + '/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courier: 'boxnow', code: '1287821477' }),
+      signal: c.signal
+    });
+    el.innerHTML = '';
+  } catch(e) {
+    el.innerHTML = '⚠ Offline';
+    el.style.color = 'var(--err)';
+  }
 })();
 
 async function go() {
-    const raw = document.getElementById('inp').value.trim();
-    if (!raw) { document.getElementById('inp').focus(); return; }
-    const nums = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-    if (!nums.length) return;
+  const raw = document.getElementById('inp').value.trim();
+  if (!raw) {
+    document.getElementById('inp').focus();
+    return;
+  }
 
-    nums.forEach(n => { hist = hist.filter(h => h !== n); hist.unshift(n); });
-    if (hist.length > 20) hist.length = 20;
-    try { localStorage.setItem('gct_h', JSON.stringify(hist)); } catch(e) {}
-    showH();
+  const nums = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+  if (!nums.length) return;
 
-    const out = document.getElementById('out'); out.innerHTML = '';
-    document.getElementById('spin').classList.add('on');
-    document.getElementById('btn').disabled = true;
+  nums.forEach(n => {
+    hist = hist.filter(h => h !== n);
+    hist.unshift(n);
+  });
+  if (hist.length > 20) hist.length = 20;
 
-    for (const num of nums) {
-        const courier = detect(num);
-        document.getElementById('spinTxt').textContent = `[${courier.toUpperCase()}] ${num}...`;
-        try {
-            if (courier === 'acs') {
-                await trackACS(num, out);
-            } else if (courier === 'geniki') {
-                await trackGeniki(num, out);
-            } else if (courier === 'speedex') {
-                await trackSpeedex(num, out);
-            } else if (courier === 'auto10') {
-                let done = false;
-                try {
-                    await trackACS(num, out, true);
-                    done = true;
-                } catch (e) {}
-                if (!done) {
-                    try {
-                        await trackGeniki(num, out, true);
-                        done = true;
-                    } catch (e) {}
-                }
-                if (!done) errC(num, 'geniki', 'Δεν βρέθηκε σε ACS ή Γενική', out);
-            } else {
-                await trackElta(num, out);
-            }
-        } catch(e) {
-            errC(num, courier === 'auto10' ? 'geniki' : courier, 'Σφάλμα: ' + e.message, out);
-        }
+  try { localStorage.setItem('gct_h', JSON.stringify(hist)); } catch(e) {}
+  showH();
+
+  const out = document.getElementById('out');
+  out.innerHTML = '';
+  document.getElementById('spin').classList.add('on');
+  document.getElementById('btn').disabled = true;
+
+  for (const num of nums) {
+    const courier = detect(num);
+    document.getElementById('spinTxt').textContent = `[${courier.toUpperCase()}] ${num}...`;
+
+    try {
+      if (courier === 'elta') await trackElta(num, out);
+      else if (courier === 'acs') await trackACS(num, out);
+      else if (courier === 'speedex') await trackSpeedex(num, out);
+      else if (courier === 'geniki') await trackGeniki(num, out);
+      else if (courier === 'boxnow') await trackBoxNow(num, out);
+      else if (courier === 'intex') await trackIntex(num, out);
+      else if (courier === 'auto10') await auto10(num, out);
+      else await trackElta(num, out);
+    } catch(e) {
+      errC(num, courier === 'auto10' ? 'geniki' : courier, 'Σφάλμα: ' + e.message, out);
     }
+  }
 
-    document.getElementById('spin').classList.remove('on');
-    document.getElementById('btn').disabled = false;
+  document.getElementById('spin').classList.remove('on');
+  document.getElementById('btn').disabled = false;
 }
 
-// ═══ ΕΛΤΑ ═══
-async function trackElta(num, out) {
-    const r = await fetch(W + '/elta', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }, body: 'number=' + encodeURIComponent(num) + '&s=0' });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const json = await r.json();
-    if (!json || json.status !== 1 || !json.result) { errC(num, 'elta', 'Δεν βρέθηκαν αποτελέσματα', out); return; }
-    for (const tn of Object.keys(json.result)) {
-        const entry = json.result[tn];
-        if (!entry || entry.status !== 1 || !entry.result || !entry.result.length) { errC(tn, 'elta', 'Δεν βρέθηκε', out); continue; }
-        const evts = entry.result, lat = evts[0].status.toLowerCase();
-        let bc = 'b-new', bt = 'ΝΕΟ';
-        if (lat.includes('παραδ')) { bc='b-ok'; bt='ΠΑΡΑΔΟΘΗΚΕ'; }
-        else if (lat.includes('επιστρ')) { bc='b-err'; bt='ΕΠΙΣΤΡΟΦΗ'; }
-        else if (lat.includes('μεταφορ')||lat.includes('αναχ')||lat.includes('άφιξη')||lat.includes('διανομ')||lat.includes('φόρτωση')||lat.includes('αποστολ')||lat.includes('εξερχ')) { bc='b-transit'; bt='ΣΕ ΜΕΤΑΦΟΡΑ'; }
-        else if (lat.includes('δημιουργ')||lat.includes('παραλαβ')) { bc='b-new'; bt='ΔΗΜΙΟΥΡΓΗΘΗΚΕ'; }
-        else { bc='b-transit'; bt='ΣΕ ΕΞΕΛΙΞΗ'; }
-        addCard(tn, 'elta', bt, bc, evts.map(v => ({ status: v.status, date: v.date, time: v.time, place: v.place })), out);
-    }
+async function auto10(num, out) {
+  let done = false;
+
+  try {
+    await trackBoxNow(num, out, true);
+    done = true;
+  } catch(e) {}
+
+  if (!done) {
+    try {
+      await trackACS(num, out, true);
+      done = true;
+    } catch(e) {}
+  }
+
+  if (!done) {
+    try {
+      await trackGeniki(num, out, true);
+      done = true;
+    } catch(e) {}
+  }
+
+  if (!done) errC(num, 'geniki', 'Δεν βρέθηκε σε BOX NOW / ACS / Γενική', out);
 }
 
-// ═══ ACS ═══
+async function apiTrack(courier, code) {
+  const r = await fetch(W + '/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ courier, code })
+  });
+
+  const json = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    throw new Error(json.error || ('HTTP ' + r.status));
+  }
+  return json;
+}
+
+async function trackElta(num, out, throwIfNotFound = false) {
+  const json = await apiTrack('elta', num);
+  if (!json.result?.history?.length) {
+    if (throwIfNotFound) throw new Error('Δεν βρέθηκε');
+    errC(num, 'elta', 'Δεν βρέθηκαν αποτελέσματα', out);
+    return;
+  }
+  addFromUnified(json, out, 'elta');
+}
+
 async function trackACS(num, out, throwIfNotFound = false) {
-    const r = await fetch(W + '/acs/' + encodeURIComponent(num));
-    if (r.status === 406) {
-        if (throwIfNotFound) throw new Error('ACS session key error');
-        errC(num, 'acs', 'ACS session key error', out);
-        return;
-    }
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const json = await r.json();
-    if (!json || !json.items || !json.items.length) {
-        if (throwIfNotFound) throw new Error('Δεν βρέθηκε');
-        errC(num, 'acs', 'Δεν βρέθηκε', out);
-        return;
-    }
-    const item = json.items[0];
-    let bc = 'b-transit', bt = 'ΣΕ ΕΞΕΛΙΞΗ';
-    if (item.isDelivered) { bc = 'b-ok'; bt = 'ΠΑΡΑΔΟΘΗΚΕ'; }
-    else if (item.isReturned) { bc = 'b-err'; bt = 'ΕΠΙΣΤΡΟΦΗ'; }
-    const events = (item.statusHistory || []).map(h => {
-        const d = new Date(h.controlPointDate);
-        return { status: h.controlPoint, date: d.toLocaleDateString('el-GR'), time: d.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' }), place: h.controlPointCode || h.info || '' };
-    });
-    addCard(num, 'acs', bt, bc, events, out, `${item.pickupDescription || ''} → ${item.destinationDescription || ''}`);
+  const json = await apiTrack('acs', num);
+  if (!json.result?.history?.length) {
+    if (throwIfNotFound) throw new Error('Δεν βρέθηκε');
+    errC(num, 'acs', 'Δεν βρέθηκαν αποτελέσματα', out);
+    return;
+  }
+  addFromUnified(json, out, 'acs');
 }
 
-// ═══ ΓΕΝΙΚΗ ΤΑΧΥΔΡΟΜΙΚΗ ═══
+async function trackSpeedex(num, out, throwIfNotFound = false) {
+  const json = await apiTrack('speedex', num);
+  if (!json.result?.history?.length) {
+    if (throwIfNotFound) throw new Error('Δεν βρέθηκε');
+    errC(num, 'speedex', 'Δεν βρέθηκαν αποτελέσματα', out);
+    return;
+  }
+  addFromUnified(json, out, 'speedex');
+}
+
 async function trackGeniki(num, out, throwIfNotFound = false) {
-    const r = await fetch(W + '/geniki/' + encodeURIComponent(num));
-    if (!r.ok) {
-        if (throwIfNotFound) throw new Error('HTTP ' + r.status);
-        throw new Error('HTTP ' + r.status);
-    }
-
-    const json = await r.json();
-
-    if (json.error) {
-        if (throwIfNotFound) throw new Error(json.error);
-        errC(num, 'geniki', json.error, out);
-        return;
-    }
-
-    if (!json.events || !json.events.length) {
-        if (throwIfNotFound) throw new Error('Δεν βρέθηκε');
-        errC(num, 'geniki', 'Δεν βρέθηκαν αποτελέσματα', out);
-        return;
-    }
-
-    const last = json.events[json.events.length - 1].status.toLowerCase();
-    let bc = 'b-transit', bt = 'ΣΕ ΕΞΕΛΙΞΗ';
-
-    if (last.includes('παραλήφθηκε από') || last.includes('παραδο') || json.isDelivered) {
-        bc = 'b-ok';
-        bt = 'ΠΑΡΑΔΟΘΗΚΕ';
-    } else if (last.includes('επιστρ') || last.includes('return')) {
-        bc = 'b-err';
-        bt = 'ΕΠΙΣΤΡΟΦΗ';
-    } else if (last.includes('δημιουργία ετικέτας') || last.includes('παραλαβ') || last.includes('χρέωση')) {
-        bc = 'b-new';
-        bt = 'ΝΕΟ';
-    } else if (last.includes('αναχώρηση') || last.includes('άφιξη') || last.includes('διαμετακόμισης') || last.includes('εξυπηρέτησης') || last.includes('κούριερ') || last.includes('αδυναμία παράδοσης')) {
-        bc = 'b-transit';
-        bt = 'ΣΕ ΜΕΤΑΦΟΡΑ';
-    }
-
-    addCard(num, 'geniki', bt, bc, json.events, out);
+  const json = await apiTrack('geniki', num);
+  if (!json.result?.history?.length) {
+    if (throwIfNotFound) throw new Error('Δεν βρέθηκε');
+    errC(num, 'geniki', 'Δεν βρέθηκαν αποτελέσματα', out);
+    return;
+  }
+  addFromUnified(json, out, 'geniki');
 }
 
-// ═══ SPEEDEX ═══
-async function trackSpeedex(num, out) {
-    const r = await fetch(W + '/speedex/' + encodeURIComponent(num));
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const json = await r.json();
-    if (json.error) { errC(num, 'speedex', json.error, out); return; }
-    if (!json.events || !json.events.length) { errC(num, 'speedex', 'Δεν βρέθηκαν αποτελέσματα', out); return; }
-    const lat = json.events[json.events.length - 1].status.toLowerCase();
-    let bc = 'b-transit', bt = 'ΣΕ ΕΞΕΛΙΞΗ';
-    if (json.isDelivered || lat.includes('παραδο')) { bc = 'b-ok'; bt = 'ΠΑΡΑΔΟΘΗΚΕ'; }
-    else if (lat.includes('επιστρ')) { bc = 'b-err'; bt = 'ΕΠΙΣΤΡΟΦΗ'; }
-    else if (lat.includes('εξαγωγ') || lat.includes('μεταφορ')) { bc = 'b-transit'; bt = 'ΣΕ ΜΕΤΑΦΟΡΑ'; }
-    else if (lat.includes('αναμονη') || lat.includes('παραλαβ')) { bc = 'b-new'; bt = 'ΣΕ ΕΞΕΛΙΞΗ'; }
-    addCard(num, 'speedex', bt, bc, json.events, out);
+async function trackBoxNow(num, out, throwIfNotFound = false) {
+  const json = await apiTrack('boxnow', num);
+  if (!json.result?.history?.length) {
+    if (throwIfNotFound) throw new Error('Δεν βρέθηκε');
+    errC(num, 'boxnow', 'Δεν βρέθηκαν αποτελέσματα', out);
+    return;
+  }
+  addFromUnified(json, out, 'boxnow');
 }
 
-// ═══ UI ═══
-function addCard(tn, courier, badgeText, badgeClass, events, out, subtitle) {
-    const tags = {
-        elta: '<span class="courier-tag tag-elta">ΕΛΤΑ</span>',
-        acs: '<span class="courier-tag tag-acs">ACS</span>',
-        speedex: '<span class="courier-tag tag-spx">SPEEDEX</span>',
-        geniki: '<span class="courier-tag tag-geniki">ΓΕΝΙΚΗ</span>'
-    };
-    const d = document.createElement('div'); d.className = 'res';
-    d.innerHTML = `
-        <div class="res-hd"><span class="tn">${tags[courier]} ${esc(tn)}</span><span class="badge ${badgeClass}">${badgeText}</span></div>
-        ${subtitle ? `<div class="sub-info">${esc(subtitle)}</div>` : ''}
-        <table><thead><tr><th>Κατάσταση</th><th>Ημ/νία</th><th>Ώρα</th><th>Πληροφορίες</th></tr></thead>
-        <tbody>${events.map(v => `<tr><td>${esc(v.status)}</td><td>${esc(v.date)}</td><td>${esc(v.time)}</td><td>${esc(v.place)}</td></tr>`).join('')}</tbody></table>`;
-    out.appendChild(d);
+async function trackIntex(num, out, throwIfNotFound = false) {
+  const json = await apiTrack('intex', num);
+  if (!json.result?.history?.length) {
+    if (throwIfNotFound) throw new Error('Δεν βρέθηκε');
+    errC(num, 'intex', 'Δεν βρέθηκαν αποτελέσματα', out);
+    return;
+  }
+  addFromUnified(json, out, 'intex');
+}
+
+function addFromUnified(json, out, forcedCourier) {
+  const summary = json.result.summary || {};
+  const history = json.result.history || [];
+
+  let badgeText = 'ΣΕ ΕΞΕΛΙΞΗ';
+  let badgeClass = 'b-transit';
+  const s = (summary.status || '').toLowerCase();
+
+  if (s.includes('παραδό') || s.includes('delivered') || s.includes('locker')) {
+    if (s.includes('παραδό') || s.includes('delivered')) {
+      badgeText = 'ΠΑΡΑΔΟΘΗΚΕ';
+      badgeClass = 'b-ok';
+    }
+  } else if (s.includes('επιστροφ') || s.includes('returned') || s.includes('cancel')) {
+    badgeText = 'ΕΠΙΣΤΡΟΦΗ';
+    badgeClass = 'b-err';
+  } else if (s.includes('new') || s.includes('created') || s.includes('παραλαβ') || s.includes('δημιουργ')) {
+    badgeText = 'ΝΕΟ';
+    badgeClass = 'b-new';
+  } else {
+    badgeText = 'ΣΕ ΜΕΤΑΦΟΡΑ';
+    badgeClass = 'b-transit';
+  }
+
+  addCard(
+    summary.trackingNumber || json.trackingNumber || '-',
+    forcedCourier || json.courier,
+    badgeText,
+    badgeClass,
+    history,
+    out,
+    makeSubtitle(json)
+  );
+}
+
+function makeSubtitle(json) {
+  const raw = json?.result?.raw || {};
+  const courier = (json.courier || '').toLowerCase();
+
+  if (courier === 'boxnow') {
+    const item = raw?.data?.[0];
+    if (!item) return '';
+    const origin = item.origin?.name || '';
+    const dest = item.destination?.name || '';
+    const addr = item.destination?.addressLine1 || '';
+    return [origin, dest, addr].filter(Boolean).join(' → ');
+  }
+
+  return '';
+}
+
+function addCard(tn, courier, badgeText, badgeClass, events, out, subtitle = '') {
+  const tags = {
+    elta: '<span class="courier-tag tag-elta">ΕΛΤΑ</span>',
+    acs: '<span class="courier-tag tag-acs">ACS</span>',
+    speedex: '<span class="courier-tag tag-spx">SPEEDEX</span>',
+    geniki: '<span class="courier-tag tag-geniki">ΓΕΝΙΚΗ</span>',
+    boxnow: '<span class="courier-tag tag-boxnow">BOX NOW</span>',
+    //intex: '<span class="courier-tag tag-intex">INTEX</span>'//
+  };
+
+  const d = document.createElement('div');
+  d.className = 'res';
+  d.innerHTML = `
+    <div class="res-hd">
+      <span class="tn">${tags[courier] || ''} ${esc(tn)}</span>
+      <span class="badge ${badgeClass}">${badgeText}</span>
+    </div>
+    ${subtitle ? `<div class="sub-info">${esc(subtitle)}</div>` : ''}
+    <table>
+      <thead>
+        <tr>
+          <th>Κατάσταση</th>
+          <th>Ημ/νία</th>
+          <th>Ώρα</th>
+          <th>Πληροφορίες</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${events.map(v => `
+          <tr>
+            <td>${esc(v.status || '')}</td>
+            <td>${esc(v.date || '')}</td>
+            <td>${esc(v.time || '')}</td>
+            <td>${esc(v.place || '')}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  out.appendChild(d);
 }
 
 function errC(tn, courier, msg, out) {
-    const tags = {
-        elta: '<span class="courier-tag tag-elta">ΕΛΤΑ</span>',
-        acs: '<span class="courier-tag tag-acs">ACS</span>',
-        speedex: '<span class="courier-tag tag-spx">SPEEDEX</span>',
-        geniki: '<span class="courier-tag tag-geniki">ΓΕΝΙΚΗ</span>'
-    };
-    const urls = {
-        elta: 'https://www.elta-courier.gr/search',
-        acs: 'https://www.acscourier.net/',
-        speedex: 'https://www.speedex.gr/speedex/NewTrackAndTrace.aspx',
-        geniki: 'https://www.taxydromiki.com/track'
-    };
-    const d = document.createElement('div'); d.className = 'res';
-    d.innerHTML = `<div class="res-hd"><span class="tn">${tags[courier] || tags.geniki} ${esc(tn)}</span><span class="badge b-err">—</span></div>
-        <div class="err-msg">${esc(msg)}</div>
-        <div class="res-ft"><a class="lnk" href="${urls[courier] || urls.geniki}" target="_blank">Δοκιμή στο site →</a></div>`;
-    out.appendChild(d);
+  const tags = {
+    elta: '<span class="courier-tag tag-elta">ΕΛΤΑ</span>',
+    acs: '<span class="courier-tag tag-acs">ACS</span>',
+    speedex: '<span class="courier-tag tag-spx">SPEEDEX</span>',
+    geniki: '<span class="courier-tag tag-geniki">ΓΕΝΙΚΗ</span>',
+    boxnow: '<span class="courier-tag tag-boxnow">BOX NOW</span>',
+    intex: '<span class="courier-tag tag-intex">INTEX</span>'
+  };
+
+  const urls = {
+    elta: 'https://www.elta-courier.gr/search',
+    acs: 'https://www.acscourier.net/',
+    speedex: 'https://www.speedex.gr/speedex/NewTrackAndTrace.aspx',
+    geniki: 'https://www.taxydromiki.com/track',
+    boxnow: 'https://boxnow.gr/en?track=',
+    intex: '#'
+  };
+
+  const href = courier === 'boxnow' ? (urls.boxnow + encodeURIComponent(tn)) : urls[courier];
+
+  const d = document.createElement('div');
+  d.className = 'res';
+  d.innerHTML = `
+    <div class="res-hd">
+      <span class="tn">${tags[courier] || ''} ${esc(tn)}</span>
+      <span class="badge b-err">—</span>
+    </div>
+    <div class="err-msg">${esc(msg)}</div>
+    <div class="res-ft">
+      ${href && href !== '#' ? `<a class="lnk" href="${href}" target="_blank" rel="noopener">Δοκιμή στο site →</a>` : ''}
+    </div>
+  `;
+  out.appendChild(d);
 }
 
-function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function showH() {
-    const sec = document.getElementById('histSec'), ch = document.getElementById('chips');
-    if (!hist.length) { sec.style.display = 'none'; return; }
-    sec.style.display = 'block'; ch.innerHTML = '';
-    hist.slice(0, 12).forEach(n => {
-        const s = document.createElement('span');
-        s.className = 'chip';
-        s.textContent = n;
-        s.onclick = () => { document.getElementById('inp').value = n; go(); };
-        ch.appendChild(s);
-    });
+function esc(s) {
+  if (s == null) return '';
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
 }
-function clrH() { hist = []; try { localStorage.removeItem('gct_h'); } catch(e) {} showH(); }
-document.getElementById('inp').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } });
+
+function showH() {
+  const sec = document.getElementById('histSec');
+  const ch = document.getElementById('chips');
+  if (!hist.length) {
+    sec.style.display = 'none';
+    return;
+  }
+  sec.style.display = 'block';
+  ch.innerHTML = '';
+  hist.slice(0, 12).forEach(n => {
+    const s = document.createElement('span');
+    s.className = 'chip';
+    s.textContent = n;
+    s.onclick = () => {
+      document.getElementById('inp').value = n;
+      go();
+    };
+    ch.appendChild(s);
+  });
+}
+
+function clrH() {
+  hist = [];
+  try { localStorage.removeItem('gct_h'); } catch(e) {}
+  showH();
+}
+
+document.getElementById('inp').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    go();
+  }
+});
+
 document.getElementById('inp').focus();
 </script>
 </body>

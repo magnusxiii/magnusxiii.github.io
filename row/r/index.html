@@ -12,7 +12,7 @@
       --ac:#e8a838;--acd:#c4872a;--gl:rgba(232,168,56,.15);
       --ok:#34d399;--inf:#60a5fa;--wrn:#fbbf24;--err:#f87171;
       --acs:#ff6b35;--elta:#2196f3;--spx:#0074bb;--gen:#e53935;
-      --box:#8b5cf6;--intex:#14b8a6;
+      --box:#8b5cf6;--intex:#14b8a6;--shop:#16a34a;
     }
     *{margin:0;padding:0;box-sizing:border-box}
     body{
@@ -114,6 +114,7 @@
     .tag-spx{background:rgba(0,116,187,.15);color:var(--spx)}
     .tag-geniki{background:rgba(229,57,53,.15);color:var(--gen)}
     .tag-boxnow{background:rgba(139,92,246,.15);color:var(--box)}
+    .tag-shopflix{background:rgba(22,163,74,.15);color:var(--shop)}
     .tag-intex{background:rgba(20,184,166,.15);color:var(--intex)}
 
     .badge{
@@ -205,6 +206,7 @@
       <button class="courier-btn" onclick="setCourier('speedex')" id="c-speedex">Speedex</button>
       <button class="courier-btn" onclick="setCourier('geniki')" id="c-geniki">Γενική</button>
       <button class="courier-btn" onclick="setCourier('boxnow')" id="c-boxnow">BOX NOW</button>
+      <button class="courier-btn" onclick="setCourier('shopflix')" id="c-shopflix">SHOPFLIX</button>
       
     </div>
 
@@ -322,6 +324,7 @@ async function go() {
       else if (courier === 'speedex') await trackSpeedex(num, out);
       else if (courier === 'geniki') await trackGeniki(num, out);
       else if (courier === 'boxnow') await trackBoxNow(num, out);
+      else if (courier === 'shopflix') await trackShopflix(num, out);
       else if (courier === 'intex') await trackIntex(num, out);
       else if (courier === 'auto10') await auto10(num, out);
       else await trackElta(num, out);
@@ -423,6 +426,16 @@ async function trackBoxNow(num, out, throwIfNotFound = false) {
   addFromUnified(json, out, 'boxnow');
 }
 
+async function trackShopflix(num, out, throwIfNotFound = false) {
+  const json = await apiTrack('shopflix', num);
+  if (!json.result?.history?.length) {
+    if (throwIfNotFound) throw new Error('Ξ”ΞµΞ½ Ξ²ΟΞ­ΞΈΞ·ΞΊΞµ');
+    errC(num, 'shopflix', 'Ξ”ΞµΞ½ Ξ²ΟΞ­ΞΈΞ·ΞΊΞ±Ξ½ Ξ±Ο€ΞΏΟ„ΞµΞ»Ξ­ΟƒΞΌΞ±Ο„Ξ±', out);
+    return;
+  }
+  addFromUnified(json, out, 'shopflix');
+}
+
 async function trackIntex(num, out, throwIfNotFound = false) {
   const json = await apiTrack('intex', num);
   if (!json.result?.history?.length) {
@@ -481,6 +494,14 @@ function makeSubtitle(json) {
     return [origin, dest, addr].filter(Boolean).join(' → ');
   }
 
+  if (courier === 'shopflix') {
+    const info = raw?.ShipmentDetails?.[0]?.ShipmentInfo || {};
+    const pickup = info?.PickupStation?.Name || '';
+    const delivery = info?.DeliveryStation?.Name || '';
+    const route = [info?.DestinationFrom, info?.DestinationTo].filter(Boolean).join(' β†’ ');
+    return [route, pickup, delivery].filter(Boolean).join(' β—Џ ');
+  }
+
   return '';
 }
 
@@ -491,6 +512,7 @@ function addCard(tn, courier, badgeText, badgeClass, events, out, subtitle = '')
     speedex: '<span class="courier-tag tag-spx">SPEEDEX</span>',
     geniki: '<span class="courier-tag tag-geniki">ΓΕΝΙΚΗ</span>',
     boxnow: '<span class="courier-tag tag-boxnow">BOX NOW</span>',
+    shopflix: '<span class="courier-tag tag-shopflix">SHOPFLIX</span>',
     //intex: '<span class="courier-tag tag-intex">INTEX</span>'//
   };
 
@@ -533,6 +555,7 @@ function errC(tn, courier, msg, out) {
     speedex: '<span class="courier-tag tag-spx">SPEEDEX</span>',
     geniki: '<span class="courier-tag tag-geniki">ΓΕΝΙΚΗ</span>',
     boxnow: '<span class="courier-tag tag-boxnow">BOX NOW</span>',
+    shopflix: '<span class="courier-tag tag-shopflix">SHOPFLIX</span>',
     intex: '<span class="courier-tag tag-intex">INTEX</span>'
   };
 
@@ -542,10 +565,14 @@ function errC(tn, courier, msg, out) {
     speedex: 'https://www.speedex.gr/speedex/NewTrackAndTrace.aspx',
     geniki: 'https://www.taxydromiki.com/track',
     boxnow: 'https://boxnow.gr/en?track=',
+    shopflix: 'https://shopflix.gr/parakoloythisi-paraggelias?tracking_number=',
     intex: '#'
   };
 
-  const href = courier === 'boxnow' ? (urls.boxnow + encodeURIComponent(tn)) : urls[courier];
+  const href =
+    courier === 'boxnow' ? (urls.boxnow + encodeURIComponent(tn)) :
+    courier === 'shopflix' ? (urls.shopflix + encodeURIComponent(tn)) :
+    urls[courier];
 
   const d = document.createElement('div');
   d.className = 'res';
