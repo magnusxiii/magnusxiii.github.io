@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Analyzer · Gemini AI</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@600;800&display=swap" rel="stylesheet">
+<!-- SheetJS for Excel export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: #0a0e1a;
+  color: #e0e6f0;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2.2em;
+  background: linear-gradient(135deg, #4fc3f7 0%, #7e57c2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 5px;
+}
+.subtitle { color: #7a8499; font-size: 0.9em; margin-bottom: 30px; }
+
+.card {
+  background: #131829;
+  border: 1px solid #2a3147;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.input-group { margin-bottom: 16px; }
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #9aa5bd;
+  font-size: 0.9em;
+}
+.input-group label .help {
+  color: #5a6478;
+  font-size: 0.85em;
+  margin-left: 8px;
+}
+
+input[type="text"], input[type="url"], input[type="password"], select {
+  width: 100%;
+  padding: 12px 16px;
+  background: #0a0e1a;
+  border: 1px solid #2a3147;
+  border-radius: 8px;
+  color: #e0e6f0;
+  font-family: inherit;
+  font-size: 0.95em;
+}
+input:focus, select:focus { outline: none; border-color: #4fc3f7; }
+
+.api-key-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.api-key-row input { flex: 1; }
+.api-key-row .toggle-btn {
+  background: #2a3147;
+  border: none;
+  color: #9aa5bd;
+  padding: 0 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85em;
+}
+.api-key-row .toggle-btn:hover { background: #3a4257; color: #e0e6f0; }
+
+.key-status {
+  margin-top: 8px;
+  font-size: 0.8em;
+  color: #66bb6a;
+  display: none;
+}
+.key-status.show { display: block; }
+
+.key-warning {
+  background: #2d2a1a;
+  border-left: 3px solid #ffa726;
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-size: 0.82em;
+  color: #d9c89a;
+  line-height: 1.5;
+}
+.key-warning a { color: #ffa726; }
+
+.file-drop {
+  border: 2px dashed #2a3147;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #0a0e1a;
+}
+.file-drop:hover, .file-drop.dragover { border-color: #4fc3f7; background: #0f1422; }
+.file-drop input { display: none; }
+.file-name { color: #4fc3f7; margin-top: 8px; font-size: 0.9em; }
+
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  color: #5a6478;
+  font-size: 0.85em;
+  position: relative;
+}
+.divider::before, .divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background: #2a3147;
+}
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+button.primary {
+  background: linear-gradient(135deg, #4fc3f7 0%, #7e57c2 100%);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.95em;
+  cursor: pointer;
+  transition: transform 0.1s;
+  width: 100%;
+}
+button.primary:hover:not(:disabled) { transform: translateY(-1px); }
+button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+button.secondary {
+  background: #2a3147;
+  color: #e0e6f0;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+button.secondary:hover { background: #3a4257; }
+
+.model-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.model-row label { margin-bottom: 0; flex-shrink: 0; }
+.model-row select { flex: 1; }
+
+.loader {
+  display: none;
+  text-align: center;
+  padding: 40px;
+}
+.loader.active { display: block; }
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #2a3147;
+  border-top-color: #4fc3f7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { color: #9aa5bd; margin-top: 12px; }
+
+.results { display: none; }
+.results.active { display: block; }
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.results-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.4em;
+  color: #4fc3f7;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #2a3147;
+}
+.tab {
+  padding: 10px 18px;
+  cursor: pointer;
+  color: #7a8499;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  font-size: 0.9em;
+}
+.tab.active { color: #4fc3f7; border-bottom-color: #4fc3f7; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+table th {
+  background: #1a2138;
+  padding: 12px 16px;
+  text-align: left;
+  color: #4fc3f7;
+  font-weight: 600;
+  border-bottom: 2px solid #2a3147;
+}
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid #1f2740;
+}
+table tr:hover td { background: #161c30; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.section-header td {
+  background: #1a2138;
+  color: #7e57c2;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+.positive { color: #66bb6a; }
+.negative { color: #ef5350; }
+.muted { color: #5a6478; }
+
+.summary-box {
+  background: #1a2138;
+  border-left: 4px solid #4fc3f7;
+  padding: 18px;
+  border-radius: 6px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.notes-box {
+  background: #1a2138;
+  border-left: 4px solid #ffa726;
+  padding: 18px;
+  border-radius: 6px;
+  line-height: 1.6;
+  font-size: 0.9em;
+  color: #b8c2d8;
+}
+
+.error {
+  background: #2d1820;
+  border: 1px solid #ef5350;
+  color: #ef9a9a;
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+pre {
+  background: #0a0e1a;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.85em;
+  line-height: 1.5;
+  color: #b8c2d8;
+}
+
+.footer {
+  text-align: center;
+  color: #5a6478;
+  font-size: 0.8em;
+  margin-top: 30px;
+  line-height: 1.6;
+}
+.footer a { color: #7a8499; }
+
+/* CORS notice */
+.cors-notice {
+  background: #1a2138;
+  border-left: 3px solid #4fc3f7;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-size: 0.78em;
+  color: #9aa5bd;
+  line-height: 1.5;
+  display: none;
+}
+.cors-notice.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📊 Financial Analyzer</h1>
+  <p class="subtitle">Ανάλυση οικονομικών καταστάσεων με Google Gemini AI · BYOK Edition</p>
+
+  <!-- API KEY CARD -->
+  <div class="card">
+    <div class="input-group">
+      <label>🔑 Gemini API Key
+        <span class="help">— Πάρε δωρεάν από <a href="https://aistudio.google.com/apikey" target="_blank" style="color:#4fc3f7;">aistudio.google.com/apikey</a></span>
+      </label>
+      <div class="api-key-row">
+        <input type="password" id="apiKey" placeholder="AIzaSy...">
+        <button type="button" class="toggle-btn" id="toggleKey">👁️ Show</button>
+        <button type="button" class="toggle-btn" id="clearKey">🗑️ Clear</button>
+      </div>
+      <div class="key-status" id="keyStatus">✓ Key αποθηκευμένο τοπικά στον browser</div>
+      <div class="key-warning">
+        ⚠️ Το API key σου αποθηκεύεται <strong>μόνο στον browser σου</strong> (localStorage)
+        και στέλνεται απευθείας στα Google servers. Ποτέ δεν φεύγει από εσένα.
+        Καμία επικοινωνία με τρίτους servers.
+      </div>
+    </div>
+
+    <div class="input-group">
+      <div class="model-row">
+        <label>🤖 Model:</label>
+        <select id="modelSelect">
+          <option value="gemini-2.5-flash" selected>gemini-2.5-flash (συνιστάται)</option>
+          <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (1000/μέρα)</option>
+          <option value="gemini-2.5-pro">gemini-2.5-pro (καλύτερη ποιότητα)</option>
+          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+          <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+          <option value="gemini-flash-latest">gemini-flash-latest</option>
+          <option value="gemini-pro-latest">gemini-pro-latest</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="card">
+    <div class="input-group">
+      <label>📎 Ανέβασε PDF</label>
+      <div class="file-drop" id="fileDrop">
+        <input type="file" id="fileInput" accept=".pdf">
+        <div>📁 Κάνε κλικ ή σύρε PDF εδώ</div>
+        <div class="file-name" id="fileName"></div>
+      </div>
+    </div>
+
+    <div class="divider">— Ή —</div>
+
+    <div class="input-group">
+      <label>🔗 URL του PDF</label>
+      <input type="url" id="urlInput" placeholder="https://example.com/report.pdf">
+      <div class="cors-notice" id="corsNotice">
+        ℹ️ Σε static deployment (GitHub Pages), το URL fetch μπορεί να αποτύχει
+        λόγω CORS αν ο server δεν επιτρέπει cross-origin requests.
+        Σε αυτή την περίπτωση, κατέβασε το PDF τοπικά και ανέβασέ το.
+      </div>
+    </div>
+
+    <button class="primary" id="analyzeBtn">🔍 Ανάλυση</button>
+    <div id="errorBox"></div>
+  </div>
+
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text" id="loaderText">Επεξεργασία PDF με Gemini AI...</div>
+  </div>
+
+  <div class="card results" id="results">
+    <div class="results-header">
+      <h2>📈 Αποτελέσματα</h2>
+      <button class="secondary" id="exportBtn">📥 Export Excel</button>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active" data-tab="table">📋 Πίνακας</div>
+      <div class="tab" data-tab="narrative">📝 Αφήγηση</div>
+      <div class="tab" data-tab="json">🔧 JSON</div>
+    </div>
+
+    <div class="tab-content active" id="tab-table"></div>
+    <div class="tab-content" id="tab-narrative"></div>
+    <div class="tab-content" id="tab-json"><pre id="jsonView"></pre></div>
+  </div>
+
+  <div class="footer">
+    Powered by Google Gemini API ·
+    <a href="https://github.com/" target="_blank">Open Source</a> ·
+    No tracking · No servers · BYOK
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const STORAGE_KEY = 'gemini_api_key';
+const MODEL_STORAGE_KEY = 'gemini_model';
+const MAX_PDF_SIZE_MB = 20;
+
+// ============================================================
+// PROMPT
+// ============================================================
+const EXTRACTION_PROMPT = `Είσαι ειδικός οικονομικός αναλυτής. Αναλύεις PDF οικονομικών καταστάσεων ελληνικών εταιρειών.
+
+Εξάγαγε ΑΥΣΤΗΡΑ τα παρακάτω στοιχεία από το PDF και επέστρεψε ΜΟΝΟ έγκυρο JSON (χωρίς markdown fences, χωρίς σχόλια):
+
+{
+  "company_info": {
+    "name": "Επωνυμία εταιρείας",
+    "vat_number": "ΑΦΜ",
+    "gemi_number": "Αριθμός ΓΕΜΗ",
+    "fiscal_year": "Έτος χρήσης (π.χ. 2023)",
+    "period_start": "Έναρξη περιόδου (YYYY-MM-DD)",
+    "period_end": "Λήξη περιόδου (YYYY-MM-DD)",
+    "legal_form": "Νομική μορφή (Α.Ε., Ε.Π.Ε., Ι.Κ.Ε. κλπ)"
+  },
+  "income_statement": {
+    "revenue": "Κύκλος εργασιών / Πωλήσεις (αριθμός)",
+    "cost_of_goods_sold": "Κόστος πωληθέντων (αριθμός)",
+    "gross_profit": "Μικτό κέρδος (αριθμός)",
+    "operating_expenses": "Λειτουργικά έξοδα (αριθμός)",
+    "ebitda": "EBITDA (αριθμός ή null)",
+    "ebit": "Κέρδη προ τόκων και φόρων (αριθμός)",
+    "interest_expense": "Χρηματοοικονομικά έξοδα (αριθμός)",
+    "profit_before_tax": "Κέρδη προ φόρων (αριθμός)",
+    "income_tax": "Φόρος εισοδήματος (αριθμός)",
+    "profit_after_tax": "Κέρδη μετά φόρων (αριθμός)"
+  },
+  "balance_sheet": {
+    "total_assets": "Σύνολο ενεργητικού (αριθμός)",
+    "total_liabilities": "Σύνολο υποχρεώσεων (αριθμός)",
+    "total_equity": "Σύνολο ιδίων κεφαλαίων (αριθμός)",
+    "cash_and_equivalents": "Ταμειακά διαθέσιμα (αριθμός ή null)"
+  },
+  "key_ratios": {
+    "gross_margin_pct": "Μικτό περιθώριο % (αριθμός)",
+    "net_margin_pct": "Καθαρό περιθώριο % (αριθμός)",
+    "effective_tax_rate_pct": "Πραγματικός φορολογικός συντελεστής % (αριθμός)"
+  },
+  "summary": "Σύντομη αφήγηση 3-5 προτάσεων στα Ελληνικά για την οικονομική κατάσταση και την πορεία της εταιρείας. Ανάφερε αν είναι κερδοφόρα, την τάση κερδών, και τυχόν αξιοσημείωτα στοιχεία.",
+  "notes": "Παρατηρήσεις: τυχόν στοιχεία που λείπουν, ασάφειες, ή σημεία προσοχής."
+}
+
+ΚΑΝΟΝΕΣ:
+- Όλοι οι αριθμοί σε EUR, χωρίς σύμβολα, χωρίς διαχωριστικά χιλιάδων
+- Αν λείπει στοιχείο, χρησιμοποίησε null
+- Αρνητικοί αριθμοί με μείον (-)
+- Αν υπάρχουν πολλαπλές χρήσεις, πάρε την πιο πρόσφατη
+- Υπολόγισε τα ratios αν δεν αναφέρονται ρητά
+- Επέστρεψε ΜΟΝΟ το JSON, τίποτα άλλο`;
+
+// ============================================================
+// API KEY MANAGEMENT
+// ============================================================
+const apiKeyInput = document.getElementById('apiKey');
+const toggleKeyBtn = document.getElementById('toggleKey');
+const clearKeyBtn = document.getElementById('clearKey');
+const keyStatus = document.getElementById('keyStatus');
+const modelSelect = document.getElementById('modelSelect');
+
+// Load από localStorage
+const savedKey = localStorage.getItem(STORAGE_KEY);
+if (savedKey) {
+  apiKeyInput.value = savedKey;
+  keyStatus.classList.add('show');
+}
+const savedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+if (savedModel) modelSelect.value = savedModel;
+
+// Auto-save
+apiKeyInput.addEventListener('input', () => {
+  const val = apiKeyInput.value.trim();
+  if (val) {
+    localStorage.setItem(STORAGE_KEY, val);
+    keyStatus.classList.add('show');
+  } else {
+    localStorage.removeItem(STORAGE_KEY);
+    keyStatus.classList.remove('show');
+  }
+});
+
+modelSelect.addEventListener('change', () => {
+  localStorage.setItem(MODEL_STORAGE_KEY, modelSelect.value);
+});
+
+toggleKeyBtn.addEventListener('click', () => {
+  if (apiKeyInput.type === 'password') {
+    apiKeyInput.type = 'text';
+    toggleKeyBtn.textContent = '🙈 Hide';
+  } else {
+    apiKeyInput.type = 'password';
+    toggleKeyBtn.textContent = '👁️ Show';
+  }
+});
+
+clearKeyBtn.addEventListener('click', () => {
+  if (confirm('Σίγουρα θες να διαγράψεις το αποθηκευμένο API key;')) {
+    apiKeyInput.value = '';
+    localStorage.removeItem(STORAGE_KEY);
+    keyStatus.classList.remove('show');
+  }
+});
+
+// ============================================================
+// FILE / URL INPUT
+// ============================================================
+const fileDrop = document.getElementById('fileDrop');
+const fileInput = document.getElementById('fileInput');
+const fileName = document.getElementById('fileName');
+const urlInput = document.getElementById('urlInput');
+const corsNotice = document.getElementById('corsNotice');
+
+fileDrop.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) {
+    fileName.textContent = '✓ ' + fileInput.files[0].name;
+    urlInput.value = '';
+    corsNotice.classList.remove('show');
+  }
+});
+['dragover','dragenter'].forEach(e => fileDrop.addEventListener(e, ev => {
+  ev.preventDefault(); fileDrop.classList.add('dragover');
+}));
+['dragleave','drop'].forEach(e => fileDrop.addEventListener(e, ev => {
+  ev.preventDefault(); fileDrop.classList.remove('dragover');
+}));
+fileDrop.addEventListener('drop', ev => {
+  if (ev.dataTransfer.files[0]) {
+    fileInput.files = ev.dataTransfer.files;
+    fileName.textContent = '✓ ' + ev.dataTransfer.files[0].name;
+    urlInput.value = '';
+    corsNotice.classList.remove('show');
+  }
+});
+
+urlInput.addEventListener('input', () => {
+  if (urlInput.value.trim()) {
+    corsNotice.classList.add('show');
+    fileInput.value = '';
+    fileName.textContent = '';
+  } else {
+    corsNotice.classList.remove('show');
+  }
+});
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('tab-' + t.dataset.tab).classList.add('active');
+}));
+
+// ============================================================
+// CORE: GEMINI API CALL
+// ============================================================
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      // Strip data URL prefix
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function urlToBase64(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP ${response.status} κατά τη λήψη του PDF`);
+  const blob = await response.blob();
+  const size_mb = blob.size / (1024 * 1024);
+  if (size_mb > MAX_PDF_SIZE_MB) {
+    throw new Error(`PDF πολύ μεγάλο (${size_mb.toFixed(1)}MB). Όριο: ${MAX_PDF_SIZE_MB}MB`);
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function callGemini(pdfBase64, apiKey, model) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const body = {
+    contents: [{
+      parts: [
+        { inline_data: { mime_type: "application/pdf", data: pdfBase64 } },
+        { text: EXTRACTION_PROMPT }
+      ]
+    }],
+    generationConfig: {
+      temperature: 0.1,
+      responseMimeType: "application/json"
+    }
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    let errMsg = `HTTP ${response.status}`;
+    try {
+      const errJson = JSON.parse(errText);
+      errMsg = errJson.error?.message || errMsg;
+    } catch(_) {}
+    throw new Error(errMsg);
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Το Gemini δεν επέστρεψε αποτέλεσμα');
+
+  // Καθάρισμα markdown fences (για παν ενδεχόμενο)
+  let cleaned = text.trim();
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.split('```')[1];
+    if (cleaned.startsWith('json')) cleaned = cleaned.substring(4);
+    cleaned = cleaned.trim();
+  }
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    throw new Error('Το Gemini επέστρεψε μη έγκυρο JSON: ' + e.message);
+  }
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function fmtNum(v) {
+  if (v === null || v === undefined || v === '') return '<span class="muted">—</span>';
+  if (typeof v !== 'number') return v;
+  const cls = v < 0 ? 'negative' : (v > 0 ? 'positive' : '');
+  return '<span class="' + cls + '">' + v.toLocaleString('el-GR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €</span>';
+}
+function fmtPct(v) {
+  if (v === null || v === undefined || v === '') return '<span class="muted">—</span>';
+  if (typeof v !== 'number') return v;
+  return v.toFixed(2) + '%';
+}
+function txt(v) {
+  if (v === null || v === undefined || v === '') return '<span class="muted">—</span>';
+  return v;
+}
+
+function renderTable(data) {
+  const ci = data.company_info || {};
+  const isd = data.income_statement || {};
+  const bs = data.balance_sheet || {};
+  const kr = data.key_ratios || {};
+
+  let html = '<table>';
+  html += '<tr class="section-header"><td colspan="2">🏢 Στοιχεία Εταιρείας</td></tr>';
+  html += `<tr><td>Επωνυμία</td><td><strong>${txt(ci.name)}</strong></td></tr>`;
+  html += `<tr><td>ΑΦΜ</td><td>${txt(ci.vat_number)}</td></tr>`;
+  html += `<tr><td>ΓΕΜΗ</td><td>${txt(ci.gemi_number)}</td></tr>`;
+  html += `<tr><td>Έτος χρήσης</td><td>${txt(ci.fiscal_year)}</td></tr>`;
+  html += `<tr><td>Περίοδος</td><td>${txt(ci.period_start)} → ${txt(ci.period_end)}</td></tr>`;
+  html += `<tr><td>Νομική μορφή</td><td>${txt(ci.legal_form)}</td></tr>`;
+
+  html += '<tr class="section-header"><td colspan="2">💰 Κατάσταση Αποτελεσμάτων</td></tr>';
+  html += `<tr><td>Κύκλος εργασιών</td><td class="num">${fmtNum(isd.revenue)}</td></tr>`;
+  html += `<tr><td>Κόστος πωληθέντων</td><td class="num">${fmtNum(isd.cost_of_goods_sold)}</td></tr>`;
+  html += `<tr><td><strong>Μικτό κέρδος</strong></td><td class="num"><strong>${fmtNum(isd.gross_profit)}</strong></td></tr>`;
+  html += `<tr><td>Λειτουργικά έξοδα</td><td class="num">${fmtNum(isd.operating_expenses)}</td></tr>`;
+  html += `<tr><td>EBITDA</td><td class="num">${fmtNum(isd.ebitda)}</td></tr>`;
+  html += `<tr><td>EBIT</td><td class="num">${fmtNum(isd.ebit)}</td></tr>`;
+  html += `<tr><td>Χρηματ/κά έξοδα</td><td class="num">${fmtNum(isd.interest_expense)}</td></tr>`;
+  html += `<tr><td><strong>Κέρδη προ φόρων</strong></td><td class="num"><strong>${fmtNum(isd.profit_before_tax)}</strong></td></tr>`;
+  html += `<tr><td>Φόρος εισοδήματος</td><td class="num">${fmtNum(isd.income_tax)}</td></tr>`;
+  html += `<tr><td><strong>Κέρδη μετά φόρων</strong></td><td class="num"><strong>${fmtNum(isd.profit_after_tax)}</strong></td></tr>`;
+
+  html += '<tr class="section-header"><td colspan="2">⚖️ Ισολογισμός</td></tr>';
+  html += `<tr><td>Σύνολο ενεργητικού</td><td class="num">${fmtNum(bs.total_assets)}</td></tr>`;
+  html += `<tr><td>Σύνολο υποχρεώσεων</td><td class="num">${fmtNum(bs.total_liabilities)}</td></tr>`;
+  html += `<tr><td>Ίδια κεφάλαια</td><td class="num">${fmtNum(bs.total_equity)}</td></tr>`;
+  html += `<tr><td>Ταμειακά διαθέσιμα</td><td class="num">${fmtNum(bs.cash_and_equivalents)}</td></tr>`;
+
+  html += '<tr class="section-header"><td colspan="2">📊 Δείκτες</td></tr>';
+  html += `<tr><td>Μικτό περιθώριο</td><td class="num">${fmtPct(kr.gross_margin_pct)}</td></tr>`;
+  html += `<tr><td>Καθαρό περιθώριο</td><td class="num">${fmtPct(kr.net_margin_pct)}</td></tr>`;
+  html += `<tr><td>Φορολογικός συντελεστής</td><td class="num">${fmtPct(kr.effective_tax_rate_pct)}</td></tr>`;
+
+  html += '</table>';
+  return html;
+}
+
+function renderNarrative(data) {
+  return `
+    <div class="summary-box">
+      <strong style="color:#4fc3f7;">📝 Σύνοψη</strong><br><br>
+      ${data.summary || 'Δεν διατίθεται σύνοψη.'}
+    </div>
+    <div class="notes-box">
+      <strong style="color:#ffa726;">⚠️ Παρατηρήσεις</strong><br><br>
+      ${data.notes || 'Καμία παρατήρηση.'}
+    </div>
+  `;
+}
+
+// ============================================================
+// EXCEL EXPORT (via SheetJS)
+// ============================================================
+let lastAnalysis = null;
+
+function exportToExcel(data) {
+  const ci = data.company_info || {};
+  const isd = data.income_statement || {};
+  const bs = data.balance_sheet || {};
+  const kr = data.key_ratios || {};
+
+  const rows = [
+    ['ΟΙΚΟΝΟΜΙΚΗ ΑΝΑΛΥΣΗ', ''],
+    ['', ''],
+    ['🏢 Στοιχεία Εταιρείας', ''],
+    ['Επωνυμία', ci.name || ''],
+    ['ΑΦΜ', ci.vat_number || ''],
+    ['ΓΕΜΗ', ci.gemi_number || ''],
+    ['Έτος χρήσης', ci.fiscal_year || ''],
+    ['Περίοδος έναρξης', ci.period_start || ''],
+    ['Περίοδος λήξης', ci.period_end || ''],
+    ['Νομική μορφή', ci.legal_form || ''],
+    ['', ''],
+    ['💰 Κατάσταση Αποτελεσμάτων', ''],
+    ['Κύκλος εργασιών', isd.revenue],
+    ['Κόστος πωληθέντων', isd.cost_of_goods_sold],
+    ['Μικτό κέρδος', isd.gross_profit],
+    ['Λειτουργικά έξοδα', isd.operating_expenses],
+    ['EBITDA', isd.ebitda],
+    ['EBIT', isd.ebit],
+    ['Χρηματοοικονομικά έξοδα', isd.interest_expense],
+    ['Κέρδη προ φόρων', isd.profit_before_tax],
+    ['Φόρος εισοδήματος', isd.income_tax],
+    ['Κέρδη μετά φόρων', isd.profit_after_tax],
+    ['', ''],
+    ['⚖️ Ισολογισμός', ''],
+    ['Σύνολο ενεργητικού', bs.total_assets],
+    ['Σύνολο υποχρεώσεων', bs.total_liabilities],
+    ['Ίδια κεφάλαια', bs.total_equity],
+    ['Ταμειακά διαθέσιμα', bs.cash_and_equivalents],
+    ['', ''],
+    ['📊 Δείκτες', ''],
+    ['Μικτό περιθώριο %', kr.gross_margin_pct],
+    ['Καθαρό περιθώριο %', kr.net_margin_pct],
+    ['Φορολογικός συντελεστής %', kr.effective_tax_rate_pct],
+  ];
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{ wch: 38 }, { wch: 22 }];
+
+  const ws2 = XLSX.utils.aoa_to_sheet([
+    ['ΣΥΝΟΨΗ'],
+    [data.summary || ''],
+    [''],
+    ['ΠΑΡΑΤΗΡΗΣΕΙΣ'],
+    [data.notes || '']
+  ]);
+  ws2['!cols'] = [{ wch: 100 }];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Σύνοψη');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Αφήγηση');
+
+  const safeName = (ci.name || 'company').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40);
+  const ts = new Date().toISOString().slice(0,19).replace(/[-:T]/g, '');
+  XLSX.writeFile(wb, `financial_${safeName}_${ts}.xlsx`);
+}
+
+// ============================================================
+// MAIN HANDLER
+// ============================================================
+const analyzeBtn = document.getElementById('analyzeBtn');
+const loader = document.getElementById('loader');
+const loaderText = document.getElementById('loaderText');
+const results = document.getElementById('results');
+const errorBox = document.getElementById('errorBox');
+const exportBtn = document.getElementById('exportBtn');
+
+analyzeBtn.addEventListener('click', async () => {
+  errorBox.innerHTML = '';
+  results.classList.remove('active');
+
+  const apiKey = apiKeyInput.value.trim();
+  if (!apiKey) {
+    errorBox.innerHTML = '<div class="error">❌ Δώσε πρώτα το Gemini API Key</div>';
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const url = urlInput.value.trim();
+  if (!file && !url) {
+    errorBox.innerHTML = '<div class="error">❌ Δώσε URL ή ανέβασε PDF</div>';
+    return;
+  }
+
+  loader.classList.add('active');
+  analyzeBtn.disabled = true;
+
+  try {
+    let pdfBase64;
+    if (file) {
+      loaderText.textContent = 'Φόρτωση PDF...';
+      const size_mb = file.size / (1024 * 1024);
+      if (size_mb > MAX_PDF_SIZE_MB) {
+        throw new Error(`PDF πολύ μεγάλο (${size_mb.toFixed(1)}MB). Όριο: ${MAX_PDF_SIZE_MB}MB`);
+      }
+      pdfBase64 = await fileToBase64(file);
+    } else {
+      loaderText.textContent = 'Λήψη PDF από URL...';
+      try {
+        pdfBase64 = await urlToBase64(url);
+      } catch (e) {
+        throw new Error(`Αδυναμία λήψης από URL (πιθανώς CORS): ${e.message}. Δοκίμασε να κατεβάσεις το PDF και να το ανεβάσεις τοπικά.`);
+      }
+    }
+
+    loaderText.textContent = 'Ανάλυση με Gemini AI...';
+    const result = await callGemini(pdfBase64, apiKey, modelSelect.value);
+    lastAnalysis = result;
+
+    document.getElementById('tab-table').innerHTML = renderTable(result);
+    document.getElementById('tab-narrative').innerHTML = renderNarrative(result);
+    document.getElementById('jsonView').textContent = JSON.stringify(result, null, 2);
+    results.classList.add('active');
+  } catch (e) {
+    errorBox.innerHTML = `<div class="error">❌ ${e.message}</div>`;
+  } finally {
+    loader.classList.remove('active');
+    analyzeBtn.disabled = false;
+  }
+});
+
+exportBtn.addEventListener('click', () => {
+  if (lastAnalysis) exportToExcel(lastAnalysis);
+});
+</script>
+</body>
+</html>
