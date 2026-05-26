@@ -2138,18 +2138,32 @@
       "type": "IC / Other"
     },
     {
-      "box": "",
+      "box": "X1",
       "desc": "Hex Schmitt-trigger inverter, χρήσιμο για debounce, shaping και oscillator circuits",
       "id": 249,
       "name": "SN74HC14N",
       "type": "Logic Gate"
     },
     {
-      "box": "",
+      "box": "X1",
       "desc": "Quad 3-state buffer/line driver για απομόνωση και bus interfacing",
       "id": 250,
       "name": "SN74HC125N",
       "type": "Logic Gate"
+    },
+    {
+      "box": "X1",
+      "desc": "8-bit parallel-load shift register, χρήσιμο για επέκταση εισόδων μέσω serial interface",
+      "id": 700,
+      "name": "SN74HC165N",
+      "type": "Logic Gate"
+    },
+    {
+      "box": "X1",
+      "desc": "Hall-effect magnetic switch sensor, χρήσιμο ως μαγνητική επαφή ή proximity trigger",
+      "id": 701,
+      "name": "3144",
+      "type": "IC / Other"
     }
   ],
   "resistors": [
@@ -6336,6 +6350,8 @@ const KB = {
   'IA0505S': ['IC / Other', 'DC-DC isolated converter 5V→5V 1W'],
   'SN74HC14N': ['Logic Gate', 'Hex Schmitt-trigger inverter, χρήσιμο για debounce, shaping και oscillator circuits'],
   'SN74HC125N': ['Logic Gate', 'Quad 3-state buffer/line driver για απομόνωση και bus interfacing'],
+  'SN74HC165N': ['Logic Gate', '8-bit parallel-load shift register, χρήσιμο για επέκταση εισόδων μέσω serial interface'],
+  '3144':    ['IC / Other', 'Hall-effect magnetic switch sensor, χρήσιμο ως μαγνητική επαφή ή proximity trigger'],
   'TL431A':  ['Voltage Reg', 'Programmable precision shunt reference — SMPS feedback'],
   'SL2.1A':  ['IC / Other', 'USB hub controller IC 4-port'],
   'IRLML6344':['N-Ch MOSFET','Logic-level N-ch 30V/5A SOT-23'],
@@ -6408,7 +6424,8 @@ const rawIC = [
   ['SL2.1A','a1'],['78L10','a1'],['3845B','a1'],['UC3843B','z2'],['IRFZ46N','z2'],
   ['IRFP250','z2'],['IRLML6344','a1'],['A09T AO3400','a1'],['IRFP254','S2'],
   ['IRLZ44N','S2'],['TL494CN','S2'],['SLA7032M','S2'],['LD7750RGR','a1'],['LR7843','z2'],
-  ['SP3232EEN-L/TR',''],['ATtiny13',''],['CH32V003J4M6',''],['SN74HC14N',''],['SN74HC125N',''],
+  ['SP3232EEN-L/TR',''],['ATtiny13',''],['CH32V003J4M6',''],['SN74HC14N','x1'],['SN74HC125N','x1'],
+  ['SN74HC165N','x1'],['3144','x1'],
 ];
 
 // Build data with IDs
