@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RF Signal Multi-Format Converter | MagnusRF v2.1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --bg: #0a0e0f;
+    --panel: #0f1518;
+    --panel2: #121a1d;
+    --border: #1a2a2e;
+    --border-hi: #2a4045;
+    --accent: #00ff88;
+    --accent2: #00ccff;
+    --accent3: #ff00aa;
+    --warn: #ff6b00;
+    --err: #ff3366;
+    --text: #c8d8d8;
+    --dim: #4a6060;
+    --glow: 0 0 20px rgba(0,255,136,0.3);
+    --glow2: 0 0 20px rgba(0,204,255,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    padding: 20px;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(0,255,136,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(0,204,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 80%, rgba(255,0,170,0.02) 0%, transparent 60%);
+    overflow-x: hidden;
+  }
+
+  /* Scanline effect */
+  body::before {
+    content: '';
+    position: fixed; top:0; left:0; right:0; bottom:0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,255,136,0.015) 0px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; position: relative; z-index: 2; }
+
+  header {
+    text-align: center;
+    padding: 30px 0 25px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 25px;
+    position: relative;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 240px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: var(--glow);
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0,255,136,0.5);
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+  h1 .v { color: var(--accent2); font-size: 0.6em; }
+  h1 .dot { color: var(--accent3); }
+
+  .subtitle {
+    color: var(--dim);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+  }
+  .subtitle .blink {
+    color: var(--accent);
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.3; } }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .panel:hover { border-color: var(--border-hi); }
+
+  .panel-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-title .num {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 0.85em;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--dim);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  select, input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+  select:focus, input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(0,255,136,0.2);
+  }
+  textarea {
+    min-height: 150px;
+    resize: vertical;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  textarea.output {
+    min-height: 280px;
+    background: #050807;
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .row.three { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 600px) {
+    .row, .row.three { grid-template-columns: 1fr; }
+  }
+
+  .field { margin-bottom: 12px; }
+
+  button {
+    background: var(--bg);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 10px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  button:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: var(--glow);
+  }
+  button.alt { color: var(--accent2); border-color: var(--accent2); }
+  button.alt:hover { background: var(--accent2); box-shadow: var(--glow2); }
+  button.warn { color: var(--warn); border-color: var(--warn); }
+  button.warn:hover { background: var(--warn); color: var(--bg); }
+  button.full { width: 100%; padding: 14px; font-size: 0.95rem; font-weight: bold; }
+
+  .btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .canvas-wrap {
+    background: #050807;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px;
+    margin: 14px 0;
+  }
+  canvas { display: block; width: 100%; height: auto; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px;
+    background: var(--bg);
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+  .stat { text-align: center; }
+  .stat .label-s {
+    font-size: 0.65rem;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .stat .val {
+    font-size: 1.1rem;
+    color: var(--accent2);
+    font-weight: bold;
+    margin-top: 2px;
+  }
+
+  .msg {
+    padding: 10px 14px;
+    border-radius: 3px;
+    margin: 12px 0;
+    font-size: 0.85rem;
+    border-left: 3px solid;
+  }
+  .msg-ok  { background: rgba(0,255,136,0.08); border-color: var(--accent); color: var(--accent); }
+  .msg-err { background: rgba(255,51,102,0.08); border-color: var(--err); color: var(--err); }
+  .msg-warn{ background: rgba(255,107,0,0.08); border-color: var(--warn); color: var(--warn); }
+  .msg-info{ background: rgba(0,204,255,0.08); border-color: var(--accent2); color: var(--accent2); }
+
+  details {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 14px;
+    margin: 10px 0;
+  }
+  summary {
+    cursor: pointer;
+    color: var(--accent2);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    user-select: none;
+  }
+  summary:hover { color: var(--accent); }
+  details[open] summary { margin-bottom: 10px; }
+  details p, details code {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  details code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 2px;
+    color: var(--accent);
+  }
+
+  .footer {
+    text-align: center;
+    padding: 30px 0;
+    color: var(--dim);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+    margin-top: 30px;
+  }
+  .footer .accent { color: var(--accent); }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--bg);
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    font-size: 0.7rem;
+    color: var(--dim);
+    margin-left: 6px;
+  }
+  .badge.hot { color: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>MAGNUS<span class="dot">·</span>RF <span class="v">v2.1</span></h1>
+    <div class="subtitle">RF SIGNAL MULTI-FORMAT CONVERTER <span class="blink">▮</span></div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: INPUT -->
+    <div class="panel">
+      <div class="panel-title"><span class="num">01</span> INPUT</div>
+
+      <div class="field">
+        <label>Input Format</label>
+        <select id="inFormat">
+          <option value="auto">Auto-detect</option>
+          <option value="hex">Hex bytes (AA BB 12 34 ή AABB1234)</option>
+          <option value="bin">Binary bits string (10101100...)</option>
+          <option value="pulses">Raw pulse timings (μs, +pulse -gap)</option>
+          <option value="rtl433_pdv">rtl_433 PDV URL (https://triq.org/pdv/#...)</option>
+          <option value="rtl433_analyzer">rtl_433 -A analyzer output (paste full)</option>
+          <option value="urh_bits">URH bits export (groups με space)</option>
+          <option value="rfraw">RfRaw B0/B1 (Sonoff/Tasmota)</option>
+          <option value="flipper">Flipper Zero .sub RAW_Data</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Paste your signal data here</label>
+        <textarea id="inData" placeholder="Παράδειγμα hex:
+70 07 fc 70 07 00 7f c3 80 38 03 80
+
+Παράδειγμα bits:
+10101010 11001100 00110011
+
+Παράδειγμα pulses (μs):
++312 -980 +312 -312 +940 -320
+
+Παράδειγμα PDV URL:
+https://triq.org/pdv/#AAB102000A27108155
+
+Auto-detect θα δοκιμάσει να καταλάβει μόνο του."></textarea>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Bit Duration (μs)</label>
+          <input type="number" id="bitDuration" value="100" min="10" max="2000" step="10">
+        </div>
+        <div>
+          <label>Sample as (όταν input είναι pulses)</label>
+          <select id="sampleMode">
+            <option value="threshold">Pulse > threshold = 1</option>
+            <option value="manchester">Manchester decode</option>
+            <option value="pwm">PWM (short=0, long=1)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="full" onclick="parseInput()">▶ PARSE INPUT</button>
+
+      <div id="parseMsg"></div>
+
+      <details>
+        <summary>📖 Tips για κάθε format</summary>
+        <p style="margin-top:8px;">
+          <strong>Hex:</strong> με ή χωρίς spaces. Παράδειγμα: <code>70 07 FC</code> ή <code>7007FC</code><br><br>
+          <strong>Binary:</strong> οποιοιδήποτε χαρακτήρες εκτός 0/1 αγνοούνται. Παράδειγμα: <code>10101 0011 1100</code><br><br>
+          <strong>Pulses:</strong> + για pulse (ON), - για gap (OFF), σε microseconds. Παράδειγμα: <code>+312 -980 +940 -320</code> ή απλά αριθμοί με spaces (πρώτος = pulse).<br><br>
+          <strong>PDV URL:</strong> Επικόλληση URL ολόκληρο. Το hash περιέχει encoded pulses (rtl_433 format).<br><br>
+          <strong>rtl_433 -A output:</strong> Επικόλληση όλο το output από <code>rtl_433 -A</code>. Θα εξαχθούν αυτόματα τα pulses.<br><br>
+          <strong>URH bits:</strong> Από Analysis tab → "Bits" view. Π.χ. <code>1010 1100 0011 0011</code>.<br><br>
+          <strong>RfRaw:</strong> Sonoff RF Bridge format. <code>AA B0 ... 55</code>.<br><br>
+          <strong>Flipper:</strong> Το RAW_Data: line από .sub αρχείο.<br><br>
+          <strong style="color:var(--accent);">🆕 Multi-burst:</strong> Αν το input έχει <code>[Pause: N samples]</code> markers (π.χ. URH export με πολλά πατήματα), το tool τα ξεχωρίζει αυτόματα. Εμφανίζεται dropdown για να διαλέξεις «όλα ενωμένα» ή ένα συγκεκριμένο burst. Χρήσιμο για rolling code (σύγκριση πατημάτων) ή για clone ενός μόνο burst.<br><br>
+          <strong style="color:var(--accent2);">🆕 Byte alignment:</strong> Αν τα bits δεν είναι πολλαπλάσιο του 8 (συχνό σε raw RF), το tool σε ειδοποιεί. Τα byte-based exports (hex dump, C array) κάνουν pad το τελευταίο byte· τα bit-exact (bits dump, pulses, ATtiny με SIGNAL_BITS) στέλνουν ακριβώς τον σωστό αριθμό bits.
+        </p>
+      </details>
+    </div>
+
+    <!-- RIGHT: PREVIEW & STATS -->
+    <div class="panel">
+      <div class="panel-title"><span class="num">02</span> PREVIEW</div>
+
+      <div class="canvas-wrap">
+        <canvas id="waveCanvas" width="800" height="120"></canvas>
+      </div>
+
+      <div class="stats" id="stats">
+        <div class="stat"><div class="label-s">Bits</div><div class="val" id="statBits">0</div></div>
+        <div class="stat"><div class="label-s">Bytes</div><div class="val" id="statBytes">0</div></div>
+        <div class="stat"><div class="label-s">Duration</div><div class="val" id="statDur">0 ms</div></div>
+        <div class="stat"><div class="label-s">Detected</div><div class="val" id="statFmt">—</div></div>
+      </div>
+
+      <details>
+        <summary>🔍 Show raw bits & hex</summary>
+        <div style="margin-top:10px;">
+          <label>Bits</label>
+          <textarea id="rawBits" readonly style="min-height:80px; font-size:0.75rem;"></textarea>
+          <label style="margin-top:10px;">Hex</label>
+          <textarea id="rawHex" readonly style="min-height:60px;"></textarea>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- OUTPUT PANEL -->
+  <div class="panel">
+    <div class="panel-title"><span class="num">03</span> OUTPUT FORMAT</div>
+
+    <div class="row three">
+      <div class="field">
+        <label>Target Format</label>
+        <select id="outFormat" onchange="generateOutput()">
+          <option value="attiny13">ATtiny13 .ino (PROGMEM) <span class="badge hot">δικό σου</span></option>
+          <option value="attiny85">ATtiny85 .ino (more RAM)</option>
+          <option value="arduino">Arduino generic .ino</option>
+          <option value="esp32_gpio">ESP32 .ino (GPIO bit-bang)</option>
+          <option value="esp32_cc1101">ESP32 + CC1101 (full SPI driver)</option>
+          <option value="hex_dump">Pure hex dump</option>
+          <option value="bin_dump">Binary bits dump</option>
+          <option value="pulse_us">Pulse timings (μs)</option>
+          <option value="rfraw_b0">RfRaw B0 (Tasmota/Sonoff)</option>
+          <option value="flipper_sub">Flipper Zero .sub</option>
+          <option value="c_array">C/C++ array (generic)</option>
+          <option value="python_pigpio">Python (pigpio waveform)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>TX Pin / GPIO</label>
+        <input type="number" id="txPin" value="1" min="0" max="40" onchange="generateOutput()">
+      </div>
+      <div class="field">
+        <label>Repeats</label>
+        <input type="number" id="repeats" value="3" min="1" max="10" onchange="generateOutput()">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Carrier Frequency (Hz) — για CC1101/SDR exports</label>
+        <input type="number" id="freq" value="433920000" step="1000" onchange="generateOutput()">
+      </div>
+      <div class="field">
+        <label>Modulation (για CC1101/Flipper)</label>
+        <select id="modulation" onchange="generateOutput()">
+          <option value="OOK">OOK / ASK</option>
+          <option value="2FSK">2-FSK</option>
+          <option value="GFSK">GFSK</option>
+          <option value="MSK">MSK</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Generated code / data</label>
+    <textarea class="output" id="outData" readonly placeholder="Πάτα PARSE INPUT πρώτα, μετά διάλεξε output format..."></textarea>
+
+    <div class="btn-grid">
+      <button onclick="copyOutput()">📋 COPY</button>
+      <button class="alt" onclick="downloadOutput()">💾 DOWNLOAD</button>
+      <button class="alt" onclick="generateOutput()">⟳ REGENERATE</button>
+      <button class="warn" onclick="clearAll()">✕ CLEAR ALL</button>
+    </div>
+
+    <div id="outMsg"></div>
+  </div>
+
+  <div class="footer">
+    MAGNUS<span class="accent">·</span>RF v2.1 &nbsp;|&nbsp; ESP32 · ATtiny · CC1101 · RTL-SDR Workflow Tool
+  </div>
+</div>
+
+<script>
+// ============================================================
+// MAGNUS RF v2.0 - Multi-Format Signal Converter
+// ============================================================
+
+let parsedSignal = {
+  bits: [],          // Array of 0/1 (currently active burst, or all joined)
+  pulses: [],        // Array of {duration_us, level} - alternating
+  bitDuration: 100,  // μs per bit
+  detectedFormat: null,
+  originalLength: 0,
+  bursts: [],        // Array of { bits:[], pauseSamples:N } per-burst
+  byteAligned: true, // false if bit count not multiple of 8
+  activeBurst: -1    // -1 = all joined, >=0 = single burst index
+};
+
+// ============================================================
+// INPUT PARSERS
+// ============================================================
+
+// Strip URH "[Pause: N samples]" markers and split into bursts.
+// Returns { cleaned, bursts, pauses } where:
+//   cleaned = text with markers replaced by space (all bursts joined)
+//   bursts  = array of segment strings (between/around pauses)
+//   pauses  = array of pause sample-counts, pauses[i] follows bursts[i]
+function stripPauseMarkers(text) {
+  // Two regexes: one for splitting (non-capturing), one for collecting pause counts
+  const pauseSplitRegex = /\[\s*Pause:?\s*\d+\s*(?:samples?)?\s*\]/gi;
+  const pauseCollectRegex = /\[\s*Pause:?\s*(\d+)\s*(?:samples?)?\s*\]/gi;
+
+  // Collect pause sample counts in order
+  const pauses = [];
+  let m;
+  while ((m = pauseCollectRegex.exec(text)) !== null) {
+    pauses.push(parseInt(m[1], 10));
+  }
+
+  // Split into bursts (non-capturing group avoids polluting the result array)
+  const bursts = text.split(pauseSplitRegex)
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  const cleaned = text.replace(pauseSplitRegex, ' ').trim();
+  const hadPauses = pauses.length > 0;
+  return { cleaned, bursts, pauses, hadPauses };
+}
+
+// Convert a single hex string to bits. Bit-exact: trailing odd nibble = 4 bits only.
+// Returns { bits, byteAligned }
+function hexStringToBits(hexStr) {
+  let clean = hexStr.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+  const bits = [];
+  const oddNibble = (clean.length % 2 !== 0);
+  const fullLen = clean.length - (oddNibble ? 1 : 0);
+  for (let i = 0; i < fullLen; i += 2) {
+    const byteVal = parseInt(clean.substr(i, 2), 16);
+    for (let j = 7; j >= 0; j--) bits.push((byteVal >> j) & 1);
+  }
+  if (oddNibble) {
+    const nibble = parseInt(clean.substr(fullLen, 1), 16);
+    for (let j = 3; j >= 0; j--) bits.push((nibble >> j) & 1);
+  }
+  return { bits, byteAligned: !oddNibble };
+}
+
+function binStringToBits(binStr) {
+  const clean = binStr.replace(/[^01]/g, '');
+  return { bits: clean.split('').map(Number), byteAligned: (clean.length % 8 === 0) };
+}
+
+function parseHex(text) {
+  // Strip pause markers first (URH exports may contain them)
+  const { cleaned, bursts, pauses } = stripPauseMarkers(text);
+  const cleanAll = cleaned.replace(/[^0-9A-Fa-f]/g, '');
+  if (cleanAll.length === 0) return null;
+
+  // Per-burst parse (preserves boundaries & pause timing)
+  const burstObjs = bursts.map((b, i) => {
+    const conv = hexStringToBits(b);
+    return { bits: conv.bits, byteAligned: conv.byteAligned, pauseSamples: pauses[i] || 0 };
+  });
+
+  // Joined bits (all bursts together)
+  const allConv = hexStringToBits(cleanAll);
+
+  return {
+    bits: allConv.bits,
+    byteAligned: allConv.byteAligned,
+    format: 'hex',
+    burstCount: bursts.length,
+    bursts: burstObjs,
+    pauses,
+    note: allConv.byteAligned ? null : 'Περιττό nibble (μη byte-aligned) — φυσιολογικό για raw RF captures'
+  };
+}
+
+function parseBinary(text) {
+  const { cleaned, bursts, pauses } = stripPauseMarkers(text);
+  const cleanAll = cleaned.replace(/[^01]/g, '');
+  if (cleanAll.length === 0) return null;
+
+  const burstObjs = bursts.map((b, i) => {
+    const conv = binStringToBits(b);
+    return { bits: conv.bits, byteAligned: conv.byteAligned, pauseSamples: pauses[i] || 0 };
+  });
+
+  const bits = cleanAll.split('').map(Number);
+  return {
+    bits,
+    byteAligned: (cleanAll.length % 8 === 0),
+    format: 'binary',
+    burstCount: bursts.length,
+    bursts: burstObjs,
+    pauses
+  };
+}
+
+function parsePulses(text) {
+  // Try +/- prefix format or just numbers
+  // +312 -980 +312 → pulse 312μs, gap 980μs, pulse 312μs
+  const tokens = text.split(/[\s,;]+/).filter(t => t.length > 0);
+  if (tokens.length === 0) return null;
+
+  const pulses = [];
+  let level = 1; // assume first is pulse
+
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    let val, lvl;
+    if (t.startsWith('+')) {
+      val = parseInt(t.substring(1));
+      lvl = 1;
+    } else if (t.startsWith('-')) {
+      val = parseInt(t.substring(1));
+      lvl = 0;
+    } else {
+      val = parseInt(t);
+      // Alternate if no sign given
+      lvl = (i % 2 === 0) ? 1 : 0;
+    }
+    if (isNaN(val) || val <= 0) continue;
+    pulses.push({ duration: val, level: lvl });
+  }
+
+  if (pulses.length === 0) return null;
+  return { pulses, format: 'pulses' };
+}
+
+function parsePDV(text) {
+  // PDV URL format: https://triq.org/pdv/#AAB102000A27108155
+  // Format after #:
+  //   AAB1 = header (magic)
+  //   XX   = number of pulse widths defined (hex byte)
+  //   YYYY = pulse widths (16-bit little-endian, in μs)
+  //   data = pulse train, each nibble references a pulse width index
+  //   55   = trailer
+
+  const match = text.match(/#([A-Fa-f0-9]+)/);
+  if (!match) return { error: 'Δεν βρέθηκε # με hex data στο URL' };
+
+  const hex = match[1].toUpperCase();
+  if (!hex.startsWith('AAB1') && !hex.startsWith('AAB0')) {
+    return { error: 'Δεν φαίνεται για rtl_433 PDV format (περιμένω AAB0/AAB1 header)' };
+  }
+
+  // Parse: AAB1 NN W1W1 W2W2 ... data 55
+  // NN = number of widths in hex
+  const numWidths = parseInt(hex.substr(4, 2), 16);
+  const widths = [];
+  let pos = 6;
+  for (let i = 0; i < numWidths; i++) {
+    // Big-endian 16-bit width
+    const w = parseInt(hex.substr(pos, 4), 16);
+    widths.push(w);
+    pos += 4;
+  }
+
+  // The rest until 55 are pulse references (4 bits each)
+  const dataPart = hex.substr(pos);
+  // Strip trailing 55 if present
+  let endPos = dataPart.length;
+  if (dataPart.endsWith('55')) endPos -= 2;
+  const data = dataPart.substr(0, endPos);
+
+  const pulses = [];
+  let level = 1;
+  for (let i = 0; i < data.length; i++) {
+    const nibble = parseInt(data[i], 16);
+    if (nibble >= widths.length) continue;
+    pulses.push({ duration: widths[nibble], level: level });
+    level = 1 - level;
+  }
+
+  if (pulses.length === 0) return { error: 'Δεν βρέθηκαν pulses στο PDV data' };
+  return { pulses, format: 'pdv', widths };
+}
+
+function parseRtl433Output(text) {
+  // Extract pulse table from rtl_433 -A output
+  // Look for lines like: [ 0] Pulse: 312, Gap: 980, Period: 1292
+  const lines = text.split(/\r?\n/);
+  const pulses = [];
+
+  for (const line of lines) {
+    const m = line.match(/\[\s*\d+\]\s*Pulse:\s*(\d+),\s*Gap:\s*(\d+)/i);
+    if (m) {
+      pulses.push({ duration: parseInt(m[1]), level: 1 });
+      pulses.push({ duration: parseInt(m[2]), level: 0 });
+    }
+  }
+
+  if (pulses.length === 0) {
+    // Try alternative: look for PDV URL in text
+    const pdvMatch = text.match(/https:\/\/triq\.org\/pdv\/#[A-Fa-f0-9]+/);
+    if (pdvMatch) {
+      return parsePDV(pdvMatch[0]);
+    }
+    return { error: 'Δεν βρέθηκαν pulse data στο rtl_433 output' };
+  }
+  return { pulses, format: 'rtl433' };
+}
+
+function parseRfRaw(text) {
+  // Tasmota RfRaw B0 format:
+  // AA B0 <length> <numBuckets> <repeats> <bucket1H><bucket1L> ... <data> 55
+  const clean = text.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+
+  // Find AA B0 start
+  let start = clean.indexOf('AAB0');
+  if (start === -1) start = clean.indexOf('AAB1');
+  if (start === -1) return { error: 'Δεν βρέθηκε AA B0/B1 header' };
+
+  const data = clean.substr(start + 4);
+  if (data.length < 6) return { error: 'RfRaw data πολύ μικρό' };
+
+  const totalLen = parseInt(data.substr(0, 2), 16);
+  const numBuckets = parseInt(data.substr(2, 2), 16);
+  const repeats = parseInt(data.substr(4, 2), 16);
+
+  const widths = [];
+  let pos = 6;
+  for (let i = 0; i < numBuckets; i++) {
+    const w = parseInt(data.substr(pos, 4), 16);
+    widths.push(w);
+    pos += 4;
+  }
+
+  // Data follows: each nibble = bucket index, alternating pulse/gap
+  const dataPart = data.substr(pos);
+  let endPos = dataPart.indexOf('55');
+  if (endPos === -1) endPos = dataPart.length;
+  const pulseData = dataPart.substr(0, endPos);
+
+  const pulses = [];
+  let level = 1;
+  for (let i = 0; i < pulseData.length; i++) {
+    const idx = parseInt(pulseData[i], 16);
+    if (idx >= widths.length) continue;
+    pulses.push({ duration: widths[idx], level: level });
+    level = 1 - level;
+  }
+
+  if (pulses.length === 0) return { error: 'Δεν βρέθηκαν pulses στο RfRaw data' };
+  return { pulses, format: 'rfraw' };
+}
+
+function parseFlipper(text) {
+  // Flipper .sub: look for RAW_Data: line(s)
+  // Format: RAW_Data: 312 -980 312 -312 940 -320 ...
+  const lines = text.split(/\r?\n/);
+  const pulses = [];
+  let foundRaw = false;
+
+  for (const line of lines) {
+    const m = line.match(/RAW_Data:\s*(.+)/i);
+    if (m) {
+      foundRaw = true;
+      const tokens = m[1].split(/\s+/).filter(t => t.length > 0);
+      for (const t of tokens) {
+        const val = parseInt(t);
+        if (isNaN(val) || val === 0) continue;
+        pulses.push({
+          duration: Math.abs(val),
+          level: val > 0 ? 1 : 0
+        });
+      }
+    }
+  }
+
+  if (!foundRaw) {
+    // Try direct parse as pulse list with +/-
+    return parsePulses(text);
+  }
+  if (pulses.length === 0) return { error: 'RAW_Data: βρέθηκε αλλά είναι κενό' };
+  return { pulses, format: 'flipper' };
+}
+
+function parseURHBits(text) {
+  // URH "Show as bits" export: groups of bits with optional [Pause: N samples]
+  // Delegate to parseBinary (same logic) but tag the format.
+  const result = parseBinary(text);
+  if (result && !result.error) result.format = 'urh_bits';
+  return result;
+}
+
+// ============================================================
+// AUTO-DETECT
+// ============================================================
+
+function autoDetect(text) {
+  text = text.trim();
+  if (!text) return null;
+
+  // PDV URL
+  if (text.includes('triq.org/pdv') || /^#?[Aa][Aa][Bb][01]/.test(text)) {
+    return parsePDV(text);
+  }
+
+  // rtl_433 analyzer output
+  if (/\[\s*\d+\]\s*Pulse:\s*\d+/i.test(text)) {
+    return parseRtl433Output(text);
+  }
+
+  // Flipper format
+  if (/RAW_Data:/i.test(text)) {
+    return parseFlipper(text);
+  }
+
+  // ⚠️ Strip URH [Pause: N samples] markers BEFORE any digit-based detection,
+  // otherwise the sample counts get mistaken for pulses/bits.
+  const stripped = stripPauseMarkers(text);
+  const work = stripped.cleaned;
+
+  // RfRaw
+  const noSpace = work.replace(/[^0-9A-Fa-f]/g, '').toUpperCase();
+  if (noSpace.startsWith('AAB0') || noSpace.startsWith('AAB1')) {
+    return parseRfRaw(work);
+  }
+
+  // Pulses (signed numbers like +312 -980, OR plain space-separated integers)
+  // Require at least one explicit sign to avoid catching binary blocks.
+  if (/[+-]\d+/.test(work)) {
+    const result = parsePulses(work);
+    if (result && result.pulses && result.pulses.length > 4) return result;
+  }
+
+  // Binary vs Hex disambiguation on the pause-stripped text:
+  // Strip whitespace, look at the character set.
+  const compact = work.replace(/\s/g, '');
+  const onlyBinChars = compact.replace(/[^01]/g, '');
+  const onlyHexChars = compact.replace(/[^0-9A-Fa-f]/g, '');
+
+  // If EVERY non-space character is 0 or 1 -> definitely binary
+  if (compact.length > 0 && onlyBinChars.length === compact.length && compact.length > 8) {
+    return parseBinary(text);  // pass original so pause splitting works
+  }
+
+  // If it's all hex chars (and contains digits/letters beyond 0/1) -> hex
+  if (compact.length > 0 && onlyHexChars.length === compact.length) {
+    return parseHex(text);
+  }
+
+  // Mixed / unknown: prefer hex if it's mostly hex, else binary
+  if (onlyHexChars.length >= onlyBinChars.length) {
+    return parseHex(text);
+  }
+  return parseBinary(text);
+}
+
+// ============================================================
+// CONVERSIONS
+// ============================================================
+
+function pulsesToBits(pulses, bitDuration) {
+  // Sample the pulse stream at bitDuration intervals
+  const bits = [];
+  let timeAccum = 0;
+  let currentLevel = pulses.length > 0 ? pulses[0].level : 0;
+  let pulseIdx = 0;
+  let pulseTimeLeft = pulses.length > 0 ? pulses[0].duration : 0;
+
+  // Total duration
+  let total = 0;
+  for (const p of pulses) total += p.duration;
+
+  // Sample at each bit boundary
+  for (let t = bitDuration / 2; t < total; t += bitDuration) {
+    // Find which pulse contains time t
+    let accum = 0;
+    for (const p of pulses) {
+      accum += p.duration;
+      if (t < accum) {
+        bits.push(p.level);
+        break;
+      }
+    }
+  }
+  return bits;
+}
+
+function bitsToPulses(bits, bitDuration) {
+  // Convert bits to pulse stream by run-length encoding
+  if (bits.length === 0) return [];
+  const pulses = [];
+  let currentLevel = bits[0];
+  let runLength = 1;
+  for (let i = 1; i < bits.length; i++) {
+    if (bits[i] === currentLevel) {
+      runLength++;
+    } else {
+      pulses.push({ duration: runLength * bitDuration, level: currentLevel });
+      currentLevel = bits[i];
+      runLength = 1;
+    }
+  }
+  pulses.push({ duration: runLength * bitDuration, level: currentLevel });
+  return pulses;
+}
+
+function bitsToBytes(bits) {
+  const bytes = [];
+  for (let i = 0; i < bits.length; i += 8) {
+    let b = 0;
+    for (let j = 0; j < 8; j++) {
+      const bit = (i + j < bits.length) ? bits[i + j] : 0;
+      b = (b << 1) | bit;
+    }
+    bytes.push(b);
+  }
+  return bytes;
+}
+
+function bytesToHex(bytes, separator = ' ') {
+  return bytes.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(separator);
+}
+
+// ============================================================
+// PARSE & UPDATE
+// ============================================================
+
+// Shared UI refresh after parsedSignal.bits / .pulses change
+function refreshUI() {
+  document.getElementById('statBits').textContent = parsedSignal.bits.length;
+  // Bytes: show floor for byte-aligned, else "N.5" style indicator
+  const fullBytes = Math.floor(parsedSignal.bits.length / 8);
+  const remBits = parsedSignal.bits.length % 8;
+  document.getElementById('statBytes').textContent = remBits === 0 ? fullBytes : (fullBytes + '+' + remBits + 'b');
+
+  let totalUs = 0;
+  for (const p of parsedSignal.pulses) totalUs += p.duration;
+  document.getElementById('statDur').textContent = (totalUs / 1000).toFixed(1) + ' ms';
+  document.getElementById('statFmt').textContent = (parsedSignal.detectedFormat || '?').toUpperCase();
+
+  const bitsStr = parsedSignal.bits.join('');
+  document.getElementById('rawBits').value = bitsStr.length ? bitsStr.match(/.{1,8}/g).join(' ') : '';
+  document.getElementById('rawHex').value = bytesToHex(bitsToBytes(parsedSignal.bits));
+  drawWaveform();
+}
+
+function parseInput() {
+  const text = document.getElementById('inData').value.trim();
+  const format = document.getElementById('inFormat').value;
+  const bitDur = parseInt(document.getElementById('bitDuration').value) || 100;
+  const msgDiv = document.getElementById('parseMsg');
+  msgDiv.innerHTML = '';
+
+  if (!text) {
+    msgDiv.innerHTML = '<div class="msg msg-err">⚠ Κενό input!</div>';
+    return;
+  }
+
+  let result;
+  try {
+    switch (format) {
+      case 'hex':              result = parseHex(text); break;
+      case 'bin':              result = parseBinary(text); break;
+      case 'pulses':           result = parsePulses(text); break;
+      case 'rtl433_pdv':       result = parsePDV(text); break;
+      case 'rtl433_analyzer':  result = parseRtl433Output(text); break;
+      case 'urh_bits':         result = parseURHBits(text); break;
+      case 'rfraw':            result = parseRfRaw(text); break;
+      case 'flipper':          result = parseFlipper(text); break;
+      case 'auto':
+      default:                 result = autoDetect(text); break;
+    }
+  } catch (e) {
+    msgDiv.innerHTML = '<div class="msg msg-err">⚠ Σφάλμα: ' + e.message + '</div>';
+    return;
+  }
+
+  if (!result) {
+    msgDiv.innerHTML = '<div class="msg msg-err">⚠ Δεν αναγνωρίστηκε το format. Διάλεξε χειροκίνητα.</div>';
+    return;
+  }
+  if (result.error) {
+    msgDiv.innerHTML = '<div class="msg msg-err">⚠ ' + result.error + '</div>';
+    return;
+  }
+
+  // Store full per-burst model
+  parsedSignal.bitDuration = bitDur;
+  parsedSignal.detectedFormat = result.format;
+  parsedSignal.bursts = result.bursts || [];
+  parsedSignal.byteAligned = (result.byteAligned !== false);
+  parsedSignal.activeBurst = -1;  // start with all-joined
+
+  // Set bits & pulses (joined view first)
+  if (result.bits && !result.pulses) {
+    parsedSignal.bits = result.bits;
+    parsedSignal.pulses = bitsToPulses(result.bits, bitDur);
+  } else if (result.pulses && !result.bits) {
+    parsedSignal.pulses = result.pulses;
+    parsedSignal.bits = pulsesToBits(result.pulses, bitDur);
+    // Pulses have no byte-alignment concept; treat as aligned
+    parsedSignal.byteAligned = true;
+  } else if (result.bits && result.pulses) {
+    parsedSignal.bits = result.bits;
+    parsedSignal.pulses = result.pulses;
+  }
+
+  refreshUI();
+
+  // Build messages
+  let msg = '<div class="msg msg-ok">✓ Parsed επιτυχώς! Format: ' + (result.format || 'unknown') +
+            ' — ' + parsedSignal.bits.length + ' bits</div>';
+
+  // Byte-alignment warning
+  if (!parsedSignal.byteAligned) {
+    msg += '<div class="msg msg-info">ℹ Το σήμα ΔΕΝ είναι byte-aligned (' + parsedSignal.bits.length +
+           ' bits = ' + (parsedSignal.bits.length % 8) + ' bits πάνω από byte boundary). ' +
+           'Αυτό είναι φυσιολογικό για raw RF. Τα byte-based exports (hex dump, C array) θα κάνουν pad το τελευταίο byte με μηδενικά· ' +
+           'τα bit-exact exports (bits dump, pulses, ATtiny με πλήρη bits) διατηρούν ακριβώς ' + parsedSignal.bits.length + ' bits.</div>';
+  }
+
+  // Multi-burst handling: build selector
+  if (parsedSignal.bursts && parsedSignal.bursts.length > 1) {
+    msg += '<div class="msg msg-warn">⚠ Εντοπίστηκαν <b>' + parsedSignal.bursts.length +
+           ' bursts</b> (χωρισμένα με [Pause]). Συχνά σημαίνει <b>rolling code</b> (κάθε πάτημα διαφέρει) ' +
+           'ή απλά επανάληψη του ίδιου σήματος. Διάλεξε ποιο burst να επεξεργαστείς:</div>';
+
+    msg += '<div style="margin-top:8px;"><label>Active burst</label><select id="burstSelect" onchange="selectBurst(this.value)">';
+    msg += '<option value="-1">Όλα ενωμένα (' + parsedSignal.bits.length + ' bits)</option>';
+    parsedSignal.bursts.forEach((b, i) => {
+      const pauseMs = b.pauseSamples ? ' → pause ' + b.pauseSamples + ' samples' : '';
+      msg += '<option value="' + i + '">Burst ' + (i+1) + ' (' + b.bits.length + ' bits' +
+             (b.byteAligned ? '' : ', μη-aligned') + ')' + pauseMs + '</option>';
+    });
+    msg += '</select></div>';
+  }
+
+  msgDiv.innerHTML = msg;
+  generateOutput();
+}
+
+// Switch active burst (or -1 for all joined)
+function selectBurst(idxStr) {
+  const idx = parseInt(idxStr, 10);
+  parsedSignal.activeBurst = idx;
+  if (idx < 0) {
+    // Rejoin all bursts
+    const all = [];
+    for (const b of parsedSignal.bursts) all.push(...b.bits);
+    parsedSignal.bits = all;
+    parsedSignal.byteAligned = (all.length % 8 === 0);
+  } else {
+    const b = parsedSignal.bursts[idx];
+    parsedSignal.bits = b.bits.slice();
+    parsedSignal.byteAligned = b.byteAligned;
+  }
+  parsedSignal.pulses = bitsToPulses(parsedSignal.bits, parsedSignal.bitDuration);
+  refreshUI();
+  generateOutput();
+
+  const note = document.getElementById('burstNote');
+  const txt = idx < 0 ? 'Όλα τα bursts ενωμένα' : ('Burst ' + (idx+1) + ' μόνο');
+  if (note) note.textContent = txt + ' — ' + parsedSignal.bits.length + ' bits';
+}
+
+// ============================================================
+// CANVAS WAVEFORM
+// ============================================================
+
+function drawWaveform() {
+  const canvas = document.getElementById('waveCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Clear
+  ctx.fillStyle = '#050807';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = '#1a2a2e';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 10; i++) {
+    const x = (i / 10) * W;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  }
+
+  if (parsedSignal.pulses.length === 0) {
+    ctx.fillStyle = '#4a6060';
+    ctx.font = '14px "Share Tech Mono"';
+    ctx.textAlign = 'center';
+    ctx.fillText('-- no signal --', W/2, H/2);
+    return;
+  }
+
+  // Compute total duration
+  let totalUs = 0;
+  for (const p of parsedSignal.pulses) totalUs += p.duration;
+
+  // Draw waveform
+  const hi = H * 0.2;
+  const lo = H * 0.8;
+  const scale = W / totalUs;
+
+  ctx.strokeStyle = '#00ff88';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = '#00ff88';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+
+  let x = 0;
+  let prevY = parsedSignal.pulses[0].level ? hi : lo;
+  ctx.moveTo(x, prevY);
+
+  for (const p of parsedSignal.pulses) {
+    const y = p.level ? hi : lo;
+    if (y !== prevY) {
+      ctx.lineTo(x, prevY);
+      ctx.lineTo(x, y);
+    }
+    x += p.duration * scale;
+    ctx.lineTo(x, y);
+    prevY = y;
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Labels
+  ctx.fillStyle = '#4a6060';
+  ctx.font = '10px "Share Tech Mono"';
+  ctx.textAlign = 'left';
+  ctx.fillText('HIGH', 4, hi - 4);
+  ctx.fillText('LOW', 4, lo + 14);
+  ctx.textAlign = 'right';
+  ctx.fillText((totalUs / 1000).toFixed(1) + ' ms', W - 4, H - 4);
+}
+
+// ============================================================
+// OUTPUT GENERATORS
+// ============================================================
+
+function generateOutput() {
+  const fmt = document.getElementById('outFormat').value;
+  const pin = parseInt(document.getElementById('txPin').value) || 1;
+  const reps = parseInt(document.getElementById('repeats').value) || 3;
+  const freq = parseInt(document.getElementById('freq').value) || 433920000;
+  const mod = document.getElementById('modulation').value;
+
+  if (parsedSignal.bits.length === 0) {
+    document.getElementById('outData').value = '// Πάτα PARSE INPUT πρώτα!';
+    return;
+  }
+
+  let out = '';
+  switch (fmt) {
+    case 'attiny13':       out = genATtiny13(pin, reps); break;
+    case 'attiny85':       out = genATtiny85(pin, reps); break;
+    case 'arduino':        out = genArduinoGeneric(pin, reps); break;
+    case 'esp32_gpio':     out = genESP32GPIO(pin, reps); break;
+    case 'esp32_cc1101':   out = genESP32CC1101(pin, reps, freq, mod); break;
+    case 'hex_dump':       out = genHexDump(); break;
+    case 'bin_dump':       out = genBinDump(); break;
+    case 'pulse_us':       out = genPulseDump(); break;
+    case 'rfraw_b0':       out = genRfRawB0(reps); break;
+    case 'flipper_sub':    out = genFlipperSub(freq, mod); break;
+    case 'c_array':        out = genCArray(); break;
+    case 'python_pigpio':  out = genPythonPigpio(pin, reps); break;
+    default:               out = 'Unsupported format';
+  }
+
+  document.getElementById('outData').value = out;
+}
+
+function genATtiny13(pin, reps) {
+  const bytes = bitsToBytes(parsedSignal.bits);
+  const numBits = parsedSignal.bits.length;
+  const lines = [];
+  for (let i = 0; i < bytes.length; i += 16) {
+    lines.push('  ' + bytes.slice(i, i+16).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ') + (i + 16 < bytes.length ? ',' : ''));
+  }
+  const alignNote = (numBits % 8 === 0)
+    ? ''
+    : `\n// NOTE: ${numBits} bits = ${numBits % 8} bits πάνω από byte boundary.\n// Το SIGNAL_BITS διασφαλίζει ότι στέλνονται ΑΚΡΙΒΩΣ ${numBits} bits (όχι padded).`;
+
+  return `// ATtiny13 RF Transmitter - Generated by MagnusRF v2.0
+// Signal: ${numBits} bits / ${bytes.length} bytes / ${parsedSignal.bitDuration}μs per bit
+// Pin ${pin} (PB${pin}) = DATA out to WL102/FS1000A
+// Detected source format: ${parsedSignal.detectedFormat}${alignNote}
+
+#include <avr/sleep.h>
+#include <avr/interrupt.h>
+#include <avr/pgmspace.h>
+#include <util/delay.h>
+
+#define TX_PIN  PB${pin}
+#define BTN_PIN PB2
+
+const byte PROGMEM signalData[] = {
+${lines.join('\n')}
+};
+
+#define SIGNAL_BYTES sizeof(signalData)
+#define SIGNAL_BITS  ${numBits}      // bit-exact: στέλνει ακριβώς τόσα bits
+#define F_CPU 9600000UL
+#define BIT_DELAY_US ${parsedSignal.bitDuration}
+
+ISR(PCINT0_vect) { }
+
+void sendSignal() {
+  uint16_t bitsSent = 0;
+  for (uint16_t i = 0; i < SIGNAL_BYTES && bitsSent < SIGNAL_BITS; i++) {
+    byte b = pgm_read_byte(&signalData[i]);
+    for (int8_t bit = 7; bit >= 0 && bitsSent < SIGNAL_BITS; bit--) {
+      if (b & (1 << bit)) {
+        PORTB |= (1 << TX_PIN);
+      } else {
+        PORTB &= ~(1 << TX_PIN);
+      }
+      _delay_us(BIT_DELAY_US);
+      bitsSent++;
+    }
+  }
+  PORTB &= ~(1 << TX_PIN);
+}
+
+void goSleep() {
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
+  sei();
+  sleep_cpu();
+  sleep_disable();
+}
+
+void setup() {
+  DDRB |= (1 << TX_PIN);
+  PORTB &= ~(1 << TX_PIN);
+  DDRB &= ~(1 << BTN_PIN);
+  PORTB |= (1 << BTN_PIN);
+  GIMSK |= (1 << PCIE);
+  PCMSK |= (1 << BTN_PIN);
+  sei();
+}
+
+void loop() {
+  if (!(PINB & (1 << BTN_PIN))) {
+    _delay_ms(20);
+    if (!(PINB & (1 << BTN_PIN))) {
+${Array(reps).fill('      sendSignal();\n      _delay_ms(10);').join('\n')}
+      while (!(PINB & (1 << BTN_PIN)));
+      _delay_ms(50);
+    }
+  }
+  goSleep();
+}
+`;
+}
+
+function genATtiny85(pin, reps) {
+  const bytes = bitsToBytes(parsedSignal.bits);
+  const lines = [];
+  for (let i = 0; i < bytes.length; i += 16) {
+    lines.push('  ' + bytes.slice(i, i+16).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ') + (i + 16 < bytes.length ? ',' : ''));
+  }
+
+  return `// ATtiny85 RF Transmitter - Generated by MagnusRF v2.0
+// Signal: ${parsedSignal.bits.length} bits / ${bytes.length} bytes / ${parsedSignal.bitDuration}μs per bit
+
+#include <avr/pgmspace.h>
+
+#define TX_PIN  ${pin}
+
+const uint8_t PROGMEM signalData[] = {
+${lines.join('\n')}
+};
+
+#define SIGNAL_LEN sizeof(signalData)
+#define BIT_DELAY_US ${parsedSignal.bitDuration}
+
+void sendSignal() {
+  for (uint16_t i = 0; i < SIGNAL_LEN; i++) {
+    uint8_t b = pgm_read_byte(&signalData[i]);
+    for (int8_t bit = 7; bit >= 0; bit--) {
+      digitalWrite(TX_PIN, (b >> bit) & 1);
+      delayMicroseconds(BIT_DELAY_US);
+    }
+  }
+  digitalWrite(TX_PIN, LOW);
+}
+
+void setup() {
+  pinMode(TX_PIN, OUTPUT);
+  digitalWrite(TX_PIN, LOW);
+}
+
+void loop() {
+  for (uint8_t r = 0; r < ${reps}; r++) {
+    sendSignal();
+    delay(10);
+  }
+  delay(2000);
+}
+`;
+}
+
+function genArduinoGeneric(pin, reps) {
+  const bytes = bitsToBytes(parsedSignal.bits);
+  const lines = [];
+  for (let i = 0; i < bytes.length; i += 16) {
+    lines.push('  ' + bytes.slice(i, i+16).map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ') + (i + 16 < bytes.length ? ',' : ''));
+  }
+
+  return `// Arduino RF Transmitter - Generated by MagnusRF v2.0
+// Signal: ${parsedSignal.bits.length} bits / ${bytes.length} bytes / ${parsedSignal.bitDuration}μs per bit
+// Πατώντας BUTTON_PIN στέλνει το σήμα ${reps} φορές.
+
+#define TX_PIN      ${pin}
+#define BUTTON_PIN  2   // optional trigger
+
+const uint8_t signalData[] = {
+${lines.join('\n')}
+};
+
+#define SIGNAL_LEN (sizeof(signalData))
+#define BIT_DELAY_US ${parsedSignal.bitDuration}
+
+void sendSignal() {
+  noInterrupts();  // για precise timing
+  for (uint16_t i = 0; i < SIGNAL_LEN; i++) {
+    uint8_t b = signalData[i];
+    for (int8_t bit = 7; bit >= 0; bit--) {
+      digitalWrite(TX_PIN, (b >> bit) & 1);
+      delayMicroseconds(BIT_DELAY_US);
+    }
+  }
+  digitalWrite(TX_PIN, LOW);
+  interrupts();
+}
+
+void setup() {
+  pinMode(TX_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  digitalWrite(TX_PIN, LOW);
+  Serial.begin(115200);
+  Serial.println("MagnusRF TX ready");
+}
+
+void loop() {
+  if (digitalRead(BUTTON_PIN) == LOW) {
+    delay(20);
+    if (digitalRead(BUTTON_PIN) == LOW) {
+      Serial.println("Sending signal...");
+      for (uint8_t r = 0; r < ${reps}; r++) {
+        sendSignal();
+        delay(10);
+      }
+      Serial.println("Done.");
+      while (digitalRead(BUTTON_PIN) == LOW);
+      delay(50);
+    }
+  }
+}
+`;
+}
+
+function genESP32GPIO(pin, reps) {
+  // Use pulse list directly for better timing on ESP32
+  const pulsesArr = parsedSignal.pulses.map(p => `{${p.duration}, ${p.level}}`);
+  const lines = [];
+  for (let i = 0; i < pulsesArr.length; i += 6) {
+    lines.push('  ' + pulsesArr.slice(i, i+6).join(', ') + (i + 6 < pulsesArr.length ? ',' : ''));
+  }
+
+  return `// ESP32 RF Transmitter - Generated by MagnusRF v2.0
+// Signal: ${parsedSignal.pulses.length} pulses / ${parsedSignal.bits.length} bits
+// GPIO ${pin} = DATA to RF transmitter module
+// Χρησιμοποιεί pulse list για ακριβές timing
+
+#include <Arduino.h>
+
+#define TX_PIN ${pin}
+#define REPEATS ${reps}
+
+struct Pulse { uint32_t duration_us; uint8_t level; };
+
+const Pulse signalPulses[] = {
+${lines.join('\n')}
+};
+
+const size_t NUM_PULSES = sizeof(signalPulses) / sizeof(Pulse);
+
+void IRAM_ATTR sendPulseTrain() {
+  for (size_t i = 0; i < NUM_PULSES; i++) {
+    digitalWrite(TX_PIN, signalPulses[i].level);
+    delayMicroseconds(signalPulses[i].duration_us);
+  }
+  digitalWrite(TX_PIN, LOW);
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(TX_PIN, OUTPUT);
+  digitalWrite(TX_PIN, LOW);
+  Serial.println("MagnusRF ESP32 TX ready. Send 't' over Serial to transmit.");
+}
+
+void loop() {
+  if (Serial.available() && Serial.read() == 't') {
+    Serial.println("TX...");
+    for (uint8_t r = 0; r < REPEATS; r++) {
+      sendPulseTrain();
+      delay(10);
+    }
+    Serial.println("Done.");
+  }
+}
+`;
+}
+
+function genESP32CC1101(pin, reps, freq, mod) {
+  const bytes = bitsToBytes(parsedSignal.bits);
+  const hexArr = bytes.map(b => '0x' + b.toString(16).padStart(2, '0').toUpperCase());
+  const lines = [];
+  for (let i = 0; i < hexArr.length; i += 16) {
+    lines.push('  ' + hexArr.slice(i, i+16).join(', ') + (i + 16 < hexArr.length ? ',' : ''));
+  }
+  const bitRate = Math.round(1e6 / parsedSignal.bitDuration);
+  const freqMHz = (freq / 1e6).toFixed(3);
+
+  return `// ESP32 + CC1101 RF Transmitter - Generated by MagnusRF v2.0
+// Uses SmartRC-CC1101-Driver-Lib by LSatan
+// Install: Library Manager → search "SmartRC-CC1101"
+//
+// Signal:  ${parsedSignal.bits.length} bits / ${bytes.length} bytes
+// Freq:    ${freqMHz} MHz
+// Mod:     ${mod}
+// BitRate: ~${bitRate} bps (${parsedSignal.bitDuration}μs/bit)
+//
+// CC1101 wiring (ESP32):
+//   SCK  -> GPIO 18    MISO -> GPIO 19
+//   MOSI -> GPIO 23    CSN  -> GPIO  5
+//   GDO0 -> GPIO  2    GDO2 -> GPIO  4
+
+#include <ELECHOUSE_CC1101_SRC_DRV.h>
+
+const uint8_t txData[] = {
+${lines.join('\n')}
+};
+const size_t TX_LEN = sizeof(txData);
+
+void setupCC1101() {
+  if (ELECHOUSE_cc1101.getCC1101()) {
+    Serial.println("CC1101 connected.");
+  } else {
+    Serial.println("CC1101 NOT FOUND. Check wiring!");
+    while (1);
+  }
+  ELECHOUSE_cc1101.Init();
+  ELECHOUSE_cc1101.setMHZ(${freqMHz});
+  ${mod === 'OOK' ? 'ELECHOUSE_cc1101.setModulation(3); // 3 = OOK/ASK' :
+    mod === '2FSK' ? 'ELECHOUSE_cc1101.setModulation(0); // 0 = 2-FSK' :
+    mod === 'GFSK' ? 'ELECHOUSE_cc1101.setModulation(1); // 1 = GFSK' :
+    'ELECHOUSE_cc1101.setModulation(2); // 2 = MSK'}
+  ELECHOUSE_cc1101.setDRate(${(bitRate/1000).toFixed(2)}); // kBaud
+  ELECHOUSE_cc1101.setDeviation(47.6);
+  ELECHOUSE_cc1101.setChannel(0);
+  ELECHOUSE_cc1101.setPA(12);  // max TX power
+  ELECHOUSE_cc1101.setSyncMode(0); // no preamble/sync (raw)
+  ELECHOUSE_cc1101.setPktFormat(0);
+  ELECHOUSE_cc1101.setLengthConfig(0); // fixed length
+  ELECHOUSE_cc1101.setPacketLength(TX_LEN);
+  ELECHOUSE_cc1101.setCrc(0); // no CRC
+}
+
+void sendSignal() {
+  ELECHOUSE_cc1101.SendData((uint8_t*)txData, TX_LEN);
+}
+
+void setup() {
+  Serial.begin(115200);
+  setupCC1101();
+  Serial.println("MagnusRF CC1101 TX ready. Send 't' to transmit.");
+}
+
+void loop() {
+  if (Serial.available() && Serial.read() == 't') {
+    Serial.println("Transmitting...");
+    for (uint8_t r = 0; r < ${reps}; r++) {
+      sendSignal();
+      delay(20);
+    }
+    Serial.println("Done.");
+  }
+}
+`;
+}
+
+function genHexDump() {
+  const bytes = bitsToBytes(parsedSignal.bits);
+  const numBits = parsedSignal.bits.length;
+  const lines = [];
+  for (let i = 0; i < bytes.length; i += 16) {
+    const offset = i.toString(16).padStart(4, '0').toUpperCase();
+    const hex = bytes.slice(i, i+16).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+    const ascii = bytes.slice(i, i+16).map(b => (b >= 32 && b < 127) ? String.fromCharCode(b) : '.').join('');
+    lines.push(`${offset}:  ${hex.padEnd(48, ' ')}  ${ascii}`);
+  }
+  const alignNote = (numBits % 8 === 0) ? ''
+    : `\n# ⚠ ${numBits} bits = μη byte-aligned. Το τελευταίο byte έχει ${8 - (numBits % 8)} padding zero-bits.\n# Για bit-exact δεδομένα χρησιμοποίησε "Binary bits dump".`;
+  return `# MagnusRF hex dump - ${bytes.length} bytes (${numBits} bits)\n# ${parsedSignal.bitDuration}μs per bit${alignNote}\n\n` + lines.join('\n');
+}
+
+function genBinDump() {
+  const bits = parsedSignal.bits.join('');
+  const lines = [];
+  for (let i = 0; i < bits.length; i += 64) {
+    const offset = i.toString().padStart(5, ' ');
+    const chunk = bits.substring(i, i+64).match(/.{1,8}/g).join(' ');
+    lines.push(`${offset}:  ${chunk}`);
+  }
+  return `# MagnusRF binary dump - ${parsedSignal.bits.length} bits\n\n` + lines.join('\n');
+}
+
+function genPulseDump() {
+  const lines = [];
+  let totalUs = 0;
+  for (const p of parsedSignal.pulses) {
+    lines.push((p.level ? '+' : '-') + p.duration);
+    totalUs += p.duration;
+  }
+  const grouped = [];
+  for (let i = 0; i < lines.length; i += 16) {
+    grouped.push(lines.slice(i, i+16).join(' '));
+  }
+  return `# MagnusRF pulse train - ${parsedSignal.pulses.length} pulses\n# Total duration: ${(totalUs/1000).toFixed(2)} ms\n# Format: +pulse_us -gap_us\n\n` + grouped.join('\n');
+}
+
+function genRfRawB0(reps) {
+  // Tasmota B0 format: AA B0 [length] [numBuckets] [repeats] [buckets...] [data] 55
+  // Collect unique pulse durations
+  const widths = [];
+  for (const p of parsedSignal.pulses) {
+    if (!widths.includes(p.duration)) widths.push(p.duration);
+  }
+  if (widths.length > 8) {
+    // RfRaw supports max 8 buckets - need to quantize
+    widths.sort((a, b) => a - b);
+    while (widths.length > 8) widths.pop();
+  }
+
+  // Build data nibbles
+  const nibbles = [];
+  for (const p of parsedSignal.pulses) {
+    // Find closest bucket
+    let best = 0;
+    let bestDiff = Math.abs(p.duration - widths[0]);
+    for (let i = 1; i < widths.length; i++) {
+      const d = Math.abs(p.duration - widths[i]);
+      if (d < bestDiff) { bestDiff = d; best = i; }
+    }
+    nibbles.push(best);
+  }
+
+  // Build hex string
+  let hex = 'AA B0 ';
+  // Calculate length: 1 (numBuckets) + 1 (repeats) + 2*numBuckets + ceil(nibbles/2)
+  const dataLen = 2 + 2 * widths.length + Math.ceil(nibbles.length / 2);
+  hex += dataLen.toString(16).padStart(2, '0').toUpperCase() + ' ';
+  hex += widths.length.toString(16).padStart(2, '0').toUpperCase() + ' ';
+  hex += reps.toString(16).padStart(2, '0').toUpperCase() + ' ';
+  for (const w of widths) {
+    hex += w.toString(16).padStart(4, '0').toUpperCase() + ' ';
+  }
+  // Pack nibbles
+  for (let i = 0; i < nibbles.length; i += 2) {
+    const hi = nibbles[i];
+    const lo = (i + 1 < nibbles.length) ? nibbles[i+1] : 0;
+    hex += ((hi << 4) | lo).toString(16).padStart(2, '0').toUpperCase();
+  }
+  hex += ' 55';
+
+  return `# MagnusRF RfRaw B0 format (Tasmota/Sonoff RF Bridge)
+# Παράδειγμα MQTT publish:
+#   topic: cmnd/your_bridge/RfRaw
+#   value: ${hex.replace(/\s/g, '')}
+#
+# Format details:
+#   AA B0 = header
+#   ${dataLen.toString(16).padStart(2, '0').toUpperCase()} = data length (${dataLen} bytes)
+#   ${widths.length.toString(16).padStart(2, '0').toUpperCase()} = number of buckets (${widths.length})
+#   ${reps.toString(16).padStart(2, '0').toUpperCase()} = repeats (${reps})
+#   buckets (μs): ${widths.join(', ')}
+#   55 = trailer
+
+${hex}
+`;
+}
+
+function genFlipperSub(freq, mod) {
+  // Flipper .sub format
+  const pulseData = parsedSignal.pulses.map(p => (p.level ? '' : '-') + p.duration).join(' ');
+  // Split into chunks of 512 chars (Flipper limit per line)
+  const chunks = [];
+  let current = '';
+  for (const token of pulseData.split(' ')) {
+    if ((current + ' ' + token).length > 480) {
+      chunks.push(current);
+      current = token;
+    } else {
+      current += (current ? ' ' : '') + token;
+    }
+  }
+  if (current) chunks.push(current);
+  const rawDataLines = chunks.map(c => 'RAW_Data: ' + c).join('\n');
+
+  const presetMap = {
+    'OOK': 'FuriHalSubGhzPresetOok650Async',
+    '2FSK': 'FuriHalSubGhzPreset2FSKDev238Async',
+    'GFSK': 'FuriHalSubGhzPresetGFSK9_99KbAsync',
+    'MSK': 'FuriHalSubGhzPresetMSK99_97KbAsync'
+  };
+
+  return `Filetype: Flipper SubGhz RAW File
+Version: 1
+Frequency: ${freq}
+Preset: ${presetMap[mod] || 'FuriHalSubGhzPresetOok650Async'}
+Protocol: RAW
+${rawDataLines}
+`;
+}
+
+function genCArray() {
+  const bytes = bitsToBytes(parsedSignal.bits);
+  const hexArr = bytes.map(b => '0x' + b.toString(16).padStart(2, '0').toUpperCase());
+  const lines = [];
+  for (let i = 0; i < hexArr.length; i += 16) {
+    lines.push('    ' + hexArr.slice(i, i+16).join(', ') + (i + 16 < hexArr.length ? ',' : ''));
+  }
+
+  return `/* MagnusRF - generic C/C++ byte array
+ * ${parsedSignal.bits.length} bits / ${bytes.length} bytes
+ * Bit duration: ${parsedSignal.bitDuration}μs
+ */
+
+#include <stdint.h>
+#include <stddef.h>
+
+const uint8_t  signal_data[] = {
+${lines.join('\n')}
+};
+const size_t   signal_length      = ${bytes.length};
+const uint16_t signal_bit_count   = ${parsedSignal.bits.length};
+const uint16_t signal_bit_us      = ${parsedSignal.bitDuration};
+`;
+}
+
+function genPythonPigpio(pin, reps) {
+  // Use waveform timings
+  const pulsesArr = parsedSignal.pulses.map(p => `(${p.duration}, ${p.level})`);
+  const lines = [];
+  for (let i = 0; i < pulsesArr.length; i += 6) {
+    lines.push('    ' + pulsesArr.slice(i, i+6).join(', ') + (i + 6 < pulsesArr.length ? ',' : ''));
+  }
+
+  return `#!/usr/bin/env python3
+"""
+MagnusRF - Raspberry Pi RF transmitter via pigpio
+Requires: sudo apt install pigpio python3-pigpio
+Start daemon: sudo pigpiod
+
+Wiring: connect RF transmitter DATA pin to GPIO ${pin}
+"""
+
+import pigpio
+import time
+
+TX_PIN = ${pin}
+REPEATS = ${reps}
+
+# List of (duration_us, level) tuples
+pulses = [
+${lines.join('\n')}
+]
+
+def main():
+    pi = pigpio.pi()
+    if not pi.connected:
+        print("pigpiod not running. Start: sudo pigpiod")
+        return
+
+    pi.set_mode(TX_PIN, pigpio.OUTPUT)
+    pi.write(TX_PIN, 0)
+
+    # Build waveform
+    pi.wave_clear()
+    wf = []
+    for duration_us, level in pulses:
+        if level:
+            wf.append(pigpio.pulse(1 << TX_PIN, 0, duration_us))
+        else:
+            wf.append(pigpio.pulse(0, 1 << TX_PIN, duration_us))
+    pi.wave_add_generic(wf)
+    wid = pi.wave_create()
+    if wid < 0:
+        print("wave_create failed")
+        pi.stop()
+        return
+
+    print(f"Transmitting {REPEATS} times...")
+    for _ in range(REPEATS):
+        pi.wave_send_once(wid)
+        while pi.wave_tx_busy():
+            time.sleep(0.001)
+        time.sleep(0.01)
+    print("Done.")
+
+    pi.wave_delete(wid)
+    pi.write(TX_PIN, 0)
+    pi.stop()
+
+if __name__ == '__main__':
+    main()
+`;
+}
+
+// ============================================================
+// HELPERS - COPY / DOWNLOAD / CLEAR
+// ============================================================
+
+function copyOutput() {
+  const txt = document.getElementById('outData').value;
+  if (!txt) return;
+  navigator.clipboard.writeText(txt).then(() => {
+    showOutMsg('✓ Αντιγράφηκε στο clipboard!', 'ok');
+  }).catch(() => {
+    showOutMsg('⚠ Copy failed - επίλεξε χειροκίνητα', 'err');
+  });
+}
+
+function downloadOutput() {
+  const txt = document.getElementById('outData').value;
+  if (!txt) return;
+  const fmt = document.getElementById('outFormat').value;
+  const extMap = {
+    'attiny13': 'ino', 'attiny85': 'ino', 'arduino': 'ino',
+    'esp32_gpio': 'ino', 'esp32_cc1101': 'ino',
+    'hex_dump': 'txt', 'bin_dump': 'txt', 'pulse_us': 'txt',
+    'rfraw_b0': 'txt', 'flipper_sub': 'sub',
+    'c_array': 'c', 'python_pigpio': 'py'
+  };
+  const ext = extMap[fmt] || 'txt';
+  const name = 'magnus_rf_' + fmt + '.' + ext;
+
+  const blob = new Blob([txt], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+  showOutMsg('✓ Downloaded ως ' + name, 'ok');
+}
+
+function clearAll() {
+  document.getElementById('inData').value = '';
+  document.getElementById('outData').value = '';
+  document.getElementById('rawBits').value = '';
+  document.getElementById('rawHex').value = '';
+  document.getElementById('parseMsg').innerHTML = '';
+  document.getElementById('outMsg').innerHTML = '';
+  parsedSignal.bits = [];
+  parsedSignal.pulses = [];
+  parsedSignal.bursts = [];
+  parsedSignal.activeBurst = -1;
+  parsedSignal.byteAligned = true;
+  document.getElementById('statBits').textContent = '0';
+  document.getElementById('statBytes').textContent = '0';
+  document.getElementById('statDur').textContent = '0 ms';
+  document.getElementById('statFmt').textContent = '—';
+  drawWaveform();
+}
+
+function showOutMsg(text, kind) {
+  document.getElementById('outMsg').innerHTML = '<div class="msg msg-' + kind + '">' + text + '</div>';
+  setTimeout(() => { document.getElementById('outMsg').innerHTML = ''; }, 3000);
+}
+
+// Initial canvas draw
+drawWaveform();
+
+// Auto-parse on input change (debounced)
+let parseTimer = null;
+document.getElementById('inData').addEventListener('input', () => {
+  clearTimeout(parseTimer);
+  parseTimer = setTimeout(() => {
+    if (document.getElementById('inData').value.trim().length > 0) {
+      parseInput();
+    }
+  }, 500);
+});
+document.getElementById('bitDuration').addEventListener('change', () => {
+  if (parsedSignal.bits.length > 0) parseInput();
+});
+</script>
+</body>
+</html>
