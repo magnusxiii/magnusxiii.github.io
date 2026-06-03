@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Δάνεια · Ο Απόλυτος Οδηγός v3.1</title>
+<!-- Fonts are loaded online when available; if offline, system fallbacks kick in -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --line: #1a1a1a;
+    --line-soft: #d4cfc2;
+    --accent: #c8401c;
+    --accent-2: #1e5631;
+    --accent-3: #b8860b;
+    --warn: #8b0000;
+    --card: #fbf8f1;
+    --hover: #ebe6da;
+    --good-bg: #e3efde;
+    --warn-bg: #fbf2db;
+    --bad-bg: #fde2e2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .container { max-width: 1500px; margin: 0 auto; }
+
+  /* Header */
+  header {
+    border-top: 4px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 24px 0 16px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .title {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-weight: 800;
+    font-size: clamp(32px, 5vw, 56px);
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+  }
+
+  .subtitle {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  .header-meta {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+  .header-meta strong { color: var(--ink); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--ink);
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .tab {
+    background: none; border: none;
+    padding: 14px 22px;
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.1em; cursor: pointer;
+    color: var(--ink-soft);
+    border-bottom: 3px solid transparent;
+    white-space: nowrap; transition: all 0.15s;
+  }
+  .tab:hover { color: var(--ink); background: var(--hover); }
+  .tab.active { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-num { color: var(--accent); margin-right: 6px; font-weight: 600; }
+
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--ink);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .card-title {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 24px; font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .card-sub {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.15em; color: var(--ink-soft);
+    margin-bottom: 20px;
+  }
+
+  /* Inputs */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .field { display: flex; flex-direction: column; }
+  .field label {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .input-wrap { position: relative; }
+  .input-wrap::after {
+    content: attr(data-suffix);
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 13px; color: var(--ink-soft);
+    pointer-events: none;
+  }
+  input[type="number"], input[type="text"], select {
+    width: 100%;
+    padding: 10px 36px 10px 12px;
+    border: 1px solid var(--ink);
+    background: var(--bg);
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 15px; color: var(--ink);
+    transition: all 0.15s;
+  }
+  select { padding-right: 12px; }
+  input:focus, select:focus {
+    outline: none; background: #fff;
+    box-shadow: 3px 3px 0 var(--ink);
+    transform: translate(-2px, -2px);
+  }
+  input[readonly] { background: var(--hover); cursor: not-allowed; }
+
+  /* KPI Strip */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    border: 1px solid var(--ink);
+    background: var(--card);
+    margin-bottom: 24px;
+  }
+  .kpi {
+    padding: 18px 20px;
+    border-right: 1px solid var(--line-soft);
+  }
+  .kpi:last-child { border-right: none; }
+  .kpi-label {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .kpi-value.accent { color: var(--accent); }
+  .kpi-value.green { color: var(--accent-2); }
+  .kpi-value.gold { color: var(--accent-3); }
+  .kpi-value.bad { color: var(--warn); }
+  .kpi-sub {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 11px; color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* Scenarios grid */
+  .scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .scenario {
+    background: var(--card);
+    border: 1px solid var(--ink);
+    padding: 18px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .scenario.best {
+    border: 2px solid var(--accent-2);
+    box-shadow: 4px 4px 0 var(--accent-2);
+  }
+  .scenario.best::before {
+    content: "★ Καλύτερο Σύνολο";
+    position: absolute; top: -10px; right: 12px;
+    background: var(--accent-2); color: var(--bg);
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; padding: 3px 8px;
+  }
+  .scenario.worst { opacity: 0.78; }
+  .scenario .scenario-head {
+    display: flex; justify-content: space-between;
+    align-items: baseline; margin-bottom: 14px;
+    border-bottom: 1px solid var(--line-soft);
+    padding-bottom: 10px;
+  }
+  .scenario .name {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 18px; font-weight: 600;
+  }
+  .scenario .name-input {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 18px; font-weight: 600;
+    border: none; background: transparent;
+    padding: 4px 6px; margin-left: -6px;
+    width: 100%;
+  }
+  .scenario .name-input:focus {
+    box-shadow: none; background: var(--bg);
+    transform: none; outline: 1px solid var(--ink);
+  }
+
+  .scenario .inputs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px; margin-bottom: 14px;
+  }
+  .scenario .mini-field label {
+    font-size: 9px; margin-bottom: 4px;
+  }
+  .scenario .mini-field input {
+    padding: 6px 8px; font-size: 13px;
+  }
+
+  .scenario-stats { font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace; font-size: 12px; }
+  .scenario-stats .row {
+    display: flex; justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dotted var(--line-soft);
+  }
+  .scenario-stats .row:last-child { border-bottom: none; }
+  .scenario-stats .row span:last-child { font-weight: 600; }
+  .scenario-stats .row.highlight {
+    border-bottom: 1px solid var(--ink);
+    padding: 8px 0;
+    margin-top: 4px;
+  }
+  .scenario-stats .row.highlight span:last-child {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 16px;
+  }
+  .scenario .bar {
+    height: 6px; background: var(--line-soft);
+    margin-top: 12px; overflow: hidden;
+  }
+  .scenario .bar span {
+    display: block; height: 100%;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  }
+  .scenario .delete-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: 1px solid var(--line-soft);
+    width: 26px; height: 26px; cursor: pointer;
+    color: var(--ink-soft); font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+  }
+  .scenario .delete-btn:hover { background: var(--bad-bg); color: var(--warn); border-color: var(--warn); }
+
+  /* Decision boxes */
+  .decisions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .decision {
+    background: var(--card);
+    border-left: 4px solid var(--accent-3);
+    padding: 16px 18px;
+  }
+  .decision strong {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 15px; font-weight: 600;
+    display: block; margin-bottom: 6px;
+  }
+  .decision p {
+    font-size: 13px; color: var(--ink-soft);
+  }
+  .decision.good { border-left-color: var(--accent-2); background: var(--good-bg); }
+  .decision.warn { border-left-color: var(--accent-3); background: var(--warn-bg); }
+  .decision.bad { border-left-color: var(--warn); background: var(--bad-bg); }
+
+  /* Section heading */
+  .section-h {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 20px; font-weight: 600;
+    margin: 32px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ink);
+    display: flex; justify-content: space-between;
+    align-items: baseline;
+  }
+  .section-h .badge {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.15em; color: var(--ink-soft);
+    font-weight: 400;
+  }
+
+  /* Tables */
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--ink);
+    overflow: auto;
+    max-height: 600px;
+    margin-bottom: 24px;
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 13px;
+  }
+  thead {
+    position: sticky; top: 0;
+    background: var(--ink); color: var(--bg);
+    z-index: 2;
+  }
+  th {
+    padding: 12px; text-align: right;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.12em; font-weight: 500;
+  }
+  th:first-child, td:first-child { text-align: left; }
+  td {
+    padding: 10px 12px; text-align: right;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  tr:hover td { background: var(--hover); }
+  tr.year-end td {
+    background: #efe9da; font-weight: 600;
+    border-top: 1px solid var(--ink-soft);
+  }
+  tr.rate-change td {
+    background: #fde9e3;
+    border-top: 2px solid var(--accent);
+  }
+
+  /* Chart */
+  .chart-wrap {
+    background: var(--card);
+    border: 1px solid var(--ink);
+    padding: 20px;
+    margin-bottom: 24px;
+    height: 380px;
+  }
+
+  .svg-chart {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .svg-chart svg { flex: 1; width: 100%; height: 100%; }
+  .svg-chart .chart-title {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 15px; font-weight: 600;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .svg-chart .chart-legend {
+    display: flex; justify-content: center; gap: 18px;
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: 11px; margin-top: 8px; flex-wrap: wrap;
+  }
+  .svg-chart .legend-item {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .svg-chart .legend-swatch {
+    width: 14px; height: 14px; display: inline-block;
+  }
+  .svg-chart .tick text {
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: 10px; fill: var(--ink-soft);
+  }
+  .svg-chart .tick line { stroke: var(--line-soft); stroke-width: 1; }
+  .svg-chart .axis-label {
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: 10px; fill: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .svg-chart .bar-label {
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: 10px; fill: var(--ink);
+  }
+
+  /* Practical reading boxes */
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .checklist-box {
+    background: var(--card);
+    border: 1px solid var(--ink);
+    padding: 16px;
+    position: relative;
+    padding-top: 28px;
+  }
+  .checklist-box .num {
+    position: absolute; top: 0; left: 0;
+    background: var(--ink); color: var(--bg);
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: 10px; padding: 3px 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .checklist-box.gold .num { background: var(--accent-3); }
+  .checklist-box strong {
+    font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif;
+    font-size: 16px; font-weight: 600;
+    display: block; margin-bottom: 6px;
+  }
+  .checklist-box p {
+    font-size: 13px; color: var(--ink-soft);
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; gap: 12px;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 18px;
+    background: var(--ink); color: var(--bg);
+    border: none; cursor: pointer;
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.12em; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--accent); }
+  .btn-ghost {
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  .btn-ghost:hover { background: var(--ink); color: var(--bg); }
+
+  .selector {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .selector label {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--ink-soft);
+  }
+  .selector select { min-width: 240px; }
+
+  /* Tip */
+  .tip {
+    border-left: 4px solid var(--accent-3);
+    padding: 14px 18px;
+    background: var(--warn-bg);
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .tip strong { font-family: 'Fraunces', 'Palatino Linotype', Georgia, serif; font-weight: 600; }
+  .tip-warn { border-left-color: var(--warn); background: var(--bad-bg); }
+  .tip-good { border-left-color: var(--accent-2); background: var(--good-bg); }
+
+  .text-cols { columns: 2; column-gap: 32px; margin: 16px 0; }
+  @media (max-width: 700px) { .text-cols { columns: 1; } }
+  .text-cols p { margin-bottom: 12px; break-inside: avoid; }
+
+  /* Rule */
+  .rule {
+    display: flex; align-items: center; gap: 12px;
+    margin: 24px 0 14px;
+  }
+  .rule::before, .rule::after {
+    content: ""; flex: 1; height: 1px; background: var(--ink);
+  }
+  .rule span {
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.2em; color: var(--ink);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ink);
+    font-family: 'IBM Plex Mono', Consolas, 'Courier New', monospace;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.15em; color: var(--ink-soft);
+    display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+
+  @media print {
+    body { background: white; }
+    .tabs, .btn { display: none; }
+    .panel { display: block !important; page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div>
+    <div class="title">Δάνεια.<br>Ο&nbsp;Απόλυτος Οδηγός.</div>
+    <div class="subtitle">v3.1 · Stress Test · LTV · Debt Ratio · SVG Charts · 100% Offline</div>
+  </div>
+  <div class="header-meta">
+    <div>Έκδοση <strong>3.1 · Final</strong></div>
+    <div id="today-date"></div>
+    <div><strong>Magnus Tools</strong></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="main"><span class="tab-num">01</span>Υπολογιστής &amp; Σύγκριση</button>
+  <button class="tab" data-tab="prepay"><span class="tab-num">02</span>Πρόωρη Αποπληρωμή</button>
+  <button class="tab" data-tab="guide"><span class="tab-num">03</span>Οδηγός</button>
+</nav>
+
+<!-- ========================================== -->
+<!-- PANEL 1: MAIN CALCULATOR                    -->
+<!-- ========================================== -->
+<section class="panel active" id="panel-main">
+
+  <!-- LOAN BASICS -->
+  <div class="card">
+    <div class="card-title">Βάση Δανείου</div>
+    <div class="card-sub">Όλα ενημερώνονται ζωντανά καθώς πληκτρολογείς</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label>Αξία ακινήτου</label>
+        <div class="input-wrap" data-suffix="€">
+          <input type="number" id="propertyValue" value="100000" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field">
+        <label>Προκαταβολή</label>
+        <div class="input-wrap" data-suffix="€">
+          <input type="number" id="downPayment" value="0" min="0" step="1000">
+        </div>
+      </div>
+      <div class="field">
+        <label>Έξοδα στο δάνειο</label>
+        <div class="input-wrap" data-suffix="€">
+          <input type="number" id="financedCosts" value="0" min="0" step="100">
+        </div>
+      </div>
+      <div class="field">
+        <label>Διάρκεια</label>
+        <div class="input-wrap" data-suffix="έτη">
+          <input type="number" id="termYears" value="30" min="1" max="40" step="1">
+        </div>
+      </div>
+      <div class="field">
+        <label>Καθαρό εισόδημα/μήνα</label>
+        <div class="input-wrap" data-suffix="€">
+          <input type="number" id="monthlyIncome" value="0" min="0" step="50">
+        </div>
+      </div>
+      <div class="field">
+        <label>Stress Test (+)</label>
+        <div class="input-wrap" data-suffix="%">
+          <input type="number" id="stressBump" value="1.5" min="0" max="10" step="0.1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="kpis" id="kpis"></div>
+
+  <!-- SCENARIOS -->
+  <div class="section-h">
+    Σενάρια Προσφορών
+    <span class="badge">Επεξεργάσιμα · έως 8</span>
+  </div>
+
+  <div class="tip">
+    <strong>Λογική Switch Point:</strong> Σε σενάρια <em>fixed → κυμαινόμενο</em>, η <strong>1η δόση</strong> υπολογίζεται σαν να ίσχυε το fixed επιτόκιο σε όλη τη διάρκεια. Όταν λήξει η fixed περίοδος, ξαναϋπολογίζεται <strong>νέα δόση</strong> πάνω στο υπόλοιπο κεφάλαιο και στα έτη που μένουν. Η <strong>stress δόση</strong> είναι η ίδια προσομοίωση αλλά με επιτόκιο "Μετά %" + το stress bump.
+  </div>
+
+  <div class="toolbar">
+    <button class="btn" onclick="addScenario()">+ Νέο σενάριο</button>
+    <button class="btn btn-ghost" onclick="resetScenarios()">↺ Επαναφορά Eurobank preset</button>
+  </div>
+
+  <div class="scenarios-grid" id="scenariosGrid"></div>
+
+  <!-- DECISION GUIDE -->
+  <div class="section-h">Αυτόματα Συμπεράσματα <span class="badge">Decision Guide</span></div>
+  <div class="decisions" id="decisions"></div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="section-h">Συγκριτικός Πίνακας <span class="badge">All Scenarios</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Σενάριο</th>
+        <th>1η δόση</th>
+        <th>Μετά fixed</th>
+        <th>Stress δόση</th>
+        <th>Υπόλοιπο σε λήξη fixed</th>
+        <th>Σύνολο τόκων</th>
+        <th>Σύνολο πληρωμών</th>
+      </tr></thead>
+      <tbody id="comparisonBody"></tbody>
+    </table>
+  </div>
+
+  <!-- BAR CHART -->
+  <div class="chart-wrap"><div id="comparisonChart" class="svg-chart"></div></div>
+
+  <!-- HORIZON TABLE -->
+  <div class="section-h">
+    <span>Τι Έχω Πληρώσει σε...</span>
+    <span class="badge">Horizon Analysis</span>
+  </div>
+  <div class="selector">
+    <label>Σενάριο:</label>
+    <select id="horizonScenario"></select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Ορίζοντας</th>
+        <th>Πληρωμές μέχρι τότε</th>
+        <th>Τόκοι μέχρι τότε</th>
+        <th>Κεφάλαιο που έσβησε</th>
+        <th>Υπόλοιπο κεφαλαίου</th>
+      </tr></thead>
+      <tbody id="horizonBody"></tbody>
+    </table>
+  </div>
+
+  <!-- AMORTIZATION SCHEDULE -->
+  <div class="section-h">
+    Πίνακας Αποπληρωμής
+    <span class="badge">Amortization · ετήσια ομαδοποίηση</span>
+  </div>
+  <div class="selector">
+    <label>Σενάριο:</label>
+    <select id="scheduleScenario"></select>
+  </div>
+  <div class="chart-wrap"><div id="balanceChart" class="svg-chart"></div></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Έτος</th>
+        <th>Μηνιαία δόση</th>
+        <th>Πληρωμές έτους</th>
+        <th>Τόκοι έτους</th>
+        <th>Κεφάλαιο έτους</th>
+        <th>Υπόλοιπο τέλους</th>
+      </tr></thead>
+      <tbody id="scheduleBody"></tbody>
+    </table>
+  </div>
+
+</section>
+
+<!-- ========================================== -->
+<!-- PANEL 2: PREPAYMENT                         -->
+<!-- ========================================== -->
+<section class="panel" id="panel-prepay">
+  <div class="two-col">
+    <aside class="card">
+      <div class="card-title">Πρόωρη Αποπληρωμή</div>
+      <div class="card-sub">Πόσο γλιτώνεις με extra πληρωμές</div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label>Ποσό Δανείου</label>
+        <div class="input-wrap" data-suffix="€">
+          <input type="number" id="p-amount" value="100000" min="0">
+        </div>
+      </div>
+
+      <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="field">
+          <label>Διάρκεια</label>
+          <div class="input-wrap" data-suffix="έτη">
+            <input type="number" id="p-years" value="30" min="1" max="40">
+          </div>
+        </div>
+        <div class="field">
+          <label>Επιτόκιο</label>
+          <div class="input-wrap" data-suffix="%">
+            <input type="number" id="p-rate" value="3.72" step="0.01">
+          </div>
+        </div>
+      </div>
+
+      <div class="rule"><span>Στρατηγική</span></div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label>Τύπος Extra Πληρωμής</label>
+        <select id="p-mode">
+          <option value="monthly">Επιπλέον κάθε μήνα</option>
+          <option value="yearly">Εφάπαξ μία φορά τον χρόνο</option>
+          <option value="onetime">Μία φορά (lump sum)</option>
+        </select>
+      </div>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label>Ποσό Extra Πληρωμής</label>
+        <div class="input-wrap" data-suffix="€">
+          <input type="number" id="p-extra" value="100" min="0">
+        </div>
+      </div>
+
+      <div class="field" id="p-when-field" style="display:none; margin-bottom:14px;">
+        <label>Στον μήνα Νο.</label>
+        <input type="number" id="p-when" value="12" min="1">
+      </div>
+    </aside>
+
+    <div>
+      <div class="kpis" id="p-results"></div>
+      <div class="chart-wrap"><div id="p-chart" class="svg-chart"></div></div>
+      <div id="p-verdict"></div>
+
+      <div class="section-h">
+        Ετήσιος Πίνακας με Extra Πληρωμές
+        <span class="badge">Yearly Breakdown</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Έτος</th>
+            <th>Βασική δόση</th>
+            <th>Πληρωμές έτους</th>
+            <th>Τόκοι έτους</th>
+            <th>Κεφάλαιο έτους</th>
+            <th>Extra έτους</th>
+            <th>Υπόλοιπο τέλους</th>
+          </tr></thead>
+          <tbody id="p-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- PANEL 3: GUIDE                              -->
+<!-- ========================================== -->
+<section class="panel" id="panel-guide">
+  <div class="card">
+    <div class="card-title">Πρακτική Ανάγνωση Προσφοράς</div>
+    <div class="card-sub">Checklist · 6 πράγματα που πάντα κοιτάς</div>
+
+    <div class="tip">
+      <strong>Αν δεις:</strong> «3 χρόνια fixed 3,02% και μετά 425,95€», <em>μην κοιτάς μόνο το 3,02%</em>. Κοίτα τι υπονοεί αυτό για το μελλοντικό κυμαινόμενο και κυρίως <strong>τι υπόλοιπο κεφαλαίου θα έχεις τότε</strong>. Η τράπεζα το λέει αυτό για να φανεί η αρχική δόση χαμηλή — το πλήρες κόστος κρύβεται στη Φάση Β.
+    </div>
+
+    <div class="checklist-grid">
+      <div class="checklist-box">
+        <span class="num">Κοίτα 01</span>
+        <strong>Πρώτη δόση</strong>
+        <p>Αντέχεται εύκολα στο σημερινό cashflow; Είναι κάτω από το 30-35% του εισοδήματος;</p>
+      </div>
+      <div class="checklist-box">
+        <span class="num">Κοίτα 02</span>
+        <strong>Δόση μετά το fixed</strong>
+        <p>Αν βρεθείς εκεί, συνεχίζει να βγαίνει άνετα ή αρχίζει να στενεύει;</p>
+      </div>
+      <div class="checklist-box">
+        <span class="num">Κοίτα 03</span>
+        <strong>Υπόλοιπο τότε</strong>
+        <p>Πόσο κεφάλαιο έχεις πράγματι ξεχρεώσει στη λήξη της fixed περιόδου;</p>
+      </div>
+      <div class="checklist-box">
+        <span class="num">Κοίτα 04</span>
+        <strong>Συνολικό κόστος</strong>
+        <p>Ποιο σενάριο είναι λογιστικά φθηνότερο σε όλη τη διάρκεια;</p>
+      </div>
+      <div class="checklist-box">
+        <span class="num">Κοίτα 05</span>
+        <strong>Stress test</strong>
+        <p>Αν ανέβει το επιτόκιο κατά +1,5% ή +3%, σπάει ή κρατάει η ισορροπία;</p>
+      </div>
+      <div class="checklist-box gold">
+        <span class="num">Χρυσός Κανόνας</span>
+        <strong>Μη διαλέγεις μόνο από τη χαμηλή αρχική δόση</strong>
+        <p>Συχνά είναι το πιο ακριβό πακέτο όταν κοιτάξεις όλη τη διαδρομή.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Ο Οδηγός σε 12 Κανόνες</div>
+    <div class="card-sub">Πριν υπογράψεις οτιδήποτε</div>
+
+    <div class="text-cols">
+      <p><strong>01 · Το επιτόκιο δεν είναι το πλήρες κόστος.</strong> Πρόσθεσε εφάπαξ έξοδα φακέλου, εκτίμηση, νομικά, εγγραφή υποθήκης (~1-2% του δανείου). Ρώτα για το <em>ΣΕΠΕ</em> (Συνολικό Ετήσιο Πραγματικό Επιτόκιο) — εκεί φαίνεται η αλήθεια.</p>
+
+      <p><strong>02 · Σταθερό vs Κυμαινόμενο.</strong> Σταθερό = σιγουριά, ακριβότερη μακροπρόθεσμα. Κυμαινόμενο = ρίσκο, φθηνότερο όταν τα επιτόκια πέφτουν. Δεν υπάρχει σωστή απάντηση — εξαρτάται από το πόσο ρίσκο αντέχεις.</p>
+
+      <p><strong>03 · Μικρό σταθερό είναι "δώρο".</strong> 2-3 έτη σταθερό είναι συχνά χαμηλότερο από το κυμαινόμενο. Καλή επιλογή αν θες λίγη ησυχία στην αρχή.</p>
+
+      <p><strong>04 · Μακρύ σταθερό = ασφάλεια με κόστος.</strong> 15-25 έτη σταθερό σε προστατεύει από αύξηση, αλλά πληρώνεις premium ~0.5-1% παραπάνω. Συμφέρει μόνο αν πιστεύεις ότι τα επιτόκια θα ανέβουν πολύ.</p>
+
+      <p><strong>05 · Η διάρκεια καθορίζει τους τόκους.</strong> 30ετές δάνειο 100.000€ στο 4% πληρώνει ~72.000€ τόκους. Το ίδιο σε 20 έτη πληρώνει ~45.000€. Η μικρότερη δόση κρύβει τεράστιο κόστος.</p>
+
+      <p><strong>06 · Δόση ≤ 30-35% του εισοδήματος.</strong> Πάνω από αυτό μπαίνεις σε ζώνη κινδύνου. Οι τράπεζες δίνουν συχνά πάνω από όσο σου ταιριάζει.</p>
+
+      <p><strong>07 · LTV πάνω από 80% πονάει.</strong> Το Loan-to-Value (δάνειο/αξία) πάνω από 80% συνεπάγεται ή ψηλότερο επιτόκιο ή απαίτηση εγγυητή. Καλό target: ≤70%.</p>
+
+      <p><strong>08 · Stress test μόνος σου.</strong> Υπολόγισε τι δόση θα είχες αν τα κυμαινόμενα ανέβαιναν +1.5% ή +3%. Αν δεν αντέχεις, ή θες σταθερό, ή θες μικρότερο δάνειο.</p>
+
+      <p><strong>09 · Πρόωρη αποπληρωμή.</strong> Στα στεγαστικά μετά τις πρώτες δόσεις μπορείς να πληρώνεις παραπάνω χωρίς πέναλτι (συχνά). Κάθε 100€ επιπλέον στους πρώτους μήνες μπορεί να γλιτώσει 200-300€ συνολικά.</p>
+
+      <p><strong>10 · Ασφάλεια ζωής &amp; πυρός.</strong> Σχεδόν πάντα υποχρεωτικές. Πρόσθετο κόστος ~200-600€/έτος. Ρώτα αν μπορείς να επιλέξεις δικό σου ασφαλιστή — συχνά πιο φθηνά εκτός τράπεζας.</p>
+
+      <p><strong>11 · Καταναλωτικό ≠ Στεγαστικό.</strong> Καταναλωτικό: 5-12% επιτόκιο, χωρίς υποθήκη, έως 7-10 έτη. Στεγαστικό: 3-5%, με υποθήκη, έως 30-40 έτη.</p>
+
+      <p><strong>12 · Σύγκρινε 3+ τράπεζες.</strong> Οι όροι διαφέρουν αισθητά. Πάντα ζήτα την επίσημη <em>ΕΣΟΠ</em> (Ευρωπαϊκή Τυποποιημένη Πληροφόρηση) πριν αποφασίσεις.</p>
+    </div>
+
+    <div class="tip tip-warn">
+      <strong>Σημαντικό:</strong> Αυτό το εργαλείο είναι για υπολογισμούς και κατανόηση. Οι πραγματικές προσφορές των τραπεζών έχουν περισσότερα στοιχεία (ΣΕΠΕ, ρήτρες, ασφάλειες). Πάντα ζήτα την επίσημη ΕΣΟΠ.
+    </div>
+
+    <div class="rule"><span>Τύποι Υπολογισμού</span></div>
+
+    <p style="font-family:'IBM Plex Mono', monospace; font-size:13px; background:var(--card); padding:16px; border:1px solid var(--ink);">
+    <strong>Μηνιαία Δόση (Annuity):</strong><br>
+    M = P × [ r(1+r)ⁿ ] / [ (1+r)ⁿ − 1 ]<br><br>
+    Όπου: P = κεφάλαιο · r = μηνιαίο επιτόκιο = (ετήσιο% / 12) / 100 · n = συνολικοί μήνες<br><br>
+    <strong>Υπόλοιπο σε μήνα m:</strong><br>
+    B(m) = P × (1+r)^m − M × [(1+r)^m − 1] / r
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div>Magnus Tools · Loan Guide v3.0 · Merged Edition</div>
+  <div>Athens · <span id="footer-year"></span></div>
+</footer>
+
+</div>
+
+<script>
+//=================================================
+// UTILITIES
+//=================================================
+const currencyFmt = new Intl.NumberFormat('el-GR', {
+  style: 'currency', currency: 'EUR', maximumFractionDigits: 0
+});
+const currencyFmt2 = new Intl.NumberFormat('el-GR', {
+  style: 'currency', currency: 'EUR', maximumFractionDigits: 2
+});
+const eur = n => isFinite(n) ? currencyFmt2.format(n) : '—';
+const eurShort = n => isFinite(n) ? currencyFmt.format(n) : '—';
+const pct = (n, d=2) => isFinite(n) ? n.toFixed(d) + '%' : '—';
+
+document.getElementById('today-date').textContent =
+  new Date().toLocaleDateString('el-GR', { day:'2-digit', month:'long', year:'numeric' });
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+// Core math
+function monthlyPayment(P, annualRate, months) {
+  if (months <= 0 || P <= 0) return 0;
+  const r = (annualRate / 100) / 12;
+  if (r === 0) return P / months;
+  return (P * r) / (1 - Math.pow(1 + r, -months));
+}
+
+//=================================================
+// STATE
+//=================================================
+const defaultScenarios = [
+  { id: "floating", name: "Κυμαινόμενο", fixedYears: 0, introRate: 3.72, variableRate: 3.72 },
+  { id: "fixed3", name: "3 χρόνια fixed", fixedYears: 3, introRate: 3.02, variableRate: 3.87 },
+  { id: "fixed5", name: "5 χρόνια fixed", fixedYears: 5, introRate: 3.62, variableRate: 3.87 },
+  { id: "fixed10", name: "10 χρόνια fixed", fixedYears: 10, introRate: 3.82, variableRate: 3.87 },
+  { id: "fixed15", name: "15 χρόνια fixed", fixedYears: 15, introRate: 4.32, variableRate: 3.87 },
+];
+
+const state = {
+  scenarios: JSON.parse(JSON.stringify(defaultScenarios)),
+  selectedHorizonId: 'fixed3',
+  selectedScheduleId: 'fixed3'
+};
+
+//=================================================
+// LOAN BUILD
+//=================================================
+function buildSchedule(P, termMonths, scenario) {
+  const fixedMonths = Math.min(termMonths, Math.max(0, Math.round(scenario.fixedYears * 12)));
+  const introPayment = monthlyPayment(P, scenario.introRate, termMonths);
+  let switchBalance = null;
+  let switchPayment = introPayment;
+  let balance = P;
+  let totalInterest = 0;
+  const monthlyRows = [];
+
+  for (let m = 1; m <= termMonths; m++) {
+    let rate, payment;
+    if (fixedMonths === 0) {
+      rate = scenario.variableRate;
+      payment = monthlyPayment(P, scenario.variableRate, termMonths);
+      switchPayment = payment;
+    } else if (m <= fixedMonths) {
+      rate = scenario.introRate;
+      payment = introPayment;
+    } else {
+      if (m === fixedMonths + 1) {
+        switchBalance = balance;
+        switchPayment = monthlyPayment(balance, scenario.variableRate, termMonths - fixedMonths);
+      }
+      rate = scenario.variableRate;
+      payment = switchPayment;
+    }
+
+    const mr = rate / 100 / 12;
+    const interest = balance * mr;
+    let principal = payment - interest;
+    if (m === termMonths) {
+      principal = balance;
+      payment = interest + principal;
+    }
+    balance = Math.max(0, balance - principal);
+    totalInterest += interest;
+    monthlyRows.push({ month: m, rate, payment, interest, principal, balance });
+  }
+  if (fixedMonths > 0 && switchBalance === null) switchBalance = balance;
+  if (fixedMonths === 0) switchBalance = P;
+
+  // Yearly aggregation
+  const yearlyRows = [];
+  const totalYears = Math.ceil(termMonths / 12);
+  for (let y = 0; y < totalYears; y++) {
+    const slice = monthlyRows.slice(y * 12, y * 12 + 12);
+    yearlyRows.push({
+      year: y + 1,
+      payment: slice[0]?.payment ?? 0,
+      totalPaid: slice.reduce((s, r) => s + r.payment, 0),
+      totalInterest: slice.reduce((s, r) => s + r.interest, 0),
+      totalPrincipal: slice.reduce((s, r) => s + r.principal, 0),
+      endingBalance: slice[slice.length - 1]?.balance ?? 0
+    });
+  }
+
+  // Horizons (5/10/15/20/25 years and term-end)
+  const horizonYears = [5, 10, 15, 20, 25, 30, Math.ceil(termMonths/12)].filter((v, i, a) => a.indexOf(v) === i).sort((a,b)=>a-b);
+  const horizons = horizonYears.filter(y => y * 12 <= termMonths).map(y => {
+    const upto = monthlyRows.slice(0, y * 12);
+    return {
+      years: y,
+      totalPaid: upto.reduce((s, r) => s + r.payment, 0),
+      totalInterest: upto.reduce((s, r) => s + r.interest, 0),
+      totalPrincipal: upto.reduce((s, r) => s + r.principal, 0),
+      balance: upto[upto.length - 1]?.balance ?? 0
+    };
+  });
+
+  return {
+    introPayment, switchPayment, switchBalance,
+    totalPaid: monthlyRows.reduce((s, r) => s + r.payment, 0),
+    totalInterest,
+    monthlyRows, yearlyRows, horizons
+  };
+}
+
+function computeStress(P, termMonths, scenario, bump) {
+  // Stress: introRate as defined, but after fixed period the variableRate + bump
+  const stressScenario = { ...scenario, variableRate: scenario.variableRate + bump };
+  const sched = buildSchedule(P, termMonths, stressScenario);
+  return sched.switchPayment;
+}
+
+//=================================================
+// RENDER
+//=================================================
+function getLoanData() {
+  const propertyValue = +document.getElementById('propertyValue').value || 0;
+  const downPayment = Math.min(+document.getElementById('downPayment').value || 0, propertyValue);
+  const financedCosts = +document.getElementById('financedCosts').value || 0;
+  const termYears = +document.getElementById('termYears').value || 1;
+  const monthlyIncome = +document.getElementById('monthlyIncome').value || 0;
+  const stressBump = +document.getElementById('stressBump').value || 0;
+  const loanAmount = Math.max(0, propertyValue - downPayment + financedCosts);
+  const ltv = propertyValue > 0 ? (loanAmount / propertyValue) * 100 : 0;
+  const termMonths = termYears * 12;
+  return { propertyValue, downPayment, financedCosts, termYears, termMonths,
+           monthlyIncome, stressBump, loanAmount, ltv };
+}
+
+function evaluateAll(data) {
+  return state.scenarios.map(sc => {
+    const sched = buildSchedule(data.loanAmount, data.termMonths, sc);
+    const stressPayment = computeStress(data.loanAmount, data.termMonths, sc, data.stressBump);
+    const debtRatio = data.monthlyIncome > 0 ? (sched.introPayment / data.monthlyIncome) * 100 : null;
+    return {
+      ...sc,
+      ...sched,
+      stressPayment,
+      stressRate: sc.variableRate + data.stressBump,
+      debtRatio
+    };
+  });
+}
+
+function renderKpis(data, results) {
+  const best = results.reduce((a, b) => a.totalPaid < b.totalPaid ? a : b, results[0]);
+  const bestStart = results.reduce((a, b) => a.introPayment < b.introPayment ? a : b, results[0]);
+
+  let debtClass = '';
+  let debtMsg = 'Βάλε εισόδημα';
+  let debtVal = '—';
+  if (data.monthlyIncome > 0 && best) {
+    const ratio = (bestStart.introPayment / data.monthlyIncome) * 100;
+    debtVal = pct(ratio, 1);
+    if (ratio <= 30) { debtClass = 'green'; debtMsg = 'Άνετο'; }
+    else if (ratio <= 40) { debtClass = 'gold'; debtMsg = 'Οριακό'; }
+    else { debtClass = 'bad'; debtMsg = 'Πολύ βαρύ'; }
+  }
+
+  let ltvClass = 'green';
+  if (data.ltv > 80) ltvClass = 'bad';
+  else if (data.ltv > 70) ltvClass = 'gold';
+
+  const items = [
+    { label: 'Ποσό Δανείου', value: eurShort(data.loanAmount), color: 'accent',
+      sub: `${data.termYears} έτη` },
+    { label: 'LTV', value: pct(data.ltv, 1), color: ltvClass,
+      sub: data.ltv > 80 ? 'Πάνω από 80%' : data.ltv > 70 ? 'Πάνω από 70%' : 'Υγιές' },
+    { label: 'Min Δόση (1η)', value: eurShort(bestStart?.introPayment ?? 0), color: 'green',
+      sub: bestStart?.name ?? '' },
+    { label: 'Debt-to-Income', value: debtVal, color: debtClass,
+      sub: debtMsg },
+    { label: 'Καλύτερο σύνολο', value: eurShort(best?.totalPaid ?? 0), color: 'gold',
+      sub: best?.name ?? '' },
+  ];
+
+  document.getElementById('kpis').innerHTML = items.map(i => `
+    <div class="kpi">
+      <div class="kpi-label">${i.label}</div>
+      <div class="kpi-value ${i.color || ''}">${i.value}</div>
+      <div class="kpi-sub">${i.sub || ''}</div>
+    </div>
+  `).join('');
+}
+
+function renderScenarios(data, results) {
+  const maxTotal = Math.max(...results.map(r => r.totalPaid));
+  const minTotal = Math.min(...results.map(r => r.totalPaid));
+
+  const html = results.map((r, idx) => {
+    const isBest = r.totalPaid === minTotal && results.length > 1;
+    const isWorst = r.totalPaid === maxTotal && results.length > 1;
+    const barW = maxTotal > 0 ? (r.totalPaid / maxTotal) * 100 : 0;
+    return `
+      <div class="scenario ${isBest ? 'best' : ''} ${isWorst ? 'worst' : ''}" data-id="${r.id}">
+        ${results.length > 1 ? `<button class="delete-btn" onclick="deleteScenario('${r.id}')" title="Διαγραφή">×</button>` : ''}
+        <div class="scenario-head">
+          <input class="name-input" type="text" value="${r.name}" data-i="${idx}" data-k="name">
+        </div>
+        <div class="inputs-row">
+          <div class="mini-field">
+            <label>Έτη fixed</label>
+            <input type="number" value="${r.fixedYears}" min="0" max="40" data-i="${idx}" data-k="fixedYears">
+          </div>
+          <div class="mini-field">
+            <label>Επιτ. fixed %</label>
+            <input type="number" value="${r.introRate}" step="0.01" min="0" data-i="${idx}" data-k="introRate">
+          </div>
+          <div class="mini-field">
+            <label>Μετά %</label>
+            <input type="number" value="${r.variableRate}" step="0.01" min="0" data-i="${idx}" data-k="variableRate">
+          </div>
+        </div>
+        <div class="scenario-stats">
+          <div class="row"><span>1η δόση</span><span>${eur(r.introPayment)}</span></div>
+          <div class="row"><span>Μετά fixed</span><span>${r.fixedYears > 0 ? eur(r.switchPayment) : '—'}</span></div>
+          <div class="row"><span>Stress (+${data.stressBump}%)</span><span style="color:var(--accent)">${eur(r.stressPayment)}</span></div>
+          <div class="row"><span>Υπόλοιπο λήξη fixed</span><span>${r.fixedYears > 0 ? eurShort(r.switchBalance) : '—'}</span></div>
+          <div class="row"><span>Σύνολο τόκων</span><span>${eurShort(r.totalInterest)}</span></div>
+          <div class="row highlight"><span>Συνολικό κόστος</span><span>${eurShort(r.totalPaid)}</span></div>
+        </div>
+        <div class="bar"><span style="width:${barW}%"></span></div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('scenariosGrid').innerHTML = html;
+
+  // Bind events
+  document.querySelectorAll('.scenario input').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = +e.target.dataset.i, k = e.target.dataset.k;
+      if (state.scenarios[i]) {
+        state.scenarios[i][k] = e.target.type === 'number' ? +e.target.value : e.target.value;
+        refresh();
+      }
+    });
+  });
+}
+
+function renderDecisions(data, results) {
+  if (results.length === 0) { document.getElementById('decisions').innerHTML = ''; return; }
+
+  const bestStart = results.reduce((a, b) => a.introPayment < b.introPayment ? a : b);
+  const bestTotal = results.reduce((a, b) => a.totalPaid < b.totalPaid ? a : b);
+  const bestShield = [...results].filter(r => r.fixedYears > 0).sort((a, b) => b.fixedYears - a.fixedYears)[0];
+  const bestStress = results.reduce((a, b) => a.stressPayment < b.stressPayment ? a : b);
+
+  const notes = [];
+
+  notes.push({
+    cls: 'good',
+    title: '💰 Χαμηλότερη αρχική δόση',
+    body: `<strong>${bestStart.name}</strong> έχει την πιο χαμηλή 1η δόση στα <strong>${eur(bestStart.introPayment)}</strong>. Βοηθάει στο cashflow τα πρώτα χρόνια.`
+  });
+
+  notes.push({
+    cls: 'good',
+    title: '📉 Χαμηλότερο συνολικό κόστος',
+    body: `<strong>${bestTotal.name}</strong> βγάζει το μικρότερο σύνολο πληρωμών στα <strong>${eurShort(bestTotal.totalPaid)}</strong>. Καθαρά λογιστικά το πιο φθηνό.`
+  });
+
+  if (bestShield) {
+    notes.push({
+      cls: '',
+      title: '🛡 Καλύτερη προστασία από άνοδο',
+      body: `<strong>${bestShield.name}</strong> κρατάει σταθερό το επιτόκιο για <strong>${bestShield.fixedYears} χρόνια</strong>. Πληρώνεις λίγο παραπάνω για ηρεμία.`
+    });
+  }
+
+  notes.push({
+    cls: 'warn',
+    title: `⚠ Stress test +${data.stressBump}%`,
+    body: `Το <strong>${bestStress.name}</strong> αντέχει καλύτερα: stress δόση <strong>${eur(bestStress.stressPayment)}</strong>. Σκέψου αν αντέχεις τη χειρότερη.`
+  });
+
+  if (data.monthlyIncome > 0) {
+    const ratio = (bestStart.introPayment / data.monthlyIncome) * 100;
+    let cls = 'good', msg = `Η 1η δόση είναι <strong>${pct(ratio,1)}</strong> του εισοδήματος σου — άνετο επίπεδο.`;
+    if (ratio > 40) { cls = 'bad'; msg = `Η 1η δόση είναι <strong>${pct(ratio,1)}</strong> του εισοδήματος — <strong>πολύ βαρύ</strong>. Σκέψου μεγαλύτερη διάρκεια ή μικρότερο ποσό.`; }
+    else if (ratio > 30) { cls = 'warn'; msg = `Η 1η δόση είναι <strong>${pct(ratio,1)}</strong> του εισοδήματος — οριακά. Πάνω από 30% είναι ζώνη προσοχής.`; }
+    notes.push({ cls, title: '💼 Debt-to-Income Check', body: msg });
+  }
+
+  if (data.ltv > 80) {
+    notes.push({
+      cls: 'bad',
+      title: '🏠 LTV πάνω από 80%',
+      body: `Το LTV σου είναι <strong>${pct(data.ltv, 1)}</strong>. Οι τράπεζες χρεώνουν παραπάνω ή ζητούν εγγυητή. Σκέψου μεγαλύτερη προκαταβολή.`
+    });
+  } else if (data.ltv > 70) {
+    notes.push({
+      cls: 'warn',
+      title: '🏠 LTV 70-80%',
+      body: `Το LTV σου είναι <strong>${pct(data.ltv, 1)}</strong>. Σε αυτή τη ζώνη οι όροι αρχίζουν να χειροτερεύουν.`
+    });
+  } else if (data.ltv > 0) {
+    notes.push({
+      cls: 'good',
+      title: '🏠 Υγιές LTV',
+      body: `Το LTV σου είναι <strong>${pct(data.ltv, 1)}</strong>. Καλή θέση για διαπραγμάτευση.`
+    });
+  }
+
+  notes.push({
+    cls: '',
+    title: '🔑 Χρυσός κανόνας',
+    body: 'Μην κρίνεις μόνο από τη δόση. Κοίτα μαζί: 1η δόση, σύνολο, υπόλοιπο στη λήξη fixed, και stress δόση. Όλα μετράνε.'
+  });
+
+  document.getElementById('decisions').innerHTML = notes.map(n => `
+    <div class="decision ${n.cls}">
+      <strong>${n.title}</strong>
+      <p>${n.body}</p>
+    </div>
+  `).join('');
+}
+
+function renderComparison(data, results) {
+  document.getElementById('comparisonBody').innerHTML = results.map(r => `
+    <tr>
+      <td><strong>${r.name}</strong><br><span style="color:var(--ink-soft); font-size:11px;">${r.fixedYears > 0 ? `${r.fixedYears} έτη @ ${pct(r.introRate)} → ${pct(r.variableRate)}` : `Κυμαινόμενο @ ${pct(r.variableRate)}`}</span></td>
+      <td>${eur(r.introPayment)}</td>
+      <td>${r.fixedYears > 0 ? eur(r.switchPayment) : '—'}</td>
+      <td style="color:var(--accent)">${eur(r.stressPayment)}</td>
+      <td>${r.fixedYears > 0 ? eurShort(r.switchBalance) : '—'}</td>
+      <td>${eurShort(r.totalInterest)}</td>
+      <td><strong>${eurShort(r.totalPaid)}</strong></td>
+    </tr>
+  `).join('');
+}
+
+function renderHorizon(data, results) {
+  const sel = document.getElementById('horizonScenario');
+  sel.innerHTML = results.map(r => `<option value="${r.id}" ${r.id === state.selectedHorizonId ? 'selected' : ''}>${r.name}</option>`).join('');
+  const r = results.find(x => x.id === state.selectedHorizonId) ?? results[0];
+  if (!r) return;
+  document.getElementById('horizonBody').innerHTML = r.horizons.map(h => `
+    <tr>
+      <td><strong>${h.years} έτη</strong></td>
+      <td>${eurShort(h.totalPaid)}</td>
+      <td>${eurShort(h.totalInterest)}</td>
+      <td>${eurShort(h.totalPrincipal)}</td>
+      <td>${eurShort(h.balance)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderSchedule(data, results) {
+  const sel = document.getElementById('scheduleScenario');
+  sel.innerHTML = results.map(r => `<option value="${r.id}" ${r.id === state.selectedScheduleId ? 'selected' : ''}>${r.name}</option>`).join('');
+  const r = results.find(x => x.id === state.selectedScheduleId) ?? results[0];
+  if (!r) return;
+  const fixedYear = r.fixedYears > 0 ? r.fixedYears : -1;
+  document.getElementById('scheduleBody').innerHTML = r.yearlyRows.map(row => {
+    const cls = row.year === fixedYear ? 'rate-change' : '';
+    return `
+      <tr class="${cls}">
+        <td><strong>${row.year}${row.year === fixedYear ? ' · λήξη fixed →' : ''}</strong></td>
+        <td>${eur(row.payment)}</td>
+        <td>${eurShort(row.totalPaid)}</td>
+        <td>${eurShort(row.totalInterest)}</td>
+        <td>${eurShort(row.totalPrincipal)}</td>
+        <td>${eurShort(row.endingBalance)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+//=================================================
+// SVG CHART UTILITIES (no external dependencies)
+//=================================================
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function el(tag, attrs = {}, text) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function niceMax(value) {
+  if (value <= 0) return 100;
+  const power = Math.pow(10, Math.floor(Math.log10(value)));
+  const norm = value / power;
+  let nice;
+  if (norm <= 1) nice = 1;
+  else if (norm <= 2) nice = 2;
+  else if (norm <= 5) nice = 5;
+  else nice = 10;
+  return nice * power;
+}
+
+function formatTick(v) {
+  if (Math.abs(v) >= 1000) return (v / 1000).toFixed(0) + 'k';
+  return v.toFixed(0);
+}
+
+function svgStackedBar(container, opts) {
+  // opts: { title, labels[], series: [{name, data[], color}], xLabel, yLabel }
+  container.innerHTML = '';
+  const title = document.createElement('div');
+  title.className = 'chart-title'; title.textContent = opts.title || '';
+  container.appendChild(title);
+
+  const width = container.clientWidth || 600;
+  const height = (container.clientHeight || 340) - 60;
+  const margin = { top: 20, right: 20, bottom: 60, left: 60 };
+
+  const svg = el('svg', { viewBox: `0 0 ${width} ${height}`, preserveAspectRatio: 'xMidYMid meet' });
+
+  // Compute max
+  const totals = opts.labels.map((_, i) => opts.series.reduce((s, ser) => s + (ser.data[i] || 0), 0));
+  const maxVal = niceMax(Math.max(...totals));
+  const innerW = width - margin.left - margin.right;
+  const innerH = height - margin.top - margin.bottom;
+  const barWidth = innerW / opts.labels.length * 0.7;
+  const barGap = innerW / opts.labels.length * 0.3;
+
+  // Y axis ticks (5 levels)
+  const ticks = 5;
+  for (let i = 0; i <= ticks; i++) {
+    const v = (maxVal / ticks) * i;
+    const y = margin.top + innerH - (v / maxVal) * innerH;
+    const g = el('g', { class: 'tick' });
+    g.appendChild(el('line', { x1: margin.left, x2: width - margin.right, y1: y, y2: y }));
+    g.appendChild(el('text', { x: margin.left - 6, y: y + 3, 'text-anchor': 'end' }, formatTick(v) + '€'));
+    svg.appendChild(g);
+  }
+
+  // Bars
+  opts.labels.forEach((label, i) => {
+    const xCenter = margin.left + (innerW / opts.labels.length) * (i + 0.5);
+    let yAcc = margin.top + innerH;
+    const total = totals[i];
+
+    opts.series.forEach((ser, sIdx) => {
+      const v = ser.data[i] || 0;
+      const h = (v / maxVal) * innerH;
+      yAcc -= h;
+      svg.appendChild(el('rect', {
+        x: xCenter - barWidth / 2, y: yAcc,
+        width: barWidth, height: h,
+        fill: ser.color
+      }));
+    });
+
+    // Total label on top
+    svg.appendChild(el('text', {
+      x: xCenter, y: yAcc - 6,
+      'text-anchor': 'middle',
+      class: 'bar-label'
+    }, formatTick(total) + '€'));
+
+    // X axis label (rotated if long)
+    const xLabel = el('text', {
+      x: xCenter, y: margin.top + innerH + 18,
+      'text-anchor': 'middle',
+      class: 'axis-label'
+    }, label.length > 14 ? label.substring(0, 12) + '…' : label);
+    if (opts.labels.length > 5) {
+      xLabel.setAttribute('transform', `rotate(-20 ${xCenter} ${margin.top + innerH + 18})`);
+      xLabel.setAttribute('text-anchor', 'end');
+    }
+    svg.appendChild(xLabel);
+  });
+
+  // Axis lines
+  svg.appendChild(el('line', { x1: margin.left, x2: margin.left, y1: margin.top, y2: margin.top + innerH, stroke: '#1a1a1a', 'stroke-width': 1 }));
+  svg.appendChild(el('line', { x1: margin.left, x2: width - margin.right, y1: margin.top + innerH, y2: margin.top + innerH, stroke: '#1a1a1a', 'stroke-width': 1 }));
+
+  container.appendChild(svg);
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  opts.series.forEach(ser => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<span class="legend-swatch" style="background:${ser.color}"></span>${ser.name}`;
+    legend.appendChild(item);
+  });
+  container.appendChild(legend);
+}
+
+function svgLineChart(container, opts) {
+  // opts: { title, labels[], series: [{name, data[], color}], xLabel, yLabel, fill }
+  container.innerHTML = '';
+  const title = document.createElement('div');
+  title.className = 'chart-title'; title.textContent = opts.title || '';
+  container.appendChild(title);
+
+  const width = container.clientWidth || 600;
+  const height = (container.clientHeight || 340) - 60;
+  const margin = { top: 20, right: 20, bottom: 50, left: 60 };
+
+  const svg = el('svg', { viewBox: `0 0 ${width} ${height}`, preserveAspectRatio: 'xMidYMid meet' });
+
+  // Compute max across all series
+  const allValues = opts.series.flatMap(s => s.data);
+  const maxVal = niceMax(Math.max(...allValues, 1));
+  const innerW = width - margin.left - margin.right;
+  const innerH = height - margin.top - margin.bottom;
+  const n = opts.labels.length;
+
+  // Y axis ticks
+  const ticks = 5;
+  for (let i = 0; i <= ticks; i++) {
+    const v = (maxVal / ticks) * i;
+    const y = margin.top + innerH - (v / maxVal) * innerH;
+    const g = el('g', { class: 'tick' });
+    g.appendChild(el('line', { x1: margin.left, x2: width - margin.right, y1: y, y2: y }));
+    g.appendChild(el('text', { x: margin.left - 6, y: y + 3, 'text-anchor': 'end' }, formatTick(v) + '€'));
+    svg.appendChild(g);
+  }
+
+  // X axis ticks (max ~10 labels)
+  const xStep = Math.max(1, Math.ceil(n / 10));
+  for (let i = 0; i < n; i += xStep) {
+    const x = margin.left + (innerW / Math.max(1, n - 1)) * i;
+    const g = el('g', { class: 'tick' });
+    g.appendChild(el('text', { x, y: margin.top + innerH + 16, 'text-anchor': 'middle' }, opts.labels[i]));
+    svg.appendChild(g);
+  }
+
+  // Series
+  opts.series.forEach(ser => {
+    const points = ser.data.map((v, i) => {
+      const x = margin.left + (innerW / Math.max(1, n - 1)) * i;
+      const y = margin.top + innerH - (v / maxVal) * innerH;
+      return [x, y];
+    });
+
+    // Area fill
+    if (opts.fill !== false) {
+      const baseY = margin.top + innerH;
+      let pathD = `M ${points[0][0]} ${baseY} L ${points.map(p => p.join(' ')).join(' L ')} L ${points[points.length-1][0]} ${baseY} Z`;
+      svg.appendChild(el('path', {
+        d: pathD,
+        fill: ser.color,
+        'fill-opacity': '0.12'
+      }));
+    }
+
+    // Line
+    const lineD = 'M ' + points.map(p => p.join(' ')).join(' L ');
+    svg.appendChild(el('path', {
+      d: lineD,
+      fill: 'none',
+      stroke: ser.color,
+      'stroke-width': 2.2,
+      'stroke-linejoin': 'round'
+    }));
+  });
+
+  // Axis lines
+  svg.appendChild(el('line', { x1: margin.left, x2: margin.left, y1: margin.top, y2: margin.top + innerH, stroke: '#1a1a1a', 'stroke-width': 1 }));
+  svg.appendChild(el('line', { x1: margin.left, x2: width - margin.right, y1: margin.top + innerH, y2: margin.top + innerH, stroke: '#1a1a1a', 'stroke-width': 1 }));
+
+  container.appendChild(svg);
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  opts.series.forEach(ser => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<span class="legend-swatch" style="background:${ser.color}"></span>${ser.name}`;
+    legend.appendChild(item);
+  });
+  container.appendChild(legend);
+}
+
+//=================================================
+// CHARTS (built on SVG)
+//=================================================
+function makeComparisonChart(data, results) {
+  svgStackedBar(document.getElementById('comparisonChart'), {
+    title: `Συνολικό Κόστος Πληρωμών · Δάνειο ${eurShort(data.loanAmount)} · ${data.termYears} έτη`,
+    labels: results.map(r => r.name),
+    series: [
+      { name: 'Κεφάλαιο', data: results.map(() => data.loanAmount), color: '#1e5631' },
+      { name: 'Τόκοι', data: results.map(r => r.totalInterest), color: '#c8401c' }
+    ]
+  });
+}
+
+function makeBalanceChart(data, results) {
+  const r = results.find(x => x.id === state.selectedScheduleId) ?? results[0];
+  if (!r) return;
+  let cumInterest = 0;
+  const cumInterestData = r.yearlyRows.map(y => (cumInterest += y.totalInterest));
+  svgLineChart(document.getElementById('balanceChart'), {
+    title: `Πορεία Δανείου · ${r.name}`,
+    labels: r.yearlyRows.map(y => 'Έτ.' + y.year),
+    series: [
+      { name: 'Υπόλοιπο Κεφαλαίου', data: r.yearlyRows.map(y => y.endingBalance), color: '#1e5631' },
+      { name: 'Σωρευτικοί Τόκοι', data: cumInterestData, color: '#c8401c' }
+    ]
+  });
+}
+
+// Window resize - re-render charts to adapt
+window.addEventListener('resize', () => {
+  if (window._lastRefreshData) {
+    const { data, results } = window._lastRefreshData;
+    makeComparisonChart(data, results);
+    makeBalanceChart(data, results);
+  }
+  if (window._lastPrepayData) renderPrepayChart(window._lastPrepayData);
+});
+
+//=================================================
+// REFRESH
+//=================================================
+function refresh() {
+  const data = getLoanData();
+  const results = evaluateAll(data);
+  if (!results.some(r => r.id === state.selectedHorizonId)) state.selectedHorizonId = results[0]?.id;
+  if (!results.some(r => r.id === state.selectedScheduleId)) state.selectedScheduleId = results[0]?.id;
+  renderKpis(data, results);
+  renderScenarios(data, results);
+  renderDecisions(data, results);
+  renderComparison(data, results);
+  renderHorizon(data, results);
+  renderSchedule(data, results);
+  makeComparisonChart(data, results);
+  makeBalanceChart(data, results);
+  window._lastRefreshData = { data, results };
+}
+
+function addScenario() {
+  if (state.scenarios.length >= 8) return;
+  const newId = 'custom_' + Date.now();
+  state.scenarios.push({ id: newId, name: 'Νέο Σενάριο', fixedYears: 0, introRate: 3.5, variableRate: 3.87 });
+  refresh();
+}
+function deleteScenario(id) {
+  if (state.scenarios.length <= 1) return;
+  state.scenarios = state.scenarios.filter(s => s.id !== id);
+  refresh();
+}
+function resetScenarios() {
+  state.scenarios = JSON.parse(JSON.stringify(defaultScenarios));
+  state.selectedHorizonId = 'fixed3';
+  state.selectedScheduleId = 'fixed3';
+  refresh();
+}
+
+// Bind global inputs
+['propertyValue','downPayment','financedCosts','termYears','monthlyIncome','stressBump'].forEach(id => {
+  document.getElementById(id).addEventListener('input', refresh);
+});
+document.getElementById('horizonScenario').addEventListener('change', e => {
+  state.selectedHorizonId = e.target.value; refresh();
+});
+document.getElementById('scheduleScenario').addEventListener('change', e => {
+  state.selectedScheduleId = e.target.value; refresh();
+});
+
+refresh();
+
+//=================================================
+// PREPAYMENT PANEL
+//=================================================
+function amortize(P, annualRate, months) {
+  const r = (annualRate / 100) / 12;
+  const pmt = monthlyPayment(P, annualRate, months);
+  const schedule = [];
+  let balance = P;
+  for (let m = 0; m < months; m++) {
+    const interest = balance * r;
+    const principal = pmt - interest;
+    balance = Math.max(0, balance - principal);
+    schedule.push({ month: m + 1, payment: pmt, interest, principal, balance });
+  }
+  return { schedule, payment: pmt };
+}
+
+function simulatePrepay(P, annualRate, months, mode, extra, when) {
+  const r = (annualRate / 100) / 12;
+  const pmt = monthlyPayment(P, annualRate, months);
+  const schedule = [];
+  let balance = P;
+  let m = 0;
+  while (balance > 0.01 && m < months * 2) {
+    m++;
+    const interest = balance * r;
+    let principal = pmt - interest;
+    let extraThisMonth = 0;
+    if (mode === 'monthly') extraThisMonth = extra;
+    else if (mode === 'yearly' && m % 12 === 0) extraThisMonth = extra;
+    else if (mode === 'onetime' && m === when) extraThisMonth = extra;
+    principal += extraThisMonth;
+    if (principal > balance) principal = balance;
+    balance = Math.max(0, balance - principal);
+    schedule.push({ month: m, payment: pmt + extraThisMonth, interest, principal, balance, extra: extraThisMonth });
+    if (balance <= 0.01) break;
+  }
+  return { schedule, payment: pmt };
+}
+
+document.getElementById('p-mode').addEventListener('change', e => {
+  document.getElementById('p-when-field').style.display = e.target.value === 'onetime' ? 'flex' : 'none';
+  calcPrepay();
+});
+
+function renderPrepayChart(payload) {
+  const { baseBalances, newBalances } = payload;
+  const maxLen = Math.max(baseBalances.length, newBalances.length);
+  const labels = Array.from({ length: maxLen }, (_, i) => 'Μ.' + (i + 1));
+  // pad newBalances with zeros to match length
+  const newPadded = [...newBalances];
+  while (newPadded.length < maxLen) newPadded.push(0);
+
+  svgLineChart(document.getElementById('p-chart'), {
+    title: 'Υπόλοιπο Δανείου · Σύγκριση',
+    labels,
+    series: [
+      { name: 'Χωρίς extra', data: baseBalances, color: '#c8401c' },
+      { name: 'Με extra πληρωμές', data: newPadded, color: '#1e5631' }
+    ]
+  });
+}
+
+function renderPrepayTable(P, schedule, basePmt) {
+  const tbody = document.getElementById('p-table');
+  if (!tbody) return;
+  const years = [];
+  for (let m = 0; m < schedule.length; m += 12) {
+    const slice = schedule.slice(m, m + 12);
+    if (slice.length === 0) break;
+    years.push({
+      year: Math.floor(m / 12) + 1,
+      payment: basePmt,
+      totalPaid: slice.reduce((s, r) => s + r.payment, 0),
+      totalInterest: slice.reduce((s, r) => s + r.interest, 0),
+      totalPrincipal: slice.reduce((s, r) => s + (r.principal - (r.extra || 0)), 0),
+      totalExtra: slice.reduce((s, r) => s + (r.extra || 0), 0),
+      endingBalance: slice[slice.length - 1]?.balance ?? 0
+    });
+  }
+  tbody.innerHTML = years.map(y => `
+    <tr>
+      <td><strong>${y.year}</strong></td>
+      <td>${eur(y.payment)}</td>
+      <td>${eurShort(y.totalPaid)}</td>
+      <td>${eurShort(y.totalInterest)}</td>
+      <td>${eurShort(y.totalPrincipal)}</td>
+      <td style="color:var(--accent-2); font-weight:600">${eurShort(y.totalExtra)}</td>
+      <td>${eurShort(y.endingBalance)}</td>
+    </tr>
+  `).join('');
+}
+
+function calcPrepay() {
+  const P = +document.getElementById('p-amount').value;
+  const years = +document.getElementById('p-years').value;
+  const rate = +document.getElementById('p-rate').value;
+  const mode = document.getElementById('p-mode').value;
+  const extra = +document.getElementById('p-extra').value || 0;
+  const when = +document.getElementById('p-when').value || 1;
+  const months = years * 12;
+
+  if (P <= 0 || months <= 0) return;
+
+  const base = amortize(P, rate, months);
+  const baseTotal = base.payment * months;
+  const baseInterest = baseTotal - P;
+  const result = simulatePrepay(P, rate, months, mode, extra, when);
+  const totalPaid = result.schedule.reduce((s, r) => s + r.payment, 0);
+  const totalInterest = result.schedule.reduce((s, r) => s + r.interest, 0);
+  const monthsSaved = months - result.schedule.length;
+  const interestSaved = baseInterest - totalInterest;
+
+  document.getElementById('p-results').innerHTML = [
+    { label: 'Νέα Διάρκεια', value: result.schedule.length + ' μήνες', color: 'accent',
+      sub: (result.schedule.length / 12).toFixed(1) + ' έτη' },
+    { label: 'Εξοικονόμηση Μηνών', value: monthsSaved.toString(), color: 'green',
+      sub: (monthsSaved / 12).toFixed(1) + ' έτη νωρίτερα' },
+    { label: 'Εξοικον. Τόκων', value: eurShort(interestSaved), color: 'green',
+      sub: 'από ' + eurShort(baseInterest) },
+    { label: 'Συν. Κόστος', value: eurShort(totalPaid),
+      sub: 'vs ' + eurShort(baseTotal) },
+  ].map(i => `
+    <div class="kpi">
+      <div class="kpi-label">${i.label}</div>
+      <div class="kpi-value ${i.color || ''}">${i.value}</div>
+      <div class="kpi-sub">${i.sub || ''}</div>
+    </div>
+  `).join('');
+
+  const payload = {
+    baseBalances: base.schedule.map(r => r.balance),
+    newBalances: result.schedule.map(r => r.balance)
+  };
+  window._lastPrepayData = payload;
+  renderPrepayChart(payload);
+  renderPrepayTable(P, result.schedule, base.payment);
+
+  document.getElementById('p-verdict').innerHTML = `
+    <div class="tip tip-good">
+      <strong>Αποτέλεσμα:</strong> Με extra πληρωμή <strong>${eurShort(extra)}</strong> ${
+        mode === 'monthly' ? 'κάθε μήνα' : mode === 'yearly' ? 'κάθε χρόνο' : `στον μήνα ${when}`
+      }, γλιτώνεις <strong>${eurShort(interestSaved)}</strong> σε τόκους και τελειώνεις
+      <strong>${(monthsSaved / 12).toFixed(1)} έτη νωρίτερα</strong>.
+    </div>
+    ${rate < 4 ? `<div class="tip tip-warn">
+      <strong>Σκέψου το:</strong> Με επιτόκιο ${pct(rate)}, ίσως τα ίδια λεφτά σε επένδυση με 5-7% απόδοση να έβγαζαν περισσότερα. Η πρόωρη αποπληρωμή είναι σίγουρη "απόδοση" ίση με το επιτόκιο.
+    </div>` : ''}
+  `;
+}
+
+['p-amount','p-years','p-rate','p-extra','p-when'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calcPrepay);
+});
+calcPrepay();
+</script>
+</body>
+</html>
