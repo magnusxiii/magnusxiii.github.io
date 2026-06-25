@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <title>RapidSign PlanetSim Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    button, a {
+      display: block;
+      margin: 10px 0;
+      padding: 14px;
+      font-size: 16px;
+      background: #0b6efd;
+      color: white;
+      text-decoration: none;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    pre {
+      background: #111;
+      color: #0f0;
+      padding: 15px;
+      white-space: pre-wrap;
+      border-radius: 6px;
+      min-height: 120px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>RapidSign PlanetSim Test</h2>
+
+<button onclick="test('/ping')">1. Test PlanetSim → Cloudflare Worker</button>
+
+<button onclick="test('/origin-test')">2. Test Worker → app.rapidsign.com.gr</button>
+
+<a href="https://rapid-test.tristaniaa2.workers.dev/" target="_blank">
+  3. Άνοιγμα RapidSign μέσω Worker Proxy
+</a>
+
+<a href="https://app.rapidsign.com.gr/" target="_blank">
+  4. Άνοιγμα RapidSign απευθείας
+</a>
+
+<pre id="out">Πάτησε ένα test...</pre>
+
+<script>
+const WORKER = "https://rapid-test.tristaniaa2.workers.dev";
+
+async function test(path) {
+  const out = document.getElementById("out");
+  out.textContent = "Τρέχει test: " + path + "\n";
+
+  try {
+    const r = await fetch(WORKER + path, {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    const text = await r.text();
+
+    out.textContent =
+      "HTTP Status: " + r.status + "\n\n" +
+      text;
+
+  } catch (e) {
+    out.textContent = "ERROR:\n" + e;
+  }
+}
+</script>
+
+</body>
+</html>
