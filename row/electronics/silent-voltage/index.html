@@ -13,10 +13,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>
+  // Αποθήκευση: στην εφαρμογή Android πάει στη μόνιμη μνήμη της εφαρμογής, αλλιώς localStorage
+  window.SV_APP = !!window.AndroidBridge;
+  window.SV_LS = window.SV_APP ? {
+    getItem: function (k) { var v = AndroidBridge.storeGet(k); return (v === undefined || v === null || v === '\u0000') ? null : v; },
+    setItem: function (k, v) { AndroidBridge.storeSet(k, String(v)); },
+    removeItem: function (k) { AndroidBridge.storeRemove(k); }
+  } : window.localStorage;
+  if (window.SV_APP) document.documentElement.classList.add('in-app');
   // Θέμα πριν το πρώτο render (χωρίς «αναλαμπή»)
   (function () {
     try {
-      var t = localStorage.getItem('silentvoltage.theme');
+      var t = SV_LS.getItem('silentvoltage.theme');
       if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', t);
     } catch (e) {}
@@ -103,6 +111,7 @@ kbd { font-family: var(--mono); font-size: 11px; color: var(--faint); border: 1p
 
 /* ---------- buttons ---------- */
 .btn {
+  max-width: 100%;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 38px; padding: 0 14px;
   border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
   font-weight: 600; font-size: 13.5px; cursor: pointer; white-space: nowrap; text-decoration: none;
@@ -144,6 +153,7 @@ main { max-width: 1440px; margin: 0 auto; padding: 22px 24px 80px; }
 .stat .v { font-size: 28px; font-weight: 800; letter-spacing: -.03em; margin-top: 4px; font-variant-numeric: tabular-nums; }
 .stat .v small { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: 0; margin-left: 4px; }
 .stat.danger .v { color: var(--danger); }
+.stat .sub { color: var(--faint); font-size: 12px; font-weight: 600; margin-top: 2px; position: relative; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
 .chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px; flex: 1 1 100%; min-width: 0; }
@@ -357,7 +367,21 @@ select.in { appearance: none; cursor: pointer; background-image: url("data:image
   .search kbd { display: none; }
   .top-actions { margin-left: auto; }
   .top-actions .btn .lbl { display: none; }
-  .top-actions .btn { width: 38px; padding: 0; }
+  .top-actions .btn { width: 36px; height: 36px; padding: 0; }
+  .top-actions { gap: 6px; }
+  .top-actions .icon-btn { width: 36px; height: 36px; }
+  .topbar-in { flex-wrap: wrap; row-gap: 10px; }
+  .brand { min-width: 0; }
+  .brand small { display: none; }
+  .brand b { font-size: 15px; white-space: nowrap; }
+  .logo { width: 34px; height: 34px; }
+  .toolbar { gap: 8px; }
+  .tool-right { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .tool-right::-webkit-scrollbar { display: none; }
+  .tool-right .select { flex: none; }
+  .tool-right .seg { flex: none; }
+  .seg button span { display: none; }
+  .seg button { padding: 0 11px; }
   main { padding: 16px 14px 70px; }
   .hero h1 { font-size: 22px; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -380,6 +404,10 @@ select.in { appearance: none; cursor: pointer; background-image: url("data:image
   .task .del { opacity: 1; }
   .tl-i .d button { opacity: 1; }
 }
+html.in-app, html.in-app body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+html.in-app .card:hover, html.in-app .stat:hover { transform: none; }
+html.in-app .topbar { padding-top: env(safe-area-inset-top); }
+@media (max-width: 380px) { .brand b { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
 /* ---------- PDF / εκτύπωση ---------- */
@@ -611,7 +639,7 @@ const URL_API = new URLSearchParams(location.search).get('api');
 const LOCAL_API = location.protocol === 'file:' ? 'http://127.0.0.1:8787' : '';
 function loadCfg() {
   let c = null;
-  try { c = JSON.parse(localStorage.getItem(CFG_KEY) || sessionStorage.getItem(CFG_KEY) || 'null'); } catch {}
+  try { c = JSON.parse(SV_LS.getItem(CFG_KEY) || sessionStorage.getItem(CFG_KEY) || 'null'); } catch {}
   c = c || {};
   if (URL_API) c.apiUrl = URL_API;
   if (!c.apiUrl) c.apiUrl = LOCAL_API || PRESET.apiUrl || '';
@@ -619,8 +647,8 @@ function loadCfg() {
 }
 function saveCfg(c, remember = true) {
   try {
-    localStorage.removeItem(CFG_KEY); sessionStorage.removeItem(CFG_KEY);
-    (remember ? localStorage : sessionStorage).setItem(CFG_KEY, JSON.stringify(c));
+    SV_LS.removeItem(CFG_KEY); sessionStorage.removeItem(CFG_KEY);
+    (remember ? SV_LS : sessionStorage).setItem(CFG_KEY, JSON.stringify(c));
   } catch {}
 }
 let cfg = loadCfg();
@@ -658,8 +686,8 @@ const Remote = {
 // ---------- backend: τοπικό demo (localStorage, ίδια λογική με τον Worker) ----------
 const DEMO_KEY = 'silentvoltage.demo';
 const Local = {
-  db() { try { return JSON.parse(localStorage.getItem(DEMO_KEY)) || null; } catch { return null; } },
-  save(d) { localStorage.setItem(DEMO_KEY, JSON.stringify(d)); },
+  db() { try { return JSON.parse(SV_LS.getItem(DEMO_KEY)) || null; } catch { return null; } },
+  save(d) { SV_LS.setItem(DEMO_KEY, JSON.stringify(d)); },
   get() { let d = this.db(); if (!d) { d = { projects: [], bugs: [], tasks: [], logs: [] }; this.save(d); } return d; },
   log(d, pid, kind, text) { d.logs.unshift({ id: uid(), project_id: pid, kind, text, created_at: nowIso() }); },
   touch(d, pid) { const p = d.projects.find((x) => x.id === pid); if (p) p.updated_at = nowIso(); },
@@ -756,7 +784,7 @@ function demoExtras(d) {
 
 // ---------- state ----------
 const UI_KEY = 'silentvoltage.ui';
-const savedUI = (() => { try { return JSON.parse(localStorage.getItem(UI_KEY)) || {}; } catch { return {}; } })();
+const savedUI = (() => { try { return JSON.parse(SV_LS.getItem(UI_KEY)) || {}; } catch { return {}; } })();
 const S = {
   data: { projects: [], bugs: [], tasks: [], logs: [] },
   loaded: false, lastLoad: 0,
@@ -764,7 +792,7 @@ const S = {
   f: { q: '', status: 'all', release: 'all', priority: 'all', sort: savedUI.sort || 'updated', bugs: 'open' },
   open: null, tab: 'overview', bugFilter: 'all',
 };
-const persistUI = () => { try { localStorage.setItem(UI_KEY, JSON.stringify({ view: S.view, sort: S.f.sort })); } catch {} };
+const persistUI = () => { try { SV_LS.setItem(UI_KEY, JSON.stringify({ view: S.view, sort: S.f.sort })); } catch {} };
 
 const projOf = (id) => S.data.projects.find((p) => p.id === id);
 const bugsOf = (id) => S.data.bugs.filter((b) => b.project_id === id);
@@ -844,8 +872,9 @@ function render() {
   const all = S.data.bugs;
   const openN = all.filter((b) => b.status === 'open').length;
   const fixedN = all.filter((b) => b.status === 'fixed').length;
-  const devN = P.filter((p) => ['development', 'testing'].includes(p.status)).length;
-  const relN = P.filter((p) => RELEASED.includes(p.release)).length;
+  const cnt = (st) => P.filter((p) => p.status === st).length;
+  const activeN = P.filter((p) => ['research', 'planning', 'development', 'testing'].includes(p.status)).length;
+  const bugProjects = new Set(all.filter((b) => b.status === 'open').map((b) => b.project_id)).size;
   const list = filtered();
 
   const counts = Object.fromEntries(STATUSES.map(([k]) => [k, P.filter((p) => p.status === k).length]));
@@ -859,11 +888,11 @@ function render() {
     </div>
   </div>
   <div class="stats">
-    <button class="stat" data-jump="all" style="--c:var(--accent)"><div class="k"><i></i>Σύνολο</div><div class="v">${P.length}</div></button>
-    <button class="stat" data-jump="development" style="--c:var(--s-development)"><div class="k"><i></i>Σε εξέλιξη</div><div class="v">${devN}</div></button>
-    <button class="stat" data-jump="releases" style="--c:var(--r-public)"><div class="k"><i></i>Releases</div><div class="v">${relN}</div></button>
-    <button class="stat danger" data-jump="openbugs" style="--c:var(--danger)"><div class="k"><i></i>Ανοιχτά bugs</div><div class="v">${openN}</div></button>
-    <button class="stat" data-jump="fixedbugs" style="--c:var(--ok)"><div class="k"><i></i>Διορθωμένα</div><div class="v">${fixedN}<small>/ ${all.length}</small></div></button>
+    <button class="stat" data-jump="all" style="--c:var(--accent)"><div class="k"><i></i>Σύνολο ιδεών</div><div class="v">${P.length}</div><div class="sub">${activeN} ενεργές · ${cnt('ready')} έτοιμες</div></button>
+    <button class="stat" data-jump="development" style="--c:var(--s-development)"><div class="k"><i></i>Υπό ανάπτυξη</div><div class="v">${cnt('development')}</div><div class="sub">+ ${cnt('testing')} σε δοκιμές</div></button>
+    <button class="stat" data-jump="ready" style="--c:var(--s-ready)"><div class="k"><i></i>Έτοιμα</div><div class="v">${cnt('ready')}</div><div class="sub">${P.filter((p) => p.release !== 'none').length} με release</div></button>
+    <button class="stat danger" data-jump="openbugs" style="--c:var(--danger)"><div class="k"><i></i>Ανοιχτά bugs</div><div class="v">${openN}</div><div class="sub">${openN ? `σε ${bugProjects} ${bugProjects === 1 ? 'ιδέα' : 'ιδέες'}` : 'κανένα εκκρεμές'}</div></button>
+    <button class="stat" data-jump="fixedbugs" style="--c:var(--ok)"><div class="k"><i></i>Διορθωμένα bugs</div><div class="v">${fixedN}</div><div class="sub">από ${all.length} συνολικά</div></button>
   </div>
   <div class="toolbar">
     <div class="chips" role="tablist" aria-label="Κατάσταση">
@@ -1027,7 +1056,7 @@ function bindMain() {
     S.f.release = 'all'; S.f.priority = 'all';
     if (j === 'all') { S.f.status = 'all'; if (S.view === 'bugs') S.view = 'grid'; }
     if (j === 'development') { S.f.status = 'development'; if (S.view === 'bugs') S.view = 'grid'; }
-    if (j === 'releases') { S.f.status = 'all'; S.f.release = 'released'; if (S.view === 'bugs') S.view = 'grid'; }
+    if (j === 'ready') { S.f.status = 'ready'; if (S.view === 'bugs') S.view = 'grid'; }
     if (j === 'openbugs') { S.f.status = 'all'; S.view = 'bugs'; S.f.bugs = 'open'; }
     if (j === 'fixedbugs') { S.f.status = 'all'; S.view = 'bugs'; S.f.bugs = 'fixed'; }
     persistUI(); render();
@@ -1403,7 +1432,7 @@ function fixForm(id) {
 // ---------- ρυθμίσεις ----------
 function settingsForm() {
   const c = loadCfg();
-  const remembered = !!localStorage.getItem(CFG_KEY);
+  const remembered = !!SV_LS.getItem(CFG_KEY);
   return modal({
     title: 'Ρυθμίσεις',
     body: `
@@ -1440,7 +1469,7 @@ function settingsForm() {
       };
       $('[data-s="logout"]', m).onclick = async () => {
         if (!(await confirmBox(isDemo() ? 'Έξοδος από τη δοκιμή;' : 'Αποσύνδεση;', isDemo() ? 'Τα δοκιμαστικά δεδομένα μένουν σε αυτόν τον browser.' : 'Θα σβηστεί το κλειδί από αυτόν τον browser. Τα δεδομένα στο Cloudflare δεν επηρεάζονται.', 'Συνέχεια'))) return;
-        cfg = { apiUrl: cfg.apiUrl }; try { localStorage.removeItem(CFG_KEY); sessionStorage.removeItem(CFG_KEY); } catch {}
+        cfg = { apiUrl: cfg.apiUrl }; try { SV_LS.removeItem(CFG_KEY); sessionStorage.removeItem(CFG_KEY); } catch {}
         close(true); closeDrawer(); showWelcome();
       };
       $('[data-s="export"]', m).onclick = exportJSON;
@@ -1459,7 +1488,9 @@ function settingsForm() {
 }
 
 function exportJSON() {
-  const blob = new Blob([JSON.stringify({ app: 'silent-voltage', exported_at: nowIso(), ...S.data }, null, 2)], { type: 'application/json' });
+  const text = JSON.stringify({ app: 'silent-voltage', exported_at: nowIso(), ...S.data }, null, 2);
+  if (window.SV_APP) { AndroidBridge.saveFile(`silent-voltage-backup-${dateInput()}.json`, 'application/json', text); return; }
+  const blob = new Blob([text], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `silent-voltage-backup-${dateInput()}.json`; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1500);
@@ -1511,11 +1542,11 @@ function exportPDF(projects, single = false) {
     ? `<div class="pr-cover" style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg, ${esc(P[0].color)}, #0f172a)"><div class="k">Silent Voltage · Αναφορά project</div><div class="meta-line" style="margin:0">Magnus · ${today}</div></div>`
     : `<div class="pr-cover"><div class="k">Silent Voltage</div><h1>Αναφορά ιδεών &amp; projects</h1><p>${P.length} ${P.length === 1 ? 'ιδέα' : 'ιδέες'}${S.f.status !== 'all' || S.f.release !== 'all' || S.f.q ? ' (με τα τρέχοντα φίλτρα)' : ''}</p><div class="meta-line">Magnus · ${today}</div></div>
       <div class="pr-stats">
-        <div><b>${P.length}</b><span>Ιδέες</span></div>
-        <div><b>${P.filter((p) => ['development', 'testing'].includes(p.status)).length}</b><span>Σε εξέλιξη</span></div>
+        <div><b>${P.length}</b><span>Σύνολο ιδεών</span></div>
+        <div><b>${P.filter((p) => p.status === 'development').length}</b><span>Υπό ανάπτυξη</span></div>
         <div><b>${P.filter((p) => p.status === 'ready').length}</b><span>Έτοιμα</span></div>
         <div><b style="color:#d4243a">${openN}</b><span>Ανοιχτά bugs</span></div>
-        <div><b style="color:#0b9467">${allBugs.filter((b) => b.status === 'fixed').length}</b><span>Διορθωμένα</span></div>
+        <div><b style="color:#0b9467">${allBugs.filter((b) => b.status === 'fixed').length}</b><span>Διορθωμένα bugs</span></div>
       </div>
       <h2 class="pr-h">Σύνοψη</h2>
       <table><thead><tr><th>Ιδέα</th><th>Κατάσταση</th><th>Release</th><th>Έκδοση</th><th>Πρόοδος</th><th>Bugs</th></tr></thead><tbody>
@@ -1529,6 +1560,11 @@ function exportPDF(projects, single = false) {
   document.title = `${slug} — ${dateInput()}`;
   const done = () => { document.title = oldTitle; root.innerHTML = ''; window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
+  if (window.SV_APP) {
+    setTimeout(() => { AndroidBridge.printPage(document.title); setTimeout(() => { document.title = oldTitle; }, 3000); }, 120);
+    toast('Διάλεξε «Αποθήκευση ως PDF» και πάτα το κουμπί PDF');
+    return;
+  }
   setTimeout(() => { window.print(); }, 60);
   toast('Στο παράθυρο εκτύπωσης διάλεξε «Αποθήκευση ως PDF»');
 }
@@ -1550,7 +1586,8 @@ function showWelcome(err = '') {
       <button class="btn primary" type="submit" style="height:44px">${ic('key')}Σύνδεση</button>
     </form>
     <div style="display:flex;align-items:center;gap:12px;margin:20px 0 14px;color:var(--faint);font-size:12px"><div style="flex:1;height:1px;background:var(--border)"></div>ή<div style="flex:1;height:1px;background:var(--border)"></div></div>
-    <button class="btn" id="demoBtn" style="width:100%">${ic('flask')}Δοκιμή χωρίς Cloudflare (μόνο σε αυτόν τον browser)</button>
+    <button class="btn" id="demoBtn" style="width:100%">${ic('flask')}Δοκιμή χωρίς Cloudflare</button>
+    <p style="text-align:center;font-size:12px;color:var(--faint);margin:8px 0 0">Η δοκιμή κρατά τα δεδομένα μόνο σε αυτή τη συσκευή.</p>
   </div>`;
   const f = $('#wf');
   $('[data-pw]', f).onclick = () => { const i = $('[name=apiKey]', f); i.type = i.type === 'password' ? 'text' : 'password'; };
@@ -1574,7 +1611,11 @@ function showWelcome(err = '') {
 }
 
 // ---------- top bar & πλήκτρα ----------
-function setThemeIcon() { $('#btnTheme').innerHTML = ic(document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon'); }
+function setThemeIcon() {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  $('#btnTheme').innerHTML = ic(dark ? 'sun' : 'moon');
+  if (window.SV_APP) try { AndroidBridge.setDark(dark); } catch (e) {}
+}
 function initChrome() {
   $('#btnRefresh').innerHTML = ic('refresh');
   $('#btnSettings').innerHTML = ic('gear');
@@ -1583,7 +1624,7 @@ function initChrome() {
   setThemeIcon();
   $('#btnTheme').onclick = () => {
     const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = t; try { localStorage.setItem('silentvoltage.theme', t); } catch {}
+    document.documentElement.dataset.theme = t; try { SV_LS.setItem('silentvoltage.theme', t); } catch {}
     $('meta[name=theme-color]').content = t === 'dark' ? '#0a0c12' : '#f3f4f8';
     setThemeIcon();
   };
@@ -1608,6 +1649,18 @@ function initChrome() {
     if (document.visibilityState === 'visible' && S.loaded && Date.now() - S.lastLoad > 20000 && !$('.modal')) reload(true);
   });
 }
+
+// Κουμπί «πίσω» του Android: κλείνει πρώτα παράθυρα/καρτέλα. true = το χειρίστηκε η σελίδα.
+window.svBack = function () {
+  const ms = $$('.modal');
+  if (ms.length) { const x = $('[data-m="x"]', ms[ms.length - 1]); if (x) x.click(); return true; }
+  if (drawerEls) { closeDrawer(); return true; }
+  if (S.loaded && (S.f.q || S.f.status !== 'all' || S.f.release !== 'all' || S.f.priority !== 'all' || S.view !== 'grid')) {
+    Object.assign(S.f, { q: '', status: 'all', release: 'all', priority: 'all' }); S.view = 'grid'; $('#q').value = ''; persistUI(); render(); return true;
+  }
+  return false;
+};
+window.svResume = function () { if (S.loaded && Date.now() - S.lastLoad > 15000 && !$('.modal')) reload(true); };
 
 initChrome();
 if (isReady()) reload(true); else showWelcome();
