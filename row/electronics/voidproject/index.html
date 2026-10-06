@@ -1,0 +1,1802 @@
+<!doctype html>
+<html lang="el" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>voidproject</title>
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="voidproject — ιδέες, projects, releases και bugs">
+<meta name="apple-mobile-web-app-title" content="voidproject">
+<meta name="theme-color" content="#111114">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%239585ef'/%3E%3Cpath d='m32 12 18 10v20L32 52 14 42V22zM14 22l18 10 18-10M32 32v20M23 17l18 10' fill='none' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  // Αποθήκευση: στην εφαρμογή Android πάει στη μόνιμη μνήμη της εφαρμογής, αλλιώς localStorage
+  window.VP_APP = !!window.AndroidBridge;
+  window.VP_LS = window.VP_APP ? {
+    getItem: function (k) { var v = AndroidBridge.storeGet(k); return (v === undefined || v === null || v === '\u0000') ? null : v; },
+    setItem: function (k, v) { AndroidBridge.storeSet(k, String(v)); },
+    removeItem: function (k) { AndroidBridge.storeRemove(k); }
+  } : window.localStorage;
+  if (window.VP_APP) document.documentElement.classList.add('in-app');
+  // Θέμα πριν το πρώτο render (χωρίς «αναλαμπή»)
+  (function () {
+    try {
+      var t = VP_LS.getItem('voidproject.theme');
+      if (!t) t = 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
+<script src="config.js" onerror="window.VOIDPROJECT_CONFIG = window.VOIDPROJECT_CONFIG || {}"></script>
+<script src="data-contract.js"></script>
+<style>
+:root {
+  --font: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+
+  --s-idea: #a78bfa; --s-research: #38bdf8; --s-planning: #818cf8; --s-development: #f59e0b;
+  --s-testing: #f472b6; --s-ready: #34d399; --s-paused: #94a3b8; --s-abandoned: #64748b;
+  --r-none: #94a3b8; --r-prototype: #c084fc; --r-alpha: #fb923c; --r-beta: #facc15;
+  --r-test: #f472b6; --r-rc: #22d3ee; --r-public: #22c55e; --r-private: #8b5cf6;
+  --p-low: #94a3b8; --p-medium: #38bdf8; --p-high: #f59e0b; --p-critical: #ef4444;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #090b11; --bg-grad: radial-gradient(1200px 600px at 10% -10%, #1b1640 0%, transparent 60%), radial-gradient(900px 500px at 110% 0%, #0b2b3a 0%, transparent 55%);
+  --surface: #11151f; --surface-2: #161b28; --surface-3: #1d2333; --hover: #1f2638;
+  --border: #232a3b; --border-strong: #303952;
+  --text: #e8ebf3; --muted: #9098ad; --faint: #646c82;
+  --accent: #8b6cff; --accent-2: #22d3ee; --accent-ink: #fff;
+  --danger: #ff5c6c; --danger-bg: rgba(255, 92, 108, .10); --ok: #34d399; --ok-bg: rgba(52, 211, 153, .10); --warn: #fbbf24;
+  --shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 10px 30px -12px rgba(0,0,0,.6);
+  --shadow-lg: 0 30px 80px -20px rgba(0,0,0,.75);
+  --backdrop: rgba(4, 6, 12, .66);
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f4f8; --bg-grad: radial-gradient(1100px 520px at 0% -10%, #e7e1ff 0%, transparent 60%), radial-gradient(900px 500px at 110% -5%, #d6f5fb 0%, transparent 55%);
+  --surface: #ffffff; --surface-2: #f7f8fb; --surface-3: #eef0f6; --hover: #f1f2f8;
+  --border: #e2e5ee; --border-strong: #cfd4e1;
+  --text: #121624; --muted: #586176; --faint: #8b93a6;
+  --accent: #6a4cf5; --accent-2: #0891b2; --accent-ink: #fff;
+  --danger: #d4243a; --danger-bg: rgba(212, 36, 58, .07); --ok: #0b9467; --ok-bg: rgba(11, 148, 103, .08); --warn: #b7791f;
+  --shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px -14px rgba(16,24,40,.18);
+  --shadow-lg: 0 30px 80px -24px rgba(16,24,40,.35);
+  --backdrop: rgba(18, 22, 36, .38);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font); font-size: 14.5px; line-height: 1.5; color: var(--text);
+  background: var(--bg-grad), var(--bg); background-attachment: fixed; min-height: 100vh;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- connection / workspace ---------- */
+.connection { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:10px 14px; margin-bottom:18px; border:1px solid var(--border); border-radius:10px; color:var(--muted); background:var(--surface); font-size:12px; }
+.connection .dot { width:7px; height:7px; background:var(--ok); border-radius:50%; }
+.connection.warn { border-color:var(--warn); }
+.connection.warn .dot { background:var(--warn); }
+.connection time { margin-left:auto; }
+.connection button { color:var(--accent); background:none; border:0; cursor:pointer; }
+.focus-summary { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 18px; }
+.focus-summary span { border:1px solid var(--border); border-radius:8px; background:var(--surface); padding:7px 11px; color:var(--muted); font-size:12px; }
+.focus-summary b { color:var(--text); }
+@media (max-width:500px) { .connection time { margin-left:0; } }
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
+  background: color-mix(in srgb, var(--bg) 76%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-in { max-width: 1440px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 14px; }
+.brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--text); flex: none; }
+.logo { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 8px 22px -8px var(--accent); }
+.logo svg { width: 20px; height: 20px; stroke: #fff; }
+.brand b { font-size: 16px; font-weight: 800; letter-spacing: -.01em; display: block; line-height: 1.1; }
+.brand small { color: var(--muted); font-size: 11.5px; font-weight: 500; }
+.search { flex: 1; max-width: 520px; margin-left: auto; position: relative; }
+.search input {
+  width: 100%; height: 40px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface);
+  padding: 0 40px 0 38px; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.search input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+.search > svg { position: absolute; left: 12px; top: 11px; color: var(--faint); }
+.search kbd { position: absolute; right: 10px; top: 9px; }
+kbd { font-family: var(--mono); font-size: 11px; color: var(--faint); border: 1px solid var(--border); border-bottom-width: 2px; padding: 1px 6px; border-radius: 6px; background: var(--surface-2); }
+.top-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ---------- buttons ---------- */
+.btn {
+  max-width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 38px; padding: 0 14px;
+  border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font-weight: 600; font-size: 13.5px; cursor: pointer; white-space: nowrap; text-decoration: none;
+  transition: background .15s, border-color .15s, transform .1s, box-shadow .15s;
+}
+.btn:hover { background: var(--hover); border-color: var(--border-strong); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible, .icon-btn:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.primary { background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, var(--accent-2))); color: var(--accent-ink); border-color: transparent; box-shadow: 0 8px 22px -10px var(--accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--danger); }
+.btn.danger:hover { background: var(--danger-bg); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
+.btn.ok { color: var(--ok); }
+.btn.ok:hover { background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover { background: var(--hover); }
+.btn.sm { height: 31px; padding: 0 10px; font-size: 12.5px; border-radius: 8px; gap: 6px; }
+.btn.sm svg.i { width: 15px; height: 15px; }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+.icon-btn { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: .15s; flex: none; }
+.icon-btn:hover { color: var(--text); background: var(--hover); border-color: var(--border-strong); }
+.icon-btn.sm { width: 31px; height: 31px; border-radius: 8px; }
+.icon-btn.sm svg.i { width: 15px; height: 15px; }
+.icon-btn.spin svg { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- layout ---------- */
+main { max-width: 1440px; margin: 0 auto; padding: 22px 24px 80px; }
+.hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 6px 0 18px; flex-wrap: wrap; }
+.hero h1 { font-size: 27px; letter-spacing: -.03em; margin: 0; font-weight: 800; }
+.hero p { margin: 4px 0 0; color: var(--muted); }
+
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); position: relative; overflow: hidden; cursor: pointer; transition: border-color .15s, transform .15s; text-align: left; }
+.stat:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+.stat::after { content: ''; position: absolute; inset: auto -20px -40px auto; width: 110px; height: 110px; border-radius: 50%; background: var(--c, var(--accent)); opacity: .09; }
+.stat .k { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; display: flex; align-items: center; gap: 7px; }
+.stat .k i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--accent)); }
+.stat .v { font-size: 28px; font-weight: 800; letter-spacing: -.03em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.stat .v small { font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: 0; margin-left: 4px; }
+.stat.danger .v { color: var(--danger); }
+.stat .sub { color: var(--faint); font-size: 12px; font-weight: 600; margin-top: 2px; position: relative; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px; flex: 1 1 100%; min-width: 0; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-weight: 600; font-size: 12.5px; cursor: pointer; white-space: nowrap; transition: .15s; }
+.chip:hover { color: var(--text); border-color: var(--border-strong); }
+.chip.on { color: var(--text); background: color-mix(in srgb, var(--c, var(--accent)) 16%, var(--surface)); border-color: color-mix(in srgb, var(--c, var(--accent)) 55%, transparent); }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--accent)); }
+.chip .n { font-variant-numeric: tabular-nums; color: var(--faint); font-weight: 700; }
+.chip.on .n { color: var(--muted); }
+.tool-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%; }
+.tool-right .seg { margin-left: auto; }
+.select { height: 34px; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); padding: 0 30px 0 11px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23889' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; padding: 3px; background: var(--surface); gap: 2px; }
+.seg button { height: 28px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; border-radius: 7px; color: var(--muted); font-weight: 600; font-size: 12.5px; cursor: pointer; }
+.seg button svg.i { width: 15px; height: 15px; }
+.seg button.on { background: var(--surface-3); color: var(--text); }
+
+/* ---------- cards ---------- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; }
+.card {
+  position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 16px 14px; box-shadow: var(--shadow); cursor: pointer; display: flex; flex-direction: column; gap: 10px;
+  transition: transform .18s var(--ease), border-color .18s, box-shadow .18s; overflow: hidden; text-align: left; width: 100%;
+}
+.card::before { content: ''; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--pc), color-mix(in srgb, var(--pc) 30%, transparent)); }
+.card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--pc) 45%, var(--border)); box-shadow: var(--shadow), 0 16px 40px -22px var(--pc); }
+.card-h { display: flex; gap: 10px; align-items: flex-start; }
+.card-h h3 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -.015em; line-height: 1.3; flex: 1; word-break: break-word; }
+.card .sum { color: var(--muted); font-size: 13.5px; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 1.5em; }
+.pin { color: var(--warn); flex: none; }
+.pin svg.i { width: 16px; height: 16px; fill: currentColor; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; font-size: 12px; font-weight: 650; white-space: nowrap;
+  background: color-mix(in srgb, var(--c) 14%, transparent); color: color-mix(in srgb, var(--c) 78%, var(--text)); border: 1px solid color-mix(in srgb, var(--c) 28%, transparent); }
+.badge svg.i { width: 12px; height: 12px; }
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+.badge.plain { --c: var(--faint); }
+.badge.ver { font-family: var(--mono); font-size: 11.5px; --c: var(--accent-2); }
+.prog { height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.prog > i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pc), color-mix(in srgb, var(--pc) 55%, var(--accent-2))); }
+.card-f { display: flex; align-items: center; gap: 12px; color: var(--faint); font-size: 12.5px; margin-top: auto; flex-wrap: wrap; }
+.card-f span { display: inline-flex; align-items: center; gap: 5px; }
+.card-f svg.i { width: 14px; height: 14px; }
+.card-f .bugs-open { color: var(--danger); font-weight: 700; }
+.card-f .right { margin-left: auto; }
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tag { font-size: 11.5px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); padding: 1px 8px; border-radius: 6px; }
+
+/* ---------- board ---------- */
+.board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(272px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 12px; align-items: start; }
+.col { background: color-mix(in srgb, var(--surface) 55%, transparent); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; min-height: 160px; transition: border-color .15s, background .15s; }
+.col.drop { border-color: var(--c); background: color-mix(in srgb, var(--c) 8%, var(--surface)); }
+.col-h { display: flex; align-items: center; gap: 8px; padding: 4px 6px 10px; font-weight: 700; font-size: 13px; }
+.col-h .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.col-h .n { margin-left: auto; color: var(--faint); font-variant-numeric: tabular-nums; }
+.col .card { padding: 12px; gap: 8px; margin-bottom: 8px; }
+.col .card h3 { font-size: 14.5px; }
+.col .card[draggable="true"] { cursor: grab; }
+.col .card.dragging { opacity: .4; }
+.col-empty { color: var(--faint); font-size: 12.5px; text-align: center; padding: 22px 6px; border: 1px dashed var(--border); border-radius: 10px; }
+
+/* ---------- bugs (κοινό στυλ) ---------- */
+.bug { display: flex; gap: 14px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); transition: border-color .15s, background .15s; }
+.bug + .bug { margin-top: 8px; }
+.bug.open { border-left: 3px solid var(--danger); background: linear-gradient(90deg, var(--danger-bg), transparent 40%), var(--surface); }
+.bug-main { flex: 1; min-width: 0; }
+.bug-title { font-weight: 650; word-break: break-word; }
+.bug.open .bug-title { color: var(--danger); }
+.bug-desc { color: var(--muted); font-size: 13.5px; margin-top: 3px; white-space: pre-wrap; word-break: break-word; }
+.bug-meta { color: var(--faint); font-size: 12px; margin-top: 6px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.bug-proj { color: var(--muted); font-weight: 600; font-size: 12px; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.bug-proj i { width: 8px; height: 8px; border-radius: 3px; background: var(--pc); }
+.sev { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+.bug-side { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; max-width: 46%; }
+.bug-actions { display: flex; gap: 6px; }
+.bug.fixed, .bug.wontfix { background: var(--surface-2); }
+.bug.fixed .bug-main, .bug.wontfix .bug-main { opacity: .5; }
+.bug.fixed .bug-title, .bug.fixed .bug-desc, .bug.wontfix .bug-title { text-decoration: line-through; text-decoration-thickness: 1.5px; text-decoration-color: color-mix(in srgb, var(--text) 55%, transparent); }
+.fixinfo { text-align: right; font-size: 12.5px; color: var(--muted); border-right: 2px solid var(--ok); padding-right: 10px; }
+.fixinfo b { color: var(--ok); display: inline-flex; align-items: center; gap: 5px; font-size: 13px; }
+.fixinfo b svg.i { width: 15px; height: 15px; stroke-width: 2.6; }
+.fixinfo code { background: var(--surface-3); padding: 1px 6px; border-radius: 5px; color: var(--text); }
+.fixinfo .how { margin-top: 3px; white-space: pre-wrap; word-break: break-word; color: var(--text); opacity: .85; }
+.wontfix .fixinfo { border-color: var(--faint); }
+.wontfix .fixinfo b { color: var(--faint); }
+
+/* ---------- drawer / modal ---------- */
+.overlay { position: fixed; inset: 0; background: var(--backdrop); backdrop-filter: blur(3px); z-index: 50; opacity: 0; transition: opacity .2s; }
+.overlay.show { opacity: 1; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(880px, 100vw); background: var(--bg); border-left: 1px solid var(--border); z-index: 51; display: flex; flex-direction: column; transform: translateX(30px); opacity: 0; transition: transform .25s var(--ease), opacity .2s; box-shadow: var(--shadow-lg); }
+.drawer.show { transform: none; opacity: 1; }
+.d-head { padding: 20px 26px 0; border-bottom: 1px solid var(--border); background: var(--surface); position: relative; }
+.d-head::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, var(--pc), var(--accent-2)); }
+.d-top { display: flex; gap: 12px; align-items: flex-start; }
+.d-top h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.025em; line-height: 1.25; flex: 1; word-break: break-word; }
+.d-sum { color: var(--muted); margin: 6px 0 12px; }
+.d-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs { display: flex; gap: 2px; margin-top: 14px; overflow-x: auto; scrollbar-width: none; }
+.tab { padding: 10px 14px; border: 0; background: none; color: var(--muted); font-weight: 650; cursor: pointer; border-bottom: 2px solid transparent; display: inline-flex; gap: 7px; align-items: center; white-space: nowrap; }
+.tab:hover { color: var(--text); }
+.tab.on { color: var(--text); border-bottom-color: var(--accent); }
+.tab .cnt { font-size: 11px; background: var(--surface-3); color: var(--muted); padding: 1px 7px; border-radius: 99px; font-weight: 700; }
+.tab .cnt.red { background: var(--danger-bg); color: var(--danger); }
+.d-body { flex: 1; overflow-y: auto; padding: 22px 26px 40px; }
+.section-t { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); font-weight: 700; margin: 0 0 10px; }
+.meta { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-bottom: 22px; }
+.meta > div { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 10px 12px; min-width: 0; }
+.meta dt { font-size: 11.5px; color: var(--faint); font-weight: 650; text-transform: uppercase; letter-spacing: .05em; }
+.meta dd { margin: 4px 0 0; font-weight: 600; word-break: break-word; }
+.meta dd a { word-break: break-all; }
+.prose { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; line-height: 1.65; word-break: break-word; }
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+.prose h1, .prose h2, .prose h3 { letter-spacing: -.02em; margin: 1.1em 0 .4em; line-height: 1.3; }
+.prose h1 { font-size: 20px; } .prose h2 { font-size: 17px; } .prose h3 { font-size: 15px; }
+.prose code { background: var(--surface-3); padding: 1px 6px; border-radius: 5px; }
+.prose pre { background: var(--surface-3); padding: 12px 14px; border-radius: 9px; overflow-x: auto; }
+.prose pre code { background: none; padding: 0; }
+.prose ul, .prose ol { padding-left: 22px; }
+.prose blockquote { margin: 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+.prose hr { border: 0; border-top: 1px solid var(--border); }
+.empty-prose { color: var(--faint); font-style: italic; }
+
+.addbox { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.addbox input, .addbox select { height: 38px; }
+.subfilter { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+
+.task { display: flex; gap: 12px; align-items: center; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); }
+.task + .task { margin-top: 6px; }
+.task .txt { flex: 1; word-break: break-word; }
+.task.done .txt { text-decoration: line-through; color: var(--faint); }
+.task .del { opacity: 0; transition: opacity .15s; }
+.task:hover .del { opacity: 1; }
+.check { width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--border-strong); display: grid; place-items: center; cursor: pointer; background: var(--surface); flex: none; transition: .15s; padding: 0; }
+.check svg.i { width: 14px; height: 14px; stroke-width: 3.2; color: #fff; opacity: 0; }
+.check.on { background: var(--ok); border-color: var(--ok); }
+.check.on svg.i { opacity: 1; }
+
+.tl { position: relative; padding-left: 26px; }
+.tl::before { content: ''; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+.tl-i { position: relative; padding: 2px 0 16px; }
+.tl-i::before { content: ''; position: absolute; left: -23px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2.5px solid var(--c, var(--accent)); }
+.tl-i .t { font-weight: 550; white-space: pre-wrap; word-break: break-word; }
+.tl-i .d { font-size: 12px; color: var(--faint); margin-top: 1px; display: flex; gap: 8px; align-items: center; }
+.tl-i .d button { opacity: 0; }
+.tl-i:hover .d button { opacity: 1; }
+
+.modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -48%) scale(.98); width: min(720px, calc(100vw - 28px)); max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px); overflow: hidden; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; z-index: 61; box-shadow: var(--shadow-lg); opacity: 0; transition: .2s var(--ease); }
+.modal.show { opacity: 1; transform: translate(-50%, -50%); }
+.modal.narrow { width: min(500px, calc(100vw - 28px)); }
+.overlay.top { z-index: 60; }
+.m-head { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.m-head h3 { margin: 0; font-size: 17px; font-weight: 750; flex: 1; letter-spacing: -.015em; }
+.m-body { padding: 20px 22px; overflow-y: auto; }
+.m-foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; background: var(--surface-2); flex-wrap: wrap; }
+.m-foot .left { margin-right: auto; }
+
+.form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field.full { grid-column: 1 / -1; }
+.field > span { font-size: 12.5px; font-weight: 650; color: var(--muted); }
+.field > small { color: var(--faint); font-size: 12px; }
+.in { height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); padding: 0 12px; outline: none; width: 100%; transition: border-color .15s, box-shadow .15s; }
+textarea.in { height: auto; min-height: 120px; padding: 10px 12px; resize: vertical; line-height: 1.55; }
+textarea.in.mono { font-family: var(--mono); font-size: 13px; }
+.in:focus { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent); background: var(--surface); }
+select.in { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23889' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sw { width: 28px; height: 28px; border-radius: 9px; border: 2px solid transparent; cursor: pointer; background: var(--c); padding: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.sw.on { border-color: var(--text); box-shadow: 0 0 0 3px var(--surface) inset; }
+.range-row { display: flex; gap: 12px; align-items: center; }
+.range-row input[type=range] { flex: 1; accent-color: var(--accent); }
+.range-row output { font-family: var(--mono); font-weight: 600; width: 46px; text-align: right; }
+.toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font-weight: 600; }
+.toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+.hint { font-size: 12.5px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.hint b { color: var(--text); }
+.pw { position: relative; }
+.pw .in { padding-right: 44px; font-family: var(--mono); }
+.pw button { position: absolute; right: 4px; top: 4px; }
+
+.toast-wrap { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 90; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.toast { background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 11px; font-weight: 600; font-size: 13.5px; box-shadow: var(--shadow-lg); display: flex; gap: 8px; align-items: center; animation: tin .25s var(--ease); max-width: calc(100vw - 30px); }
+.toast.err { background: var(--danger); color: #fff; }
+@keyframes tin { from { opacity: 0; transform: translateY(10px); } }
+
+.empty { text-align: center; padding: 70px 20px; color: var(--muted); border: 1px dashed var(--border-strong); border-radius: 18px; background: color-mix(in srgb, var(--surface) 50%, transparent); }
+.empty .big { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; margin: 0 auto 14px; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent-2) 18%, transparent)); color: var(--accent); }
+.empty .big svg.i { width: 30px; height: 30px; }
+.empty h3 { color: var(--text); margin: 0 0 6px; font-size: 18px; }
+.empty p { margin: 0 auto 18px; max-width: 460px; }
+
+.welcome { max-width: 560px; margin: 7vh auto; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 30px; box-shadow: var(--shadow-lg); }
+.welcome h1 { font-size: 26px; letter-spacing: -.03em; margin: 16px 0 6px; }
+.welcome p { color: var(--muted); margin: 0 0 20px; }
+.loader { display: grid; place-items: center; padding: 120px 0; color: var(--muted); gap: 14px; }
+.loader .ring { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+.mode-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); border: 1px solid color-mix(in srgb, var(--warn) 30%, transparent); }
+.list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+
+#print-root { display: none; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) { .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 860px) {
+  .topbar-in { flex-wrap: wrap; padding: 10px 14px; gap: 10px; }
+  .search { order: 3; max-width: none; flex-basis: 100%; }
+  .search kbd { display: none; }
+  .top-actions { margin-left: auto; }
+  .top-actions .btn .lbl { display: none; }
+  .top-actions .btn { width: 36px; height: 36px; padding: 0; }
+  .top-actions { gap: 6px; }
+  .top-actions .icon-btn { width: 36px; height: 36px; }
+  .topbar-in { flex-wrap: wrap; row-gap: 10px; }
+  .brand { min-width: 0; }
+  .brand small { display: none; }
+  .brand b { font-size: 15px; white-space: nowrap; }
+  .logo { width: 34px; height: 34px; }
+  .toolbar { gap: 8px; }
+  .tool-right { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .tool-right::-webkit-scrollbar { display: none; }
+  .tool-right .select { flex: none; }
+  .tool-right .seg { flex: none; }
+  .seg button span { display: none; }
+  .seg button { padding: 0 11px; }
+  main { padding: 16px 14px 70px; }
+  .hero h1 { font-size: 22px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .stats .stat:last-child { grid-column: 1 / -1; }
+  .stat { padding: 11px 13px; }
+  .stat .v { font-size: 23px; }
+  .grid { grid-template-columns: 1fr; }
+  .drawer { width: 100vw; border-left: 0; }
+  .d-head { padding: 16px 16px 0; }
+  .d-body { padding: 16px 14px 40px; }
+  .d-top h2 { font-size: 19px; }
+  .form { grid-template-columns: 1fr; }
+  .bug { flex-direction: column; gap: 10px; }
+  .bug-side { max-width: none; width: 100%; align-items: stretch; }
+  .fixinfo { text-align: left; border-right: 0; border-left: 2px solid var(--ok); padding: 0 0 0 10px; }
+  .bug-actions { justify-content: flex-end; }
+  .modal { top: auto; bottom: 0; left: 0; right: 0; width: 100%; max-height: 92vh; max-height: 92dvh; border-radius: 18px 18px 0 0; transform: translateY(30px); }
+  .modal.narrow { width: 100%; }
+  .modal.show { transform: none; }
+  .task .del { opacity: 1; }
+  .tl-i .d button { opacity: 1; }
+}
+html.in-app, html.in-app body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+html.in-app .card:hover, html.in-app .stat:hover { transform: none; }
+html.in-app .topbar { padding-top: env(safe-area-inset-top); }
+@media (max-width: 380px) { .brand b { display: none; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- PDF / εκτύπωση ---------- */
+@media print {
+  @page { size: A4; margin: 14mm 13mm 16mm; }
+  html, body { background: #fff !important; color: #111 !important; }
+  body > *:not(#print-root) { display: none !important; }
+  #print-root { display: block !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+#print-root { width: 100%; overflow-wrap: anywhere; font-family: var(--font); color: #141824; font-size: 10.5pt; line-height: 1.5; }
+#print-root .pr-cover { border-radius: 14px; padding: 22px 24px; color: #fff; background: linear-gradient(135deg, #5b3fe0, #0891b2); margin-bottom: 18px; }
+#print-root .pr-cover .k { font-size: 9pt; letter-spacing: .14em; text-transform: uppercase; opacity: .85; font-weight: 700; }
+#print-root .pr-cover h1 { margin: 6px 0 4px; font-size: 22pt; letter-spacing: -.02em; line-height: 1.15; }
+#print-root .pr-cover p { margin: 0; opacity: .92; }
+#print-root .pr-cover .meta-line { margin-top: 10px; font-size: 9pt; opacity: .85; }
+#print-root .pr-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 18px; }
+#print-root .pr-stats div { border: 1px solid #e3e6ee; border-radius: 10px; padding: 8px 10px; }
+#print-root .pr-stats b { display: block; font-size: 16pt; letter-spacing: -.02em; }
+#print-root .pr-stats span { font-size: 8pt; color: #6b7285; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+#print-root h2.pr-h { break-after: avoid; font-size: 10pt; text-transform: uppercase; letter-spacing: .1em; color: #6b7285; margin: 18px 0 8px; border-bottom: 1px solid #e3e6ee; padding-bottom: 4px; }
+#print-root table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+#print-root th { text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; color: #6b7285; border-bottom: 1.5px solid #cfd4e1; padding: 6px 6px; }
+#print-root td { border-bottom: 1px solid #eceef4; padding: 6px 6px; vertical-align: top; }
+#print-root tr { break-inside: avoid; }
+#print-root .pb { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 8.5pt; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 13%, #fff); border: 1px solid color-mix(in srgb, var(--c) 35%, #fff); white-space: nowrap; }
+#print-root .pr-proj { break-before: page; }
+#print-root .pr-proj.first { break-before: auto; }
+#print-root .pr-ph { border-left: 5px solid var(--pc); padding: 2px 0 2px 14px; margin-bottom: 12px; }
+#print-root .pr-ph h1 { font-size: 18pt; margin: 0; letter-spacing: -.02em; line-height: 1.2; }
+#print-root .pr-ph p { margin: 4px 0 0; color: #586176; }
+#print-root .pr-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 12px 0; }
+#print-root .pr-meta div { background: #f5f6fa; border-radius: 8px; padding: 6px 9px; break-inside: avoid; }
+#print-root .pr-meta dt { font-size: 7.5pt; text-transform: uppercase; letter-spacing: .06em; color: #8b93a6; font-weight: 700; }
+#print-root .pr-meta dd { margin: 2px 0 0; font-weight: 650; font-size: 9.5pt; word-break: break-word; }
+#print-root .pr-prog { height: 6px; background: #eceef4; border-radius: 9px; overflow: hidden; margin-top: 5px; }
+#print-root .pr-prog i { display: block; height: 100%; background: var(--pc); }
+#print-root .prose { background: none; border: 0; padding: 0; }
+#print-root .prose code, #print-root .prose pre { background: #f2f3f7; }
+#print-root .pr-bug { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 40%); gap: 14px; padding: 7px 0; border-bottom: 1px solid #eceef4; break-inside: avoid; }
+#print-root .pr-bug .l { min-width: 0; }
+#print-root .pr-bug.open .t { color: #d4243a; font-weight: 700; }
+#print-root .pr-bug.fixed .l, #print-root .pr-bug.wontfix .l { opacity: .55; }
+#print-root .pr-bug.fixed .t, #print-root .pr-bug.wontfix .t { text-decoration: line-through; }
+#print-root .pr-bug .d { color: #586176; font-size: 9pt; white-space: pre-wrap; }
+#print-root .pr-bug .r { min-width: 0; text-align: right; font-size: 9pt; color: #586176; }
+#print-root .pr-bug .r b { color: #0b9467; }
+#print-root .pr-bug .sevp { font-size: 7.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--c); margin-right: 6px; }
+#print-root .pr-task { padding: 3px 0; break-inside: avoid; }
+#print-root .pr-task.done { color: #8b93a6; text-decoration: line-through; }
+#print-root .pr-log { display: flex; gap: 12px; font-size: 9pt; padding: 3px 0; break-inside: avoid; }
+#print-root .pr-log span { color: #8b93a6; width: 120px; flex: none; }
+#print-root .pr-log > div { min-width: 0; flex: 1; }
+#print-root .pr-meta > div { min-width: 0; }
+#print-root .pr-foot { margin-top: 22px; font-size: 8pt; color: #8b93a6; text-align: center; }
+#print-root .muted { color: #8b93a6; }
+</style>
+<link rel="stylesheet" href="voidproject.css">
+</head>
+<body>
+<header class="topbar" id="topbar" hidden>
+  <div class="topbar-in">
+    <a class="brand" href="#" id="brandLink">
+      <span class="logo" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8"/></svg></span>
+      <span><b>voidproject</b><small id="brandSub">Ιδέες · Projects · Bugs</small></span>
+    </a>
+    <label class="search">
+      <span class="sr">Αναζήτηση</span>
+      <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Αναζήτηση σε ιδέες, tags, bugs…" autocomplete="off">
+      <kbd>/</kbd>
+    </label>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnRefresh" title="Ανανέωση από τη βάση" aria-label="Ανανέωση"></button>
+      <button class="icon-btn" id="btnTheme" title="Σκούρο / ανοιχτό θέμα" aria-label="Αλλαγή θέματος"></button>
+      <button class="icon-btn" id="btnSettings" title="Ρυθμίσεις" aria-label="Ρυθμίσεις"></button>
+      <button class="btn" id="btnPdfAll" title="Εξαγωγή αναφοράς σε PDF"></button>
+      <button class="btn primary" id="btnNew" title="Νέα ιδέα (N)"></button>
+    </div>
+  </div>
+</header>
+
+<aside class="workspace-nav" id="workspaceNav" hidden>
+  <a class="nav-brand" href="#" id="navBrand"><span class="logo"><svg class="i" viewBox="0 0 24 24"><path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8"/></svg></span><b>void<span>project</span></b></a>
+  <div class="nav-caption">Ο ΠΡΟΣΩΠΙΚΟΣ ΣΟΥ ΧΩΡΟΣ</div>
+  <nav aria-label="Κύρια πλοήγηση">
+    <button class="nav-item" data-nav="grid"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>Projects</span><small id="navProjectCount"></small></button>
+    <button class="nav-item" data-nav="board"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18M15 3v18"/></svg><span>Πίνακας</span></button>
+    <button class="nav-item" data-nav="bugs"><svg class="i" viewBox="0 0 24 24"><rect x="7" y="6" width="10" height="14" rx="5"/><path d="M9 6V4M15 6V4M3 10h4M17 10h4M3 16h4M17 16h4M12 6v14"/></svg><span>Bugs</span><small class="nav-bug-count" id="navBugCount"></small></button>
+    <button class="nav-item" data-nav="archive"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="5" rx="1"/><path d="M5 8v13h14V8M9 12h6"/></svg><span>Αρχειοθήκη</span><small id="navArchiveCount"></small></button>
+  </nav>
+  <button class="nav-create" id="navCreate"><span>+</span> Καταγραφή νέας ιδέας</button>
+  <div class="nav-note"><div class="note-spark">✦</div><b>Μια ιδέα είναι η αρχή.</b><p>Δώσε της χώρο, μικρά βήματα και την επόμενη έκδοση.</p></div>
+  <div class="nav-footer"><span class="workspace-avatar">V</span><div><b>Το workspace μου</b><small id="navMode">Προσωπική συλλογή</small></div><span class="online-dot"></span></div>
+</aside>
+<main id="app"><div class="loader"><div class="ring"></div>Φόρτωση…</div></main>
+
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+<div id="print-root"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   voidproject — frontend (GitHub Pages) για Cloudflare Worker + D1
+   ===================================================================== */
+
+// ---------- σταθερές ----------
+const STATUSES = [
+  ['idea', 'Ιδέα'], ['research', 'Σε έρευνα'], ['planning', 'Σχεδιασμός'], ['development', 'Υπό ανάπτυξη'],
+  ['testing', 'Σε δοκιμές'], ['ready', 'Έτοιμο'], ['paused', 'Σε παύση'], ['abandoned', 'Εγκαταλείφθηκε'],
+];
+const RELEASES = [
+  ['none', 'Χωρίς release'], ['prototype', 'Prototype'], ['alpha', 'Alpha release'], ['beta', 'Beta release'],
+  ['test', 'Δοκιμαστικό release'], ['rc', 'Release Candidate'], ['public', 'Δημόσιο release'], ['private', 'Ιδιωτική χρήση'],
+];
+const PRIORITIES = [['low', 'Χαμηλή'], ['medium', 'Μεσαία'], ['high', 'Υψηλή'], ['critical', 'Κρίσιμη']];
+const RELEASED = ['alpha', 'beta', 'test', 'rc', 'public'];
+const SEVERITIES = [['low', 'Μικρό'], ['medium', 'Μέτριο'], ['high', 'Σοβαρό'], ['critical', 'Κρίσιμο']];
+const COLORS = ['#8b7cf8', '#74cbb3', '#72b1ee', '#e3b675', '#f43f5e', '#ec4899', '#3b82f6', '#a3e635', '#f97316', '#94a3b8'];
+const LOG_COLORS = { created: 'var(--accent)', status: 'var(--s-development)', release: 'var(--r-public)', version: 'var(--accent-2)', bug: 'var(--danger)', fix: 'var(--ok)', reopen: 'var(--warn)', note: 'var(--faint)' };
+
+const MAP = (arr) => Object.fromEntries(arr);
+const ST = MAP(STATUSES), RL = MAP(RELEASES), PR = MAP(PRIORITIES), SV = MAP(SEVERITIES);
+const sColor = (k) => `var(--s-${k})`, rColor = (k) => `var(--r-${k})`, pColor = (k) => `var(--p-${k})`;
+
+// ---------- icons ----------
+const ICONS = {
+  cube: '<path d="m12 3 9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8M7.5 5.5l9 5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  gear: '<path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.6a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.6a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  pdf: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4M9 12h2"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/>',
+  bug: '<path d="M8 2l1.9 1.9M16 2l-1.9 1.9M9 7.1V6a3 3 0 1 1 6 0v1.1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6.5 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M22 13h-4M17.2 17c2.1.1 3.8 1.9 3.8 4"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  board: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/>',
+  refresh: '<path d="M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12A9 9 0 0 1 18.5 5.8L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/>',
+  pin: '<path d="M12 17v5M9 10.8V4h6v6.8l3 3.2v2H6v-2z"/>',
+  link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+  upload: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  undo: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
+  list: '<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  tasks: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 12 2 2 4-4M15 10h2M15 14h2"/>',
+  history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff: '<path d="M17.9 17.9A10.4 10.4 0 0 1 12 19c-6.5 0-10-7-10-7a18.6 18.6 0 0 1 5.1-5.9M9.9 5.2A9.6 9.6 0 0 1 12 5c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.2 3.2M14.1 14.1a3 3 0 1 1-4.2-4.2M2 2l20 20"/>',
+  key: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M17 6l3 3M14 9l2 2"/>',
+  cloud: '<path d="M17.5 19H8a6 6 0 1 1 5.7-7.9A4.5 4.5 0 1 1 17.5 19z"/>',
+  flask: '<path d="M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><path d="M7 15h10"/>',
+  bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  bulb: '<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  rocket: '<path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.2 2.2 0 0 0-2.9-.1z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.6-3 2-4c1.6-1.1 5 0 5 0M12 15v5s3-.6 4-2c1.1-1.6 0-5 0-5"/>',
+  copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+};
+const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+
+// ---------- utils ----------
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => (globalThis.crypto?.randomUUID ? crypto.randomUUID() : 'id-' + Date.now().toString(36) + Math.random().toString(36).slice(2));
+const nowIso = () => new Date().toISOString();
+const fmtDate = (iso, withTime = false) => {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return '—';
+  return d.toLocaleDateString('el-GR', { day: 'numeric', month: 'short', year: 'numeric', ...(withTime ? { hour: '2-digit', minute: '2-digit' } : {}) });
+};
+const rtf = new Intl.RelativeTimeFormat('el', { numeric: 'auto' });
+const ago = (iso) => {
+  if (!iso) return '';
+  const s = (new Date(iso) - Date.now()) / 1000;
+  const a = Math.abs(s);
+  if (a < 60) return 'μόλις τώρα';
+  if (a < 3600) return rtf.format(Math.round(s / 60), 'minute');
+  if (a < 86400) return rtf.format(Math.round(s / 3600), 'hour');
+  if (a < 86400 * 30) return rtf.format(Math.round(s / 86400), 'day');
+  if (a < 86400 * 365) return rtf.format(Math.round(s / 86400 / 30), 'month');
+  return rtf.format(Math.round(s / 86400 / 365), 'year');
+};
+const tagsOf = (p) => String(p.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
+const safeUrl = (u) => { try { const x = new URL(u); return ['http:', 'https:'].includes(x.protocol) ? x.href : ''; } catch { return ''; } };
+const dateInput = (iso) => { const d = iso ? new Date(iso) : new Date(); const off = d.getTimezoneOffset(); return new Date(d - off * 60000).toISOString().slice(0, 10); };
+
+// Μικρός, ασφαλής markdown renderer (escape πρώτα)
+function md(src) {
+  if (!String(src || '').trim()) return '';
+  const inline = (t) => {
+    const tokens = [];
+    const hold = html => { const key = `\u0001${tokens.length}\u0002`; tokens.push(html); return key; };
+    t = t.replace(/`([^`]+)`/g, (_,text) => hold(`<code>${text}</code>`))
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (all,text,url) => {
+        const decoded = url.replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+        const safe = safeUrl(decoded);
+        return safe ? hold(`<a href="${esc(safe)}" target="_blank" rel="noopener noreferrer">${text}</a>`) : all;
+      })
+      .replace(/https?:\/\/[^\s<)\u0001\u0002]+/g, url => {
+        const decoded = url.replace(/&amp;/g,'&');
+        const safe = safeUrl(decoded);
+        return safe ? hold(`<a href="${esc(safe)}" target="_blank" rel="noopener noreferrer">${url}</a>`) : url;
+      })
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+      .replace(/~~([^~]+)~~/g, '<del>$1</del>');
+    return t.replace(/\u0001(\d+)\u0002/g, (_,i) => tokens[Number(i)]);
+  };
+  const lines = esc(src).replace(/\r/g, '').split('\n');
+  let html = '', list = null, para = [], code = null;
+  const flushP = () => { if (para.length) { html += `<p>${inline(para.join('<br>'))}</p>`; para = []; } };
+  const flushL = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const line of lines) {
+    if (code !== null) {
+      if (/^```/.test(line)) { html += `<pre><code>${code}</code></pre>`; code = null; } else code += (code ? '\n' : '') + line;
+      continue;
+    }
+    if (/^```/.test(line)) { flushP(); flushL(); code = ''; continue; }
+    let m;
+    if ((m = line.match(/^(#{1,3})\s+(.*)$/))) { flushP(); flushL(); html += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; continue; }
+    if (/^(-{3,}|\*{3,})$/.test(line.trim())) { flushP(); flushL(); html += '<hr>'; continue; }
+    if ((m = line.match(/^&gt;\s?(.*)$/))) { flushP(); flushL(); html += `<blockquote>${inline(m[1])}</blockquote>`; continue; }
+    if ((m = line.match(/^\s*[-*+]\s+\[( |x|X)\]\s+(.*)$/))) { flushP(); if (list !== 'ul') { flushL(); html += '<ul>'; list = 'ul'; } html += `<li>${m[1].trim() ? '☑' : '☐'} ${inline(m[2])}</li>`; continue; }
+    if ((m = line.match(/^\s*[-*+]\s+(.*)$/))) { flushP(); if (list !== 'ul') { flushL(); html += '<ul>'; list = 'ul'; } html += `<li>${inline(m[1])}</li>`; continue; }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) { flushP(); if (list !== 'ol') { flushL(); html += '<ol>'; list = 'ol'; } html += `<li>${inline(m[1])}</li>`; continue; }
+    if (!line.trim()) { flushP(); flushL(); continue; }
+    flushL(); para.push(line);
+  }
+  if (code !== null) html += `<pre><code>${code}</code></pre>`;
+  flushP(); flushL();
+  return html;
+}
+
+function toast(msg, err = false) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (err ? ' err' : '');
+  el.innerHTML = (err ? ic('info') : ic('check')) + `<span>${esc(msg)}</span>`;
+  $('#toasts').appendChild(el);
+  setTimeout(() => { el.style.transition = 'opacity .3s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 320); }, err ? 4200 : 2200);
+}
+
+// ---------- ρυθμίσεις / κλειδί ----------
+const CFG_KEY = 'voidproject.cfg';
+const PRESET = window.VOIDPROJECT_CONFIG || {};
+// API endpoints can only be changed explicitly in Settings; never through a URL parameter.
+const LOCAL_API = location.protocol === 'file:' ? 'http://127.0.0.1:8887' : '';
+function loadCfg() {
+  let c = null;
+  try { c = JSON.parse(VP_LS.getItem(CFG_KEY) || sessionStorage.getItem(CFG_KEY) || 'null'); } catch {}
+  c = c || {};
+  if (!c.apiUrl) c.apiUrl = LOCAL_API || PRESET.apiUrl || '';
+  return c;
+}
+function saveCfg(c, remember = true) {
+  try {
+    VP_LS.removeItem(CFG_KEY); sessionStorage.removeItem(CFG_KEY);
+    (remember ? VP_LS : sessionStorage).setItem(CFG_KEY, JSON.stringify(c));
+  } catch { toast('Ο browser δεν επέτρεψε την αποθήκευση των ρυθμίσεων. Η σύνδεση ισχύει για αυτή την καρτέλα.', true); }
+}
+let cfg = loadCfg();
+const isDemo = () => cfg.mode === 'demo';
+const isReady = () => isDemo() || (cfg.apiUrl && cfg.apiKey);
+
+// ---------- backend: Cloudflare ----------
+class ApiError extends Error { constructor(msg, status) { super(msg); this.status = status; } }
+function apiBase(value) {
+  let url; try { url = new URL(value); } catch { throw new ApiError('Μη έγκυρη διεύθυνση Worker.',400); }
+  const local = ['localhost','127.0.0.1','[::1]'].includes(url.hostname);
+  if ((url.protocol !== 'https:' && !(url.protocol === 'http:' && local)) || url.username || url.password || url.search || url.hash || url.pathname !== '/')
+    throw new ApiError('Χρησιμοποίησε HTTPS για τον Worker ή HTTP μόνο για localhost, χωρίς παραμέτρους.',400);
+  return url.origin;
+}
+async function apiCall(method, path, body, override, expected) {
+  const base = apiBase((override || cfg).apiUrl || '');
+  const key = (override || cfg).apiKey || '';
+  let res;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(),15000);
+  try {
+    res = await fetch(base + path, {
+      method, signal: controller.signal, redirect: 'error', credentials: 'omit', referrerPolicy: 'no-referrer',
+      headers: { 'Authorization': 'Bearer ' + key, ...(body ? { 'Content-Type': 'application/json' } : {}), ...(expected ? {'If-Unmodified-Since':expected} : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    throw new ApiError(e.name === 'AbortError' ? 'Ο Worker δεν απάντησε σε 15 δευτερόλεπτα. Κάνε ανανέωση πριν επαναλάβεις την αλλαγή.' : 'Δεν υπάρχει σύνδεση με τον Worker. Έλεγξε τη διεύθυνση ή το internet.', 0);
+  }
+  let data = null;
+  try { data = await res.json(); } catch (e) { throw new ApiError('Ο Worker δεν επέστρεψε έγκυρη απάντηση. Κάνε ανανέωση πριν επαναλάβεις.',0); } finally { clearTimeout(timer); }
+  if (path === '/api/ping' && res.ok && data?.service !== 'voidproject') throw new ApiError('Αυτή η διεύθυνση δεν είναι Worker του voidproject. Χρησιμοποίησε τον νέο Worker από το setup.',400);
+  if (!res.ok) throw new ApiError((data && data.error) || `Σφάλμα ${res.status}`, res.status);
+  return data;
+}
+const Remote = {
+  load: () => apiCall('GET', '/api/data'),
+  create: (t, b) => apiCall('POST', `/api/${t}`, b),
+  update: (t, id, b, expected) => apiCall('PUT', `/api/${t}/${id}`, b, null, expected || S.data[t].find(r => r.id === id)?.updated_at),
+  remove: (t, id) => apiCall('DELETE', `/api/${t}/${id}`),
+  importAll: (d) => apiCall('POST', '/api/import', d),
+};
+
+// ---------- backend: τοπικό demo (localStorage, ίδια λογική με τον Worker) ----------
+const DEMO_KEY = 'voidproject.demo';
+const Local = {
+  db() { try { return JSON.parse(VP_LS.getItem(DEMO_KEY)) || null; } catch { return null; } },
+  save(d) { VP_LS.setItem(DEMO_KEY, JSON.stringify(d)); },
+  get() { let d = this.db(); if (!d) { d = { projects: [], bugs: [], tasks: [], logs: [], releases: [] }; this.save(d); } return d; },
+  log(d, pid, kind, text) { d.logs.unshift({ id: uid(), project_id: pid, kind, text, created_at: nowIso() }); },
+  touch(d, pid) { const p = d.projects.find((x) => x.id === pid); if (p) p.updated_at = new Date(Math.max(Date.now(),Date.parse(p.updated_at)+1||0)).toISOString(); },
+  async load() {
+    const d = this.get();
+    const s = (a, k, dir = -1) => [...a].sort((x, y) => (x[k] < y[k] ? -dir : x[k] > y[k] ? dir : 0));
+    return {
+      projects: [...d.projects].sort((a, b) => (b.pinned - a.pinned) || (a.updated_at < b.updated_at ? 1 : -1)),
+      bugs: s(d.bugs, 'created_at'), tasks: s(d.tasks, 'created_at', 1), logs: s(d.logs, 'created_at'), releases: s(d.releases || [], 'released_at'),
+    };
+  },
+  async create(t, b) {
+    b = VPContract.validateRow(t,b,true);
+    const d = this.get(); const t0 = nowIso();
+    const row = { ...b, id: uid(), created_at: t0 };
+    if (t !== 'logs') row.updated_at = t0;
+    if (t === 'projects') {
+      Object.assign(row, { summary: '', description: '', category: '', tags: '', status: 'idea', release: 'none', priority: 'medium', progress: 0, version: '', repo_url: '', color: COLORS[0], pinned: 0, archived:0, ...b, id: row.id, created_at: t0, updated_at: t0 });
+      d.projects.unshift(row); this.log(d, row.id, 'created', 'Δημιουργήθηκε η ιδέα');
+    } else {
+      if (t === 'bugs') { Object.assign(row, { description: '', severity: 'medium', status: 'open', version_found: '', fix_method: '', fix_patch: '', fixed_at: '', ...b, id: row.id, created_at: t0, updated_at: t0 }); this.log(d, row.project_id, 'bug', `Νέο bug: ${row.title}`); }
+      if (t === 'tasks') { row.done = row.done ? 1 : 0; row.done_at = row.done ? t0 : ''; }
+      if (t === 'releases') {
+        row.released_at = row.released_at || t0;
+        const project=d.projects.find(p=>p.id===row.project_id);
+        if (!project) throw new ApiError('Δεν βρέθηκε το project.',404);
+        project.version=row.version; project.release=row.channel;
+        this.log(d,row.project_id,'release', 'Release '+row.version+' · '+RL[row.channel]);
+      }
+      d[t].unshift(row); this.touch(d, row.project_id);
+    }
+    this.save(d); return row;
+  },
+  async update(t, id, b, expected) {
+    b = VPContract.validateRow(t,b);
+    const d = this.get(); const row = d[t].find((x) => x.id === id);
+    if (!row) throw new ApiError('Δεν βρέθηκε.', 404);
+    if (expected && row.updated_at !== expected) throw new ApiError('Η εγγραφή άλλαξε. Κάνε ανανέωση πριν αποθηκεύσεις.',409);
+    const t0 = new Date(Math.max(Date.now(),Date.parse(row.updated_at)+1||0)).toISOString(); const pid = t === 'projects' ? id : row.project_id;
+    if (t === 'projects') {
+      if ('archived' in b && b.archived !== row.archived) this.log(d,id,'archive',b.archived ? 'Αρχειοθετήθηκε το project' : 'Επαναφέρθηκε από την αρχειοθήκη');
+      if (b.status && b.status !== row.status) this.log(d, id, 'status', `Κατάσταση: ${ST[row.status]} → ${ST[b.status]}`);
+      if (b.release && b.release !== row.release) this.log(d, id, 'release', `Release: ${RL[row.release]} → ${RL[b.release]}`);
+      if (b.version && b.version !== row.version) this.log(d, id, 'version', `Έκδοση ${b.version}${row.version ? ` (από ${row.version})` : ''}`);
+    }
+    if (t === 'tasks' && 'done' in b) { b.done = b.done ? 1 : 0; if (b.done !== row.done) b.done_at = b.done ? t0 : ''; }
+    if (t === 'bugs' && b.status && b.status !== row.status) {
+      if (b.status === 'fixed') { if (!b.fixed_at) b.fixed_at = t0; const how = [b.fix_patch || row.fix_patch, b.fix_method || row.fix_method].filter(Boolean).join(' — '); this.log(d, pid, 'fix', `Διορθώθηκε: ${row.title}${how ? ` (${how})` : ''}`); }
+      else if (b.status === 'open') { b.fixed_at = ''; this.log(d, pid, 'reopen', `Άνοιξε ξανά: ${row.title}`); }
+      else this.log(d, pid, 'fix', `Δεν θα διορθωθεί: ${row.title}`);
+    }
+    Object.assign(row, b, t !== 'logs' ? { updated_at: t0 } : {});
+    if (t !== 'projects') this.touch(d, pid);
+    this.save(d); return row;
+  },
+  async remove(t, id) {
+    const d = this.get(); const row = d[t].find((x) => x.id === id);
+    if (!row) throw new ApiError('Δεν βρέθηκε.', 404);
+    d[t] = d[t].filter((x) => x.id !== id);
+    if (t === 'projects') for (const c of ['bugs', 'tasks', 'logs','releases']) d[c] = d[c].filter((x) => x.project_id !== id);
+    else this.touch(d, row.project_id);
+    this.save(d); return { ok: true };
+  },
+  async importAll(body) {
+    body = VPContract.validateBackup(body);
+    let d = this.get();
+    if (body.mode === 'replace') d = { projects: [], bugs: [], tasks: [], logs: [], releases: [] };
+    const projects = new Set([...d.projects,...body.projects].map(p => p.id));
+    for (const t of ['bugs','tasks','logs','releases']) for (const r of body[t]) {
+      if (!projects.has(r.project_id)) throw new ApiError('Εγγραφή χωρίς αντίστοιχο project.',400);
+      const old = d[t].find(x => x.id === r.id);
+      if (old && old.project_id !== r.project_id) throw new ApiError('Δεν επιτρέπεται μετακίνηση υπάρχουσας εγγραφής.',400);
+    }
+    let n = 0;
+    for (const t of ['projects', 'bugs', 'tasks', 'logs','releases']) for (const r of body[t] || []) {
+      if (!r || !r.id) continue; d[t] = d[t].filter((x) => x.id !== r.id); d[t].push(r); n++;
+    }
+    this.save(d); return { ok: true, imported: n };
+  },
+};
+const DB = new Proxy({}, { get: (_, k) => (isDemo() ? Local : Remote)[k].bind(isDemo() ? Local : Remote) });
+
+// ---------- δοκιμαστικά δεδομένα ----------
+function starterData() {
+  const t=nowIso();
+  const mk=(title,o)=>({id:uid(),title,summary:'',description:'',category:'',tags:'',status:'idea',release:'none',priority:'medium',progress:0,version:'',repo_url:'',color:COLORS[0],pinned:0,archived:0,created_at:t,updated_at:t,...o});
+  const projects=[
+    mk('Pulse Lab',{summary:'Ασύρματη συλλογή μετρήσεων με ESP32 και ένα ζωντανό dashboard.',category:'Hardware',tags:'ESP32, IoT, αισθητήρες',status:'development',release:'beta',priority:'high',progress:68,version:'v0.8.2',color:'#74cbb3',pinned:1,description:'## Η ιδέα\nΈνας μικρός σταθμός που παρακολουθεί θερμοκρασία, υγρασία και ποιότητα αέρα.\n\n## Επόμενα βήματα\n- Σταθερό Wi-Fi\n- Δοκιμή αυτονομίας\n- Οδηγός εγκατάστασης'}),
+    mk('Pico Capture',{summary:'Φορητό εργαλείο καταγραφής και ανάλυσης σημάτων για τον πάγκο.',category:'Hardware',tags:'RF, RP2040',status:'testing',release:'rc',priority:'high',progress:85,version:'v1.0-rc1',color:'#8b7cf8'}),
+    mk('Field Notes',{summary:'Σημειώσεις από δοκιμές, σκέψεις και ευρήματα σε ένα απλό ημερολόγιο.',category:'Software',tags:'web, σημειώσεις',status:'research',progress:20,color:'#72b1ee'}),
+    mk('Bench Supply',{summary:'Ρυθμιζόμενο τροφοδοτικό με καθαρή ένδειξη και ασφαλή όρια.',category:'Hardware',tags:'PCB, εργαστήριο',status:'planning',release:'prototype',progress:35,version:'v0.1',color:'#e3b675'}),
+    mk('Orbit Docs',{summary:'Μια ήσυχη, εύχρηστη βιβλιοθήκη τεχνικών οδηγών για κάθε project.',category:'Software',tags:'docs, markdown',status:'ready',release:'public',priority:'low',progress:100,version:'v1.0.0',color:'#dba1b7'}),
+    mk('Tiny Automations',{summary:'Μικροί αυτοματισμοί που κάνουν τις καθημερινές εργασίες πιο απλές.',category:'Software',tags:'scripts',priority:'low',color:'#a7bb83'}),
+  ];
+  return {projects,bugs:[],tasks:[],releases:[],logs:projects.map(p=>({id:uid(),project_id:p.id,kind:'created',text:'Δημιουργήθηκε η ιδέα',created_at:t}))};
+}
+function demoExtras(d) {
+  const p=d.projects[0],t=Date.now(),iso=h=>new Date(t-h*3600e3).toISOString();
+  d.bugs.push(
+    {id:uid(),project_id:p.id,title:'Χάνεται η σύνδεση μετά από αλλαγή δικτύου',description:'Εμφανίζεται όταν ο σταθμός μετακινείται σε διαφορετικό Wi-Fi.',severity:'high',status:'open',version_found:'v0.8.2',fix_method:'',fix_patch:'',fixed_at:'',created_at:iso(30),updated_at:iso(30)},
+    {id:uid(),project_id:p.id,title:'Λάθος στρογγυλοποίηση θερμοκρασίας',description:'',severity:'medium',status:'fixed',version_found:'v0.8.1',fix_method:'Διατήρηση της δεκαδικής τιμής μέχρι την τελική εμφάνιση.',fix_patch:'v0.8.2',fixed_at:iso(5),created_at:iso(70),updated_at:iso(5)}
+  );
+  d.tasks.push(...[['Δοκιμή αισθητήρων στον πάγκο',1],['Οδηγός εγκατάστασης',0],['Δοκιμή αυτονομίας 24 ωρών',0]].map(([text,done])=>({id:uid(),project_id:p.id,text,done,done_at:done?iso(10):'',created_at:iso(60),updated_at:iso(10)})));
+  d.releases.push(...[['v0.8.1','Πρώτη beta με ζωντανές μετρήσεις.',80],['v0.8.2','Διόρθωση στρογγυλοποίησης και βελτίωση dashboard.',5]].map(([version,notes,h])=>({id:uid(),project_id:p.id,version,notes,channel:'beta',url:'',released_at:iso(h),created_at:iso(h),updated_at:iso(h)})));
+  return d;
+}
+
+// ---------- state ----------
+const UI_KEY = 'voidproject.ui';
+const savedUI = (() => { try { return JSON.parse(VP_LS.getItem(UI_KEY)) || {}; } catch { return {}; } })();
+const S = {
+  data: { projects: [], bugs: [], tasks: [], logs: [], releases: [] },
+  loaded: false, lastLoad: 0, stale:false, busy:false,
+  view: savedUI.view || 'grid',
+  f: { q: '', status: 'all', release: 'all', priority: 'all', sort: savedUI.sort || 'updated', bugs: 'open' },
+  open: null, tab: 'overview', bugFilter: 'all',
+};
+const persistUI = () => { try { VP_LS.setItem(UI_KEY, JSON.stringify({ view: S.view, sort: S.f.sort })); } catch {} };
+
+const projOf = (id) => S.data.projects.find((p) => p.id === id);
+const bugsOf = (id) => S.data.bugs.filter((b) => b.project_id === id);
+const tasksOf = (id) => S.data.tasks.filter((t) => t.project_id === id);
+const logsOf = (id) => S.data.logs.filter((l) => l.project_id === id);
+const releasesOf = id => S.data.releases.filter(r=>r.project_id===id).sort((a,b)=>b.released_at.localeCompare(a.released_at));
+const openBugs = (id) => bugsOf(id).filter((b) => b.status === 'open');
+
+async function reload(silent = false) {
+  const btn = $('#btnRefresh');
+  btn && btn.classList.add('spin');
+  try {
+    const d = await DB.load();
+    S.data = { projects: d.projects || [], bugs: d.bugs || [], tasks: d.tasks || [], logs: d.logs || [], releases: d.releases || [] };
+    S.loaded = true; S.stale=false; S.lastLoad = Date.now();
+    render();
+    if (S.open) { if (projOf(S.open)) renderDrawer(); else closeDrawer(); }
+    if (!silent) toast('Ενημερώθηκε');
+  } catch (e) {
+    if (e.status === 401) { closeDrawer(); toast('Το κλειδί δεν είναι σωστό. Βάλ’ το ξανά.', true); showWelcome(e.message); }
+    else if (!S.loaded) showWelcome(e.message);
+    else { S.stale=true; render(); toast(e.message, true); }
+  } finally { btn && btn.classList.remove('spin'); }
+}
+
+// Κάθε αλλαγή: κλήση στη βάση, μετά φρέσκα δεδομένα (ώστε να έρθει και το αυτόματο ιστορικό)
+async function mutate(fn, okMsg) {
+  if (S.busy) throw new ApiError('Περίμενε να ολοκληρωθεί η προηγούμενη αποθήκευση.',409);
+  if (S.stale) { toast('Κάνε πρώτα ανανέωση για να φορτωθούν τα τελευταία δεδομένα.',true); throw new ApiError('Χρειάζεται ανανέωση.',409); }
+  S.busy=true;
+  try {
+    const r = await fn();
+    try {
+      const d = await DB.load();
+      S.data = { projects: d.projects || [], bugs: d.bugs || [], tasks: d.tasks || [], logs: d.logs || [], releases: d.releases || [] };
+      S.lastLoad=Date.now(); S.stale=false;
+    } catch {
+      S.stale=true;
+      toast('Η αλλαγή αποθηκεύτηκε, αλλά η ανανέωση απέτυχε. Πάτα ανανέωση για να τη δεις.',true);
+    }
+    render();
+    if (S.open) { if (projOf(S.open)) renderDrawer(); else closeDrawer(); }
+    if (okMsg && !S.stale) toast(okMsg);
+    return r;
+  } catch (e) {
+    toast(e.message || 'Σφάλμα',true);
+    if (e.status === 0) { S.stale=true; render(); }
+    if (e.status === 401) { closeDrawer(); showWelcome(e.message); }
+    throw e;
+  } finally { S.busy=false; }
+}
+
+// ---------- filtering ----------
+function filtered() {
+  const { q, status, release, priority, sort } = S.f;
+  const ql = q.trim().toLowerCase();
+  let list = S.data.projects.filter((p) => {
+    if (S.view === 'archive' ? !p.archived : !!p.archived) return false;
+    if (status !== 'all' && p.status !== status) return false;
+    if (release === 'released' ? !RELEASED.includes(p.release) : (release !== 'all' && p.release !== release)) return false;
+    if (priority !== 'all' && p.priority !== priority) return false;
+    if (ql) {
+      const hay = [p.title, p.summary, p.description, p.category, p.tags, p.version, ...bugsOf(p.id).map((b) => b.title + ' ' + b.fix_patch)].join(' ').toLowerCase();
+      if (!ql.split(/\s+/).every((w) => hay.includes(w))) return false;
+    }
+    return true;
+  });
+  const prioN = { critical: 0, high: 1, medium: 2, low: 3 };
+  const stN = Object.fromEntries(STATUSES.map(([k], i) => [k, i]));
+  const by = {
+    updated: (a, b) => (a.updated_at < b.updated_at ? 1 : -1),
+    created: (a, b) => (a.created_at < b.created_at ? 1 : -1),
+    title: (a, b) => a.title.localeCompare(b.title, 'el'),
+    priority: (a, b) => prioN[a.priority] - prioN[b.priority],
+    progress: (a, b) => b.progress - a.progress,
+    bugs: (a, b) => openBugs(b.id).length - openBugs(a.id).length,
+    status: (a, b) => stN[a.status] - stN[b.status],
+  }[sort] || (() => 0);
+  return list.sort((a, b) => (b.pinned - a.pinned) || by(a, b));
+}
+
+// ---------- render: main ----------
+function render() {
+  if (!S.loaded) return;
+  $('#topbar').hidden = false;
+  $('#workspaceNav').hidden = false;
+  document.body.classList.add('workspace-on');
+  $$('[data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===S.view));
+  $('#navProjectCount').textContent=S.data.projects.filter(p=>!p.archived).length;
+  $('#navArchiveCount').textContent=S.data.projects.filter(p=>p.archived).length;
+  $('#navBugCount').textContent=S.data.bugs.filter(b=>b.status==='open'&&!projOf(b.project_id)?.archived).length;
+  $('#navMode').textContent=isDemo()?'Δοκιμαστική λειτουργία':'Cloudflare · Προσωπικό';
+  $('#brandSub').innerHTML = isDemo() ? '<span class="mode-pill">' + ic('flask') + 'Δοκιμαστική λειτουργία</span>' : 'Ιδέες · Projects · Bugs';
+  const P = S.data.projects.filter(p=>!p.archived);
+  const all = S.data.bugs.filter(b=>!projOf(b.project_id)?.archived);
+  const openN = all.filter((b) => b.status === 'open').length;
+  const fixedN = all.filter((b) => b.status === 'fixed').length;
+  const cnt = (st) => P.filter((p) => p.status === st).length;
+  const activeN = P.filter((p) => ['research', 'planning', 'development', 'testing'].includes(p.status)).length;
+  const bugProjects = new Set(all.filter((b) => b.status === 'open').map((b) => b.project_id)).size;
+  const list = filtered();
+
+  const collection=S.view==='archive'?S.data.projects.filter(p=>p.archived):P;
+  const counts = Object.fromEntries(STATUSES.map(([k]) => [k, collection.filter((p) => p.status === k).length]));
+  const chip = (k, label, c, n) => `<button class="chip ${S.f.status === k ? 'on' : ''}" data-status="${k}" style="--c:${c}">${k !== 'all' ? '<span class="dot"></span>' : ''}${label}<span class="n">${n}</span></button>`;
+
+  const pendingTasks = S.data.tasks.filter(t => !t.done && !projOf(t.project_id)?.archived).length;
+  const criticalBugs = all.filter(b => b.status === 'open' && b.severity === 'critical').length;
+  const h = `
+  <div class="connection ${S.stale ? 'warn' : ''}" role="status"><span class="dot"></span><b>${isDemo() ? 'Τοπική δοκιμή' : S.stale ? 'Χρειάζεται ανανέωση' : 'Cloudflare D1 · Συνδεδεμένο'}</b><span>${isDemo() ? 'Αποθήκευση σε αυτή τη συσκευή' : S.stale ? 'Τα εμφανιζόμενα δεδομένα μπορεί να είναι παλιά' : 'Αποθήκευση στη βάση σου'}</span><time>Ενημέρωση ${new Date(S.lastLoad).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})}</time><button id="syncNow">Ανανέωση</button></div>
+  <div class="hero">
+    <div>
+      <div class="eyebrow">ΑΠΟ ΤΗΝ ΙΔΕΑ ΣΤΗΝ ΥΛΟΠΟΙΗΣΗ</div>
+      <h1>${S.view==='archive'?'Η αρχειοθήκη μου':S.view==='bugs'?'Κάθε διόρθωση μετράει.':'Χώρος για την επόμενη ιδέα.'}</h1>
+      <p>${collection.length ? `${collection.length} ${collection.length === 1 ? 'ιδέα' : 'ιδέες'} · τελευταία αλλαγή ${ago(collection.reduce((m, p) => (p.updated_at > m ? p.updated_at : m), '')) || '—'}` : S.view==='archive'?'Τα αρχειοθετημένα projects διατηρούν ολόκληρο το ιστορικό τους.':'Ξεκίνα γράφοντας την πρώτη σου ιδέα.'}</p>
+    </div>
+  </div>
+  <div class="stats">
+    <button class="stat" data-jump="all" style="--c:var(--accent)"><div class="k"><i></i>Σύνολο ιδεών</div><div class="v">${P.length}</div><div class="sub">${activeN} ${activeN===1?'ενεργή':'ενεργές'} · ${cnt('ready')} ${cnt('ready')===1?'έτοιμη':'έτοιμες'}</div></button>
+    <button class="stat" data-jump="development" style="--c:var(--s-development)"><div class="k"><i></i>Υπό ανάπτυξη</div><div class="v">${cnt('development')}</div><div class="sub">+ ${cnt('testing')} σε δοκιμές</div></button>
+    <button class="stat" data-jump="ready" style="--c:var(--s-ready)"><div class="k"><i></i>Έτοιμα</div><div class="v">${cnt('ready')}</div><div class="sub">${P.filter((p) => p.status === 'ready' && p.release !== 'none').length} με release</div></button>
+    <button class="stat danger" data-jump="openbugs" style="--c:var(--danger)"><div class="k"><i></i>Ανοιχτά bugs</div><div class="v">${openN}</div><div class="sub">${openN ? `σε ${bugProjects} ${bugProjects === 1 ? 'ιδέα' : 'ιδέες'}` : 'κανένα εκκρεμές'}</div></button>
+    <button class="stat" data-jump="fixedbugs" style="--c:var(--ok)"><div class="k"><i></i>Διορθωμένα bugs</div><div class="v">${fixedN}</div><div class="sub">από ${all.length} συνολικά</div></button>
+  </div>
+  <div class="focus-summary"><span><b>${pendingTasks}</b> εκκρεμείς εργασίες</span><span><b>${criticalBugs}</b> κρίσιμα ανοιχτά bugs</span><span><b>${cnt('research')}</b> ιδέες σε έρευνα</span></div>
+  <div class="toolbar">
+    <div class="chips" role="tablist" aria-label="Κατάσταση">
+      ${chip('all', 'Όλα', 'var(--accent)', collection.length)}
+      ${STATUSES.map(([k, l]) => chip(k, l, sColor(k), counts[k])).join('')}
+    </div>
+    <div class="tool-right">
+      <select class="select" id="fRelease" aria-label="Release">
+        <option value="all">Όλα τα releases</option>
+        <option value="released" ${S.f.release === 'released' ? 'selected' : ''}>Με ενεργό release</option>
+        ${RELEASES.map(([k, l]) => `<option value="${k}" ${S.f.release === k ? 'selected' : ''}>${l}</option>`).join('')}
+      </select>
+      <select class="select" id="fPriority" aria-label="Προτεραιότητα">
+        <option value="all">Κάθε προτεραιότητα</option>
+        ${PRIORITIES.map(([k, l]) => `<option value="${k}" ${S.f.priority === k ? 'selected' : ''}>${l}</option>`).join('')}
+      </select>
+      <select class="select" id="fSort" aria-label="Ταξινόμηση">
+        ${[['updated', 'Πρόσφατη αλλαγή'], ['created', 'Νεότερες'], ['priority', 'Προτεραιότητα'], ['status', 'Κατάσταση'], ['progress', 'Πρόοδος'], ['bugs', 'Περισσότερα bugs'], ['title', 'Αλφαβητικά']]
+          .map(([k, l]) => `<option value="${k}" ${S.f.sort === k ? 'selected' : ''}>${l}</option>`).join('')}
+      </select>
+      <div class="seg" role="tablist" aria-label="Προβολή">
+        <button data-view="grid" class="${S.view === 'grid' ? 'on' : ''}" title="Κάρτες">${ic('grid')}<span>Κάρτες</span></button>
+        <button data-view="board" class="${S.view === 'board' ? 'on' : ''}" title="Πίνακας κατάστασης">${ic('board')}<span>Board</span></button>
+        <button data-view="bugs" class="${S.view === 'bugs' ? 'on' : ''}" title="Όλα τα bugs">${ic('bug')}<span>Bugs</span></button>
+      </div>
+    </div>
+  </div>
+  <div id="content">${S.view === 'board' ? renderBoard(list) : S.view === 'bugs' ? renderAllBugs() : renderGrid(list)}</div>`;
+  $('#app').innerHTML = h;
+  bindMain();
+  $('#syncNow').onclick=() => reload();
+}
+
+function cardHTML(p, compact = false) {
+  const ob = openBugs(p.id).length;
+  const tk = tasksOf(p.id); const td = tk.filter((t) => t.done).length;
+  const tags = tagsOf(p).slice(0, 4);
+  return `<article class="card" tabindex="0" role="button" aria-label="Άνοιγμα ${esc(p.title)}" data-open="${p.id}" style="--pc:${esc(p.color || COLORS[0])}" ${compact ? 'draggable="true"' : ''}>
+    <div class="card-h"><h3>${esc(p.title)}</h3>${p.pinned ? `<span class="pin" title="Καρφιτσωμένο">${ic('pin')}</span>` : ''}</div>
+    ${compact ? '' : `<p class="sum">${esc(p.summary) || '<span style="opacity:.6">Χωρίς περίληψη</span>'}</p>`}
+    <div class="badges">
+      ${compact ? '' : `<span class="badge" style="--c:${sColor(p.status)}"><span class="dot"></span>${ST[p.status] || p.status}</span>`}
+      ${p.release !== 'none' ? `<span class="badge" style="--c:${rColor(p.release)}">${ic('rocket')}${RL[p.release]}</span>` : ''}
+      ${p.version ? `<span class="badge ver">${esc(p.version)}</span>` : ''}
+      ${!compact && p.category ? `<span class="badge plain">${esc(p.category)}</span>` : ''}
+    </div>
+    ${!compact && tags.length ? `<div class="tags">${tags.map((t) => `<span class="tag">#${esc(t)}</span>`).join('')}</div>` : ''}
+    <div class="prog" title="Πρόοδος ${p.progress}%"><i style="width:${p.progress}%"></i></div>
+    <div class="card-f">
+      <span title="Προτεραιότητα" style="color:${pColor(p.priority)}">● ${PR[p.priority]}</span>
+      ${ob ? `<span class="bugs-open">${ic('bug')}${ob}</span>` : ''}
+      ${tk.length ? `<span>${ic('tasks')}${td}/${tk.length}</span>` : ''}
+      <span class="right">${p.progress}% · ${ago(p.updated_at)}</span>
+    </div>
+  </article>`;
+}
+
+function emptyState() {
+  if (S.view==='archive'&&!S.data.projects.some(p=>p.archived)) return '<div class="empty"><h3>Μια καθαρή αρχειοθήκη.</h3><p>Άνοιξε ένα project και πάτα «Αρχειοθέτηση» όταν θέλεις να το κρατήσεις για αργότερα.</p></div>';
+  const filteredOut = S.data.projects.length > 0;
+  return `<div class="empty">
+    <div class="big">${ic(filteredOut ? 'list' : 'bulb')}</div>
+    <h3>${filteredOut ? 'Τίποτα με αυτά τα φίλτρα' : 'Δεν υπάρχουν ακόμα ιδέες'}</h3>
+    <p>${filteredOut ? 'Άλλαξε τα φίλτρα ή την αναζήτηση.' : 'Γράψε την πρώτη σου ιδέα ή κάνε εισαγωγή από αρχείο JSON (π.χ. backup.json).'}</p>
+    ${filteredOut ? '<button class="btn" data-act="clear-filters">Καθαρισμός φίλτρων</button>'
+      : `<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn primary" data-act="new">${ic('plus')}Νέα ιδέα</button><button class="btn" data-act="import">${ic('upload')}Εισαγωγή JSON</button></div>`}
+  </div>`;
+}
+
+function renderGrid(list) {
+  if (!list.length) return emptyState();
+  return `<div class="grid">${list.map((p) => cardHTML(p)).join('')}</div>`;
+}
+
+function renderBoard(list) {
+  if (!S.data.projects.length) return emptyState();
+  const cols = S.f.status === 'all' ? STATUSES : STATUSES.filter(([k]) => k === S.f.status);
+  return `<div class="board">${cols.map(([k, l]) => {
+    const items = list.filter((p) => p.status === k);
+    return `<section class="col" data-col="${k}" style="--c:${sColor(k)}">
+      <div class="col-h"><span class="dot"></span>${l}<span class="n">${items.length}</span></div>
+      ${items.map((p) => cardHTML(p, true)).join('') || '<div class="col-empty">Σύρε μια κάρτα εδώ</div>'}
+    </section>`;
+  }).join('')}</div>`;
+}
+
+function bugHTML(b, withProject = false) {
+  const p = projOf(b.project_id);
+  const sev = `<span class="sev" style="--c:${pColor(b.severity)}">${SV[b.severity] || b.severity}</span>`;
+  const projTag = withProject && p ? `<span class="bug-proj" data-open="${p.id}" style="--pc:${esc(p.color)}"><i></i>${esc(p.title)}</span>` : '';
+  if (b.status === 'open') {
+    return `<div class="bug open" data-bug="${b.id}">
+      <div class="bug-main">
+        <div class="bug-title">${esc(b.title)}</div>
+        ${b.description ? `<div class="bug-desc">${esc(b.description)}</div>` : ''}
+        <div class="bug-meta">${sev}${projTag}<span>Εντοπίστηκε ${fmtDate(b.created_at)}</span>${b.version_found ? `<span>στην <code>${esc(b.version_found)}</code></span>` : ''}</div>
+      </div>
+      <div class="bug-side"><div class="bug-actions">
+        <button class="btn sm ok" data-act="fix" data-id="${b.id}">${ic('check')}Διορθώθηκε</button>
+        <button class="icon-btn sm" data-act="edit-bug" data-id="${b.id}" title="Επεξεργασία">${ic('edit')}</button>
+      </div></div>
+    </div>`;
+  }
+  const won = b.status === 'wontfix';
+  return `<div class="bug ${b.status}" data-bug="${b.id}">
+    <div class="bug-main">
+      <div class="bug-title">${esc(b.title)}</div>
+      ${b.description ? `<div class="bug-desc">${esc(b.description)}</div>` : ''}
+      <div class="bug-meta">${sev}${projTag}<span>Εντοπίστηκε ${fmtDate(b.created_at)}</span>${b.version_found ? `<span>στην <code>${esc(b.version_found)}</code></span>` : ''}</div>
+    </div>
+    <div class="bug-side">
+      <div class="fixinfo">
+        <b>${won ? ic('x') + 'Δεν θα διορθωθεί' : ic('check') + 'Διορθώθηκε'}</b> · ${fmtDate(b.fixed_at)}${b.fix_patch ? ` · <code>${esc(b.fix_patch)}</code>` : ''}
+        ${b.fix_method ? `<div class="how">${won ? '' : 'με: '}${esc(b.fix_method)}</div>` : ''}
+      </div>
+      <div class="bug-actions">
+        <button class="btn sm ghost" data-act="reopen" data-id="${b.id}" title="Άνοιγμα ξανά">${ic('undo')}Άνοιγμα ξανά</button>
+        <button class="icon-btn sm" data-act="edit-bug" data-id="${b.id}" title="Επεξεργασία">${ic('edit')}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function sortBugs(arr) {
+  const sevN = { critical: 0, high: 1, medium: 2, low: 3 };
+  return [...arr].sort((a, b) => {
+    if ((a.status === 'open') !== (b.status === 'open')) return a.status === 'open' ? -1 : 1;
+    if (a.status === 'open') return (sevN[a.severity] - sevN[b.severity]) || (a.created_at < b.created_at ? 1 : -1);
+    return (a.fixed_at || '') < (b.fixed_at || '') ? 1 : -1;
+  });
+}
+
+function renderAllBugs() {
+  const ql = S.f.q.trim().toLowerCase();
+  let arr = S.data.bugs.filter((b) => {
+    if (S.f.bugs === 'open' && b.status !== 'open') return false;
+    if (S.f.bugs === 'fixed' && b.status === 'open') return false;
+    const p = projOf(b.project_id);
+    if (!p || p.archived) return false;
+    if (S.f.status !== 'all' && p.status !== S.f.status) return false;
+    if (S.f.release === 'released' ? !RELEASED.includes(p.release) : (S.f.release !== 'all' && p.release !== S.f.release)) return false;
+    if (S.f.priority !== 'all' && p.priority !== S.f.priority) return false;
+    if (ql && !ql.split(/\s+/).every((w) => [b.title, b.description, b.fix_method, b.fix_patch, p.title].join(' ').toLowerCase().includes(w))) return false;
+    return true;
+  });
+  arr = sortBugs(arr);
+  const seg = (k, l) => `<button data-bf="${k}" class="${S.f.bugs === k ? 'on' : ''}">${l}</button>`;
+  return `<div class="list-head"><div class="seg">${seg('open', 'Ανοιχτά')}${seg('fixed', 'Διορθωμένα')}${seg('all', 'Όλα')}</div>
+    <span style="color:var(--muted);font-size:13px">${arr.length} ${arr.length === 1 ? 'εγγραφή' : 'εγγραφές'}</span></div>
+    ${arr.length ? arr.map((b) => bugHTML(b, true)).join('')
+      : `<div class="empty"><div class="big">${ic('bug')}</div><h3>${S.f.bugs === 'open' ? 'Κανένα ανοιχτό bug' : 'Δεν υπάρχουν bugs εδώ'}</h3><p>Τα bugs προστίθενται μέσα από κάθε ιδέα, στην καρτέλα «Bugs».</p></div>`}`;
+}
+
+function bindMain() {
+  $$('[data-status]').forEach((b) => b.onclick = () => { S.f.status = b.dataset.status; render(); });
+  $('#fRelease').onchange = (e) => { S.f.release = e.target.value; render(); };
+  $('#fPriority').onchange = (e) => { S.f.priority = e.target.value; render(); };
+  $('#fSort').onchange = (e) => { S.f.sort = e.target.value; persistUI(); render(); };
+  $$('[data-view]').forEach((b) => b.onclick = () => { S.view = b.dataset.view; persistUI(); render(); });
+  $$('[data-bf]').forEach((b) => b.onclick = () => { S.f.bugs = b.dataset.bf; render(); });
+  $$('[data-jump]').forEach((b) => b.onclick = () => {
+    const j = b.dataset.jump;
+    S.f.release = 'all'; S.f.priority = 'all';
+    if (j === 'all') { S.f.status = 'all'; if (S.view === 'bugs') S.view = 'grid'; }
+    if (j === 'development') { S.f.status = 'development'; if (S.view === 'bugs') S.view = 'grid'; }
+    if (j === 'ready') { S.f.status = 'ready'; if (S.view === 'bugs') S.view = 'grid'; }
+    if (j === 'openbugs') { S.f.status = 'all'; S.view = 'bugs'; S.f.bugs = 'open'; }
+    if (j === 'fixedbugs') { S.f.status = 'all'; S.view = 'bugs'; S.f.bugs = 'fixed'; }
+    persistUI(); render();
+  });
+  $$('#content [data-open]').forEach((el) => {
+    el.onclick = (e) => { if (e.target.closest('button')) return; openDrawer(el.dataset.open); };
+    el.onkeydown = (e) => { if (e.key === 'Enter') openDrawer(el.dataset.open); };
+  });
+  bindBugActions($('#content'));
+  $$('#content [data-act="new"]').forEach((b) => b.onclick = () => projectForm());
+  $$('#content [data-act="import"]').forEach((b) => b.onclick = () => { settingsForm(); setTimeout(() => $('#impFile')?.click(), 120); });
+  $$('#content [data-act="clear-filters"]').forEach((b) => b.onclick = () => { Object.assign(S.f, { q: '', status: 'all', release: 'all', priority: 'all' }); $('#q').value = ''; render(); });
+
+  // drag & drop στο board
+  if (S.view === 'board') {
+    $$('.col .card').forEach((c) => {
+      c.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', c.dataset.open); e.dataTransfer.effectAllowed = 'move'; c.classList.add('dragging'); });
+      c.addEventListener('dragend', () => c.classList.remove('dragging'));
+    });
+    $$('.col').forEach((col) => {
+      col.addEventListener('dragover', (e) => { e.preventDefault(); col.classList.add('drop'); });
+      col.addEventListener('dragleave', (e) => { if (!col.contains(e.relatedTarget)) col.classList.remove('drop'); });
+      col.addEventListener('drop', (e) => {
+        e.preventDefault(); col.classList.remove('drop');
+        const id = e.dataTransfer.getData('text/plain'); const p = projOf(id);
+        if (p && p.status !== col.dataset.col) mutate(() => DB.update('projects', id, { status: col.dataset.col }), `«${p.title}» → ${ST[col.dataset.col]}`);
+      });
+    });
+  }
+}
+
+function bindBugActions(root) {
+  $$('[data-act="fix"]', root).forEach((b) => b.onclick = (e) => { e.stopPropagation(); fixForm(b.dataset.id); });
+  $$('[data-act="reopen"]', root).forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    const bug = S.data.bugs.find((x) => x.id === b.dataset.id);
+    if (await confirmBox('Άνοιγμα ξανά;', `Το «${bug.title}» θα ξαναγίνει ανοιχτό bug. Οι σημειώσεις διόρθωσης κρατιούνται στο ιστορικό.`, 'Άνοιγμα ξανά'))
+      mutate(() => DB.update('bugs', bug.id, { status: 'open' }), 'Το bug άνοιξε ξανά');
+  });
+  $$('[data-act="edit-bug"]', root).forEach((b) => b.onclick = (e) => { e.stopPropagation(); bugForm(S.data.bugs.find((x) => x.id === b.dataset.id)); });
+  $$('.bug-proj[data-open]', root).forEach((el) => el.onclick = (e) => { e.stopPropagation(); openDrawer(el.dataset.open, 'bugs'); });
+}
+
+// ---------- drawer (λεπτομέρειες ιδέας) ----------
+let drawerEls = null;
+function openDrawer(id, tab = 'overview') {
+  S.open = id; S.tab = tab; S.bugFilter = 'all';
+  if (!drawerEls) {
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    const dr = document.createElement('aside'); dr.className = 'drawer'; dr.setAttribute('role', 'dialog'); dr.setAttribute('aria-modal', 'true');
+    document.body.append(ov, dr);
+    ov.onclick = closeDrawer;
+    drawerEls = { ov, dr };
+    requestAnimationFrame(() => { ov.classList.add('show'); dr.classList.add('show'); });
+    document.body.style.overflow = 'hidden';
+  }
+  renderDrawer();
+}
+function closeDrawer() {
+  if (!drawerEls) return;
+  const { ov, dr } = drawerEls; drawerEls = null; S.open = null;
+  ov.classList.remove('show'); dr.classList.remove('show');
+  setTimeout(() => { ov.remove(); dr.remove(); }, 230);
+  if (!$('.modal')) document.body.style.overflow = '';
+}
+
+function renderDrawer() {
+  const p = projOf(S.open); if (!p || !drawerEls) return;
+  const bugs = bugsOf(p.id), ob = bugs.filter((b) => b.status === 'open').length;
+  const tasks = tasksOf(p.id), logs = logsOf(p.id), releases=releasesOf(p.id);
+  const tab = (k, icon, label, cnt, red) => `<button class="tab ${S.tab === k ? 'on' : ''}" data-tab="${k}">${ic(icon)}${label}${cnt !== undefined ? `<span class="cnt ${red ? 'red' : ''}">${cnt}</span>` : ''}</button>`;
+  const scroll = $('.d-body', drawerEls.dr)?.scrollTop || 0;
+  drawerEls.dr.style.setProperty('--pc', p.color || COLORS[0]);
+  drawerEls.dr.innerHTML = `
+    <div class="d-head">
+      <div class="d-top">
+        <h2>${esc(p.title)}</h2>
+        <button class="icon-btn" data-d="close" title="Κλείσιμο (Esc)" aria-label="Κλείσιμο">${ic('x')}</button>
+      </div>
+      ${p.summary ? `<p class="d-sum">${esc(p.summary)}</p>` : '<div style="height:10px"></div>'}
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <div class="badges">
+          <span class="badge" style="--c:${sColor(p.status)}"><span class="dot"></span>${ST[p.status]}</span>
+          <span class="badge" style="--c:${rColor(p.release)}">${RL[p.release]}</span>
+          ${p.version ? `<span class="badge ver">${esc(p.version)}</span>` : ''}
+          <span class="badge" style="--c:${pColor(p.priority)}">Προτερ.: ${PR[p.priority]}</span>
+        </div>
+        <div class="d-acts">
+          <button class="btn sm" data-d="edit">${ic('edit')}Επεξεργασία</button>
+          <button class="btn sm" data-d="pin">${ic('pin')}${p.pinned ? 'Ξεκαρφίτσωμα' : 'Καρφίτσωμα'}</button>
+          <button class="btn sm" data-d="pdf">${ic('pdf')}PDF</button>
+          <button class="btn sm" data-d="archive">${ic('history')}${p.archived?'Επαναφορά':'Αρχειοθέτηση'}</button>
+          <button class="icon-btn sm" data-d="delete" title="Διαγραφή ιδέας" aria-label="Διαγραφή">${ic('trash')}</button>
+        </div>
+      </div>
+      <div class="tabs" role="tablist">
+        ${tab('overview', 'info', 'Επισκόπηση')}
+        ${tab('bugs', 'bug', 'Bugs', ob ? ob : bugs.length, ob > 0)}
+        ${tab('tasks', 'tasks', 'Εργασίες', tasks.length ? `${tasks.filter((t) => t.done).length}/${tasks.length}` : 0)}
+        ${tab('releases', 'rocket', 'Εκδόσεις', releases.length)}
+        ${tab('history', 'history', 'Ιστορικό', logs.length)}
+      </div>
+    </div>
+    <div class="d-body">${{ overview: dOverview, bugs: dBugs, tasks: dTasks, releases:dReleases, history: dHistory }[S.tab](p)}</div>`;
+  $('.d-body', drawerEls.dr).scrollTop = scroll;
+  bindDrawer(p);
+}
+
+function dOverview(p) {
+  const url = safeUrl(p.repo_url);
+  const tags = tagsOf(p);
+  const m = (k, v) => `<div><dt>${k}</dt><dd>${v}</dd></div>`;
+  return `
+    <h4 class="section-t">Στοιχεία</h4>
+    <dl class="meta">
+      ${m('Κατάσταση', `<span style="color:${sColor(p.status)}">●</span> ${ST[p.status]}`)}
+      ${m('Release', `<span style="color:${rColor(p.release)}">●</span> ${RL[p.release]}`)}
+      ${m('Έκδοση', p.version ? `<code>${esc(p.version)}</code>` : '—')}
+      ${m('Πρόοδος', `${p.progress}%<div class="prog" style="margin-top:7px;--pc:${esc(p.color)}"><i style="width:${p.progress}%"></i></div>`)}
+      ${m('Κατηγορία', esc(p.category) || '—')}
+      ${m('Προτεραιότητα', `<span style="color:${pColor(p.priority)}">●</span> ${PR[p.priority]}`)}
+      ${m('Δημιουργία', fmtDate(p.created_at))}
+      ${m('Τελευταία αλλαγή', `${fmtDate(p.updated_at, true)}`)}
+      ${url ? `<div style="grid-column:1/-1"><dt>Σύνδεσμος</dt><dd><a href="${esc(url)}" target="_blank" rel="noopener">${esc(p.repo_url)}</a></dd></div>` : ''}
+      ${tags.length ? `<div style="grid-column:1/-1"><dt>Tags</dt><dd><div class="tags" style="margin-top:3px">${tags.map((t) => `<span class="tag">#${esc(t)}</span>`).join('')}</div></dd></div>` : ''}
+    </dl>
+    <h4 class="section-t">Περιγραφή</h4>
+    <div class="prose">${md(p.description) || '<p class="empty-prose">Δεν υπάρχει περιγραφή. Πάτα «Επεξεργασία» για να γράψεις λεπτομέρειες, υλικά, σημειώσεις.</p>'}</div>`;
+}
+
+function dBugs(p) {
+  const all = sortBugs(bugsOf(p.id));
+  const list = all.filter((b) => S.bugFilter === 'all' || (S.bugFilter === 'open' ? b.status === 'open' : b.status !== 'open'));
+  const seg = (k, l, n) => `<button data-bfd="${k}" class="${S.bugFilter === k ? 'on' : ''}">${l} ${n}</button>`;
+  const on = all.filter((b) => b.status === 'open').length;
+  return `
+    <form class="addbox" id="addBug" autocomplete="off">
+      <input class="in" name="title" placeholder="Νέο bug — τι πρόβλημα βρήκες;" style="flex:1 1 260px" required maxlength="300">
+      <select class="in" name="severity" style="width:auto">${SEVERITIES.map(([k, l]) => `<option value="${k}" ${k === 'medium' ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <button class="btn primary" type="submit">${ic('plus')}Προσθήκη</button>
+      <button class="btn" type="button" data-d="bug-full" title="Με περιγραφή και έκδοση">Αναλυτικά…</button>
+    </form>
+    ${all.length ? `<div class="subfilter"><div class="seg">${seg('all', 'Όλα', all.length)}${seg('open', 'Ανοιχτά', on)}${seg('fixed', 'Διορθωμένα', all.length - on)}</div></div>` : ''}
+    <div id="bugList">${list.map((b) => bugHTML(b)).join('') || `<div class="empty" style="padding:40px 20px"><div class="big">${ic('bug')}</div><h3>${all.length ? 'Τίποτα εδώ' : 'Κανένα bug'}</h3><p>${all.length ? '' : 'Όταν βρεις πρόβλημα, γράψ’ το εδώ. Όταν το διορθώσεις δεν σβήνεται: διαγράφεται με γραμμή και γράφεις πώς διορθώθηκε.'}</p></div>`}</div>`;
+}
+
+function dTasks(p) {
+  const tasks = tasksOf(p.id);
+  const sorted = [...tasks].sort((a, b) => (a.done - b.done) || (a.created_at < b.created_at ? -1 : 1));
+  const pct = tasks.length ? Math.round(tasks.filter((t) => t.done).length / tasks.length * 100) : 0;
+  return `
+    <form class="addbox" id="addTask" autocomplete="off">
+      <input class="in" name="text" placeholder="Νέα εργασία, π.χ. «Σχηματικό στο KiCad»" style="flex:1 1 260px" required maxlength="500">
+      <button class="btn primary" type="submit">${ic('plus')}Προσθήκη</button>
+    </form>
+    ${tasks.length ? `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;color:var(--muted);font-size:13px">
+      <div class="prog" style="flex:1"><i style="width:${pct}%"></i></div><span>${pct}% ολοκληρωμένο</span>
+      ${pct !== p.progress ? `<button class="btn sm" data-d="sync-progress" title="Ορισμός προόδου ιδέας στο ${pct}%">Πρόοδος → ${pct}%</button>` : ''}</div>` : ''}
+    ${sorted.map((t) => `<div class="task ${t.done ? 'done' : ''}">
+      <button class="check ${t.done ? 'on' : ''}" data-task="${t.id}" aria-label="${t.done ? 'Αναίρεση' : 'Ολοκλήρωση'}">${ic('check')}</button>
+      <span class="txt">${esc(t.text)}</span>
+      ${t.done && t.done_at ? `<span style="color:var(--faint);font-size:12px">${fmtDate(t.done_at)}</span>` : ''}
+      <button class="icon-btn sm del" data-deltask="${t.id}" title="Διαγραφή">${ic('trash')}</button>
+    </div>`).join('') || `<div class="empty" style="padding:40px 20px"><div class="big">${ic('tasks')}</div><h3>Χωρίς εργασίες</h3><p>Χώρισε την ιδέα σε βήματα και τσέκαρέ τα όσο προχωράς.</p></div>`}`;
+}
+
+function dHistory(p) {
+  const logs = logsOf(p.id);
+  return `
+    <form class="addbox" id="addNote" autocomplete="off">
+      <input class="in" name="text" placeholder="Σημείωση στο ιστορικό, π.χ. «Παραγγέλθηκαν PCB»" style="flex:1 1 260px" required maxlength="2000">
+      <button class="btn primary" type="submit">${ic('plus')}Σημείωση</button>
+    </form>
+    <div class="tl">${logs.map((l) => `<div class="tl-i" style="--c:${LOG_COLORS[l.kind] || 'var(--faint)'}">
+      <div class="t">${esc(l.text)}</div>
+      <div class="d">${fmtDate(l.created_at, true)} · ${ago(l.created_at)}${l.kind === 'note' ? ` <button class="icon-btn sm" data-dellog="${l.id}" title="Διαγραφή σημείωσης" style="width:24px;height:24px">${ic('trash')}</button>` : ''}</div>
+    </div>`).join('') || '<p style="color:var(--faint)">Δεν υπάρχει ιστορικό.</p>'}</div>`;
+}
+
+function dReleases(p) {
+  return `<div class="release-intro"><div><h3>Κάθε έκδοση, μια πρόοδος.</h3><p>Κράτησε τις αλλαγές, το κανάλι και τον σύνδεσμο κάθε release.</p></div><button class="btn primary" data-d="release-new">${ic('plus')}Νέα έκδοση</button></div>
+    ${releasesOf(p.id).map(r=>`<article class="release-entry"><div class="release-heading"><b>${esc(r.version)}</b><span class="badge" style="--c:${rColor(r.channel)}">${RL[r.channel]}</span><time>${fmtDate(r.released_at)}</time></div><div class="prose">${md(r.notes)||'<p class="muted">Χωρίς σημειώσεις.</p>'}</div>${safeUrl(r.url)?`<a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener">Άνοιγμα έκδοσης ↗</a>`:''}</article>`).join('')||'<div class="empty"><h3>Η πρώτη έκδοση ξεκινά εδώ.</h3><p>Η καταγραφή ενημερώνει και την τρέχουσα έκδοση του project.</p></div>'}`;
+}
+
+function releaseForm(p) {
+  return modal({title:'Καταγραφή έκδοσης',body:`<form class="form" id="rf">
+    <label class="field"><span>Έκδοση *</span><input class="in" name="version" placeholder="v1.0.0" required maxlength="40" autofocus></label>
+    <label class="field"><span>Κανάλι</span><select class="in" name="channel">${opts(RELEASES.filter(([k])=>k!=='none'),'beta')}</select></label>
+    <label class="field full"><span>Τι άλλαξε;</span><textarea class="in" name="notes" rows="6" maxlength="20000" placeholder="Νέες δυνατότητες, διορθώσεις, γνωστά προβλήματα…"></textarea></label>
+    <label class="field full"><span>Σύνδεσμος έκδοσης</span><input class="in" name="url" type="url" maxlength="500" placeholder="https://github.com/…/releases/…"></label>
+    <p class="hint full">Η έκδοση και το κανάλι του project θα ενημερωθούν αυτόματα. Οι παλαιότερες εκδόσεις διατηρούνται.</p></form>`,
+    foot:'<button class="btn" data-m="cancel">Άκυρο</button><button class="btn primary" type="submit" form="rf">Αποθήκευση έκδοσης</button>',
+    onMount:(m,close)=>{$('#rf',m).onsubmit=async e=>{e.preventDefault();const b=$('button[type=submit]',m);b.disabled=true;try{await mutate(()=>DB.create('releases',{project_id:p.id,...Object.fromEntries(new FormData(e.target))}),'Η έκδοση καταγράφηκε');close(true);}catch{}finally{b.disabled=false;}};}});
+}
+
+function bindDrawer(p) {
+  const dr = drawerEls.dr;
+  $$('[data-tab]', dr).forEach((b) => b.onclick = () => { S.tab = b.dataset.tab; $('.d-body', dr).scrollTop = 0; renderDrawer(); });
+  $$('[data-d="close"]', dr).forEach((b) => b.onclick = closeDrawer);
+  $('[data-d="edit"]', dr).onclick = () => projectForm(p);
+  $('[data-d="pin"]', dr).onclick = () => mutate(() => DB.update('projects', p.id, { pinned: p.pinned ? 0 : 1 }), p.pinned ? 'Ξεκαρφιτσώθηκε' : 'Καρφιτσώθηκε');
+  $('[data-d="pdf"]', dr).onclick = () => exportPDF([p], true);
+  $('[data-d="archive"]',dr).onclick=()=>mutate(()=>DB.update('projects',p.id,{archived:p.archived?0:1}),p.archived?'Το project επανήλθε':'Το project αρχειοθετήθηκε');
+  $$('[data-d="release-new"]',dr).forEach(b=>b.onclick=()=>releaseForm(p));
+  $('[data-d="delete"]', dr).onclick = async () => {
+    if (await confirmBox('Διαγραφή ιδέας;', `Θα διαγραφεί οριστικά το «${p.title}» μαζί με ${bugsOf(p.id).length} bugs, ${tasksOf(p.id).length} εργασίες και το ιστορικό του. Δεν αναιρείται.`, 'Οριστική διαγραφή', true, p.title))
+      mutate(() => DB.remove('projects', p.id), 'Η ιδέα διαγράφηκε');
+  };
+  const addBug = $('#addBug', dr);
+  if (addBug) addBug.onsubmit = (e) => {
+    e.preventDefault(); const f = new FormData(addBug);
+    mutate(() => DB.create('bugs', { project_id: p.id, title: f.get('title'), severity: f.get('severity'), version_found: p.version || '' }), 'Το bug καταγράφηκε')
+      .then(() => setTimeout(() => $('#addBug input')?.focus(), 30)).catch(() => {});
+  };
+  $$('[data-d="bug-full"]', dr).forEach((b) => b.onclick = () => bugForm(null, p.id, $('#addBug input').value));
+  $$('[data-bfd]', dr).forEach((b) => b.onclick = () => { S.bugFilter = b.dataset.bfd; renderDrawer(); });
+  bindBugActions(dr);
+  const addTask = $('#addTask', dr);
+  if (addTask) addTask.onsubmit = (e) => {
+    e.preventDefault(); const t = new FormData(addTask).get('text');
+    mutate(() => DB.create('tasks', { project_id: p.id, text: t })).then(() => setTimeout(() => $('#addTask input')?.focus(), 30)).catch(() => {});
+  };
+  $$('[data-task]', dr).forEach((b) => b.onclick = () => { const t = S.data.tasks.find((x) => x.id === b.dataset.task); mutate(() => DB.update('tasks', t.id, { done: t.done ? 0 : 1 })); });
+  $$('[data-deltask]', dr).forEach((b) => b.onclick = () => mutate(() => DB.remove('tasks', b.dataset.deltask), 'Η εργασία διαγράφηκε'));
+  $$('[data-d="sync-progress"]', dr).forEach((b) => b.onclick = () => {
+    const ts = tasksOf(p.id); const pct = Math.round(ts.filter((t) => t.done).length / ts.length * 100);
+    mutate(() => DB.update('projects', p.id, { progress: pct }), `Πρόοδος ${pct}%`);
+  });
+  const addNote = $('#addNote', dr);
+  if (addNote) addNote.onsubmit = (e) => { e.preventDefault(); mutate(() => DB.create('logs', { project_id: p.id, kind: 'note', text: new FormData(addNote).get('text') }), 'Η σημείωση αποθηκεύτηκε'); };
+  $$('[data-dellog]', dr).forEach((b) => b.onclick = () => mutate(() => DB.remove('logs', b.dataset.dellog)));
+}
+
+// ---------- modals ----------
+function modal({ title, body, foot, narrow = false, onMount }) {
+  return new Promise((resolve) => {
+    const ov = document.createElement('div'); ov.className = 'overlay top';
+    const m = document.createElement('div'); m.className = 'modal' + (narrow ? ' narrow' : ''); m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+    m.innerHTML = `<div class="m-head"><h3>${title}</h3><button class="icon-btn sm" data-m="x" aria-label="Κλείσιμο">${ic('x')}</button></div>
+      <div class="m-body">${body}</div>${foot ? `<div class="m-foot">${foot}</div>` : ''}`;
+    const previousFocus=document.activeElement;
+    document.body.append(ov, m);
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => { ov.classList.add('show'); m.classList.add('show'); });
+    const close = (v) => {
+      ov.classList.remove('show'); m.classList.remove('show');
+      setTimeout(() => { ov.remove(); m.remove(); if (!drawerEls && !$('.modal')) document.body.style.overflow = ''; }, 200);
+      document.removeEventListener('keydown', onKey, true);
+      if (previousFocus?.isConnected) previousFocus.focus();
+      resolve(v);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Tab' && $$('.modal').pop() === m) {
+        const items=$$('button:not([disabled]),input:not([disabled]):not([type=hidden]),select,textarea,a[href]',m).filter(x=>x.getClientRects().length);
+        const first=items[0],last=items[items.length-1];
+        if (e.shiftKey && document.activeElement===first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement===last) { e.preventDefault(); first?.focus(); }
+      }
+      if (e.key === 'Escape' && $$('.modal').pop() === m) { e.stopPropagation(); close(null); } };
+    document.addEventListener('keydown', onKey, true);
+    ov.onclick = () => close(null);
+    $('[data-m="x"]', m).onclick = () => close(null);
+    $$('[data-m="cancel"]', m).forEach((b) => b.onclick = () => close(null));
+    onMount && onMount(m, close);
+    setTimeout(() => { const f = $('[autofocus]', m) || $('input:not([type=hidden]):not([type=checkbox]),textarea', m); f && f.focus(); }, 60);
+  });
+}
+
+function confirmBox(title, text, okLabel = 'OK', danger = false, typeToConfirm = '') {
+  return modal({
+    title: esc(title), narrow: true,
+    body: `<p style="margin:0;color:var(--muted)">${esc(text)}</p>${typeToConfirm ? `<label class="field" style="margin-top:16px"><span>Για επιβεβαίωση γράψε: <b style="color:var(--text)">ΔΙΑΓΡΑΦΗ</b></span><input class="in" id="cfType" autocomplete="off"></label>` : ''}`,
+    foot: `<button class="btn" data-m="cancel">Άκυρο</button><button class="btn ${danger ? 'danger' : 'primary'}" data-m="ok" ${typeToConfirm ? 'disabled' : ''}>${esc(okLabel)}</button>`,
+    onMount: (m, close) => {
+      const ok = $('[data-m="ok"]', m); ok.onclick = () => close(true);
+      const t = $('#cfType', m); if (t) t.oninput = () => { ok.disabled = t.value.trim().toUpperCase() !== 'ΔΙΑΓΡΑΦΗ'; };
+      if (!typeToConfirm) setTimeout(() => ok.focus(), 70);
+    },
+  });
+}
+
+function opts(arr, sel) { return arr.map(([k, l]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${l}</option>`).join(''); }
+
+function projectForm(p = null) {
+  const v = p || { title: '', summary: '', description: '', category: '', tags: '', status: 'idea', release: 'none', priority: 'medium', progress: 0, version: '', repo_url: '', color: COLORS[Math.floor(Math.random() * 5)], pinned: 0 };
+  const cats = [...new Set(S.data.projects.map((x) => x.category).filter(Boolean))].sort();
+  return modal({
+    title: p ? 'Επεξεργασία ιδέας' : 'Νέα ιδέα',
+    body: `<form class="form" id="pf" autocomplete="off">
+      <label class="field full"><span>Τίτλος *</span><input class="in" name="title" value="${esc(v.title)}" required maxlength="200" placeholder="π.χ. Ασύρματος συναγερμός με CC1101" autofocus></label>
+      <label class="field full"><span>Σύντομη περιγραφή</span><input class="in" name="summary" value="${esc(v.summary)}" maxlength="400" placeholder="Μία πρόταση: τι είναι και τι λύνει"></label>
+      <label class="field"><span>Κατάσταση</span><select class="in" name="status">${opts(STATUSES, v.status)}</select></label>
+      <label class="field"><span>Release</span><select class="in" name="release">${opts(RELEASES, v.release)}</select></label>
+      <label class="field"><span>Έκδοση</span><input class="in mono" name="version" value="${esc(v.version)}" maxlength="40" placeholder="π.χ. v0.3.1" style="font-family:var(--mono)"></label>
+      <label class="field"><span>Προτεραιότητα</span><select class="in" name="priority">${opts(PRIORITIES, v.priority)}</select></label>
+      <label class="field"><span>Κατηγορία</span><input class="in" name="category" value="${esc(v.category)}" list="catlist" maxlength="60" placeholder="π.χ. RF, IoT, Εργασία"><datalist id="catlist">${cats.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label>
+      <label class="field"><span>Tags</span><input class="in" name="tags" value="${esc(v.tags)}" maxlength="300" placeholder="ESP32, CC1101, KiCad"><small>Χωρισμένα με κόμμα</small></label>
+      <div class="field full"><span>Πρόοδος</span><div class="range-row"><input type="range" name="progress" min="0" max="100" step="5" value="${v.progress}"><output>${v.progress}%</output></div></div>
+      <label class="field full"><span>Σύνδεσμος (GitHub, ιστοσελίδα, έγγραφο)</span><input class="in" name="repo_url" value="${esc(v.repo_url)}" maxlength="500" placeholder="https://github.com/…"></label>
+      <div class="field full"><span>Χρώμα</span><div class="swatches">${COLORS.map((c) => `<button type="button" class="sw ${c === v.color ? 'on' : ''}" style="--c:${c}" data-c="${c}" aria-label="Χρώμα ${c}"></button>`).join('')}
+        <input type="color" name="color" value="${esc(v.color || COLORS[0])}" title="Δικό σου χρώμα" style="width:34px;height:30px;border:0;background:none;padding:0;cursor:pointer"></div></div>
+      <label class="field full"><span>Αναλυτική περιγραφή</span><textarea class="in" name="description" rows="9" maxlength="100000" placeholder="Λεπτομέρειες, υλικά, σκέψεις…&#10;&#10;## Επικεφαλίδα&#10;- λίστα&#10;**έντονα**, \`κώδικας\`, [σύνδεσμος](https://…)">${esc(v.description)}</textarea><small>Υποστηρίζει απλό Markdown: # επικεφαλίδες, - λίστες, **έντονα**, \`κώδικας\`, \`\`\` μπλοκ κώδικα, συνδέσμους.</small></label>
+      <label class="toggle field full" style="flex-direction:row"><input type="checkbox" name="pinned" ${v.pinned ? 'checked' : ''}> Καρφιτσωμένο στην κορυφή</label>
+    </form>`,
+    foot: `<button class="btn" data-m="cancel">Άκυρο</button><button class="btn primary" data-m="save">${ic('check')}${p ? 'Αποθήκευση' : 'Δημιουργία'}</button>`,
+    onMount: (m, close) => {
+      const f = $('#pf', m);
+      const rng = $('input[type=range]', m); rng.oninput = () => { $('output', m).textContent = rng.value + '%'; };
+      const col = $('input[type=color]', m);
+      $$('.sw', m).forEach((b) => b.onclick = () => { $$('.sw', m).forEach((x) => x.classList.remove('on')); b.classList.add('on'); col.value = b.dataset.c; });
+      col.oninput = () => $$('.sw', m).forEach((x) => x.classList.toggle('on', x.dataset.c === col.value));
+      const save = async () => {
+        if (!f.reportValidity()) return;
+        const fd = new FormData(f);
+        const body = Object.fromEntries(['title', 'summary', 'description', 'category', 'tags', 'status', 'release', 'priority', 'version', 'repo_url', 'color'].map((k) => [k, String(fd.get(k) || '').trim()]));
+        body.progress = Number(fd.get('progress')); body.pinned = fd.get('pinned') ? 1 : 0;
+        body.tags = tagsOf(body).join(', ');
+        const btn = $('[data-m="save"]', m); btn.disabled = true;
+        try {
+          if (p) { await mutate(() => DB.update('projects', p.id, body, p.updated_at), 'Αποθηκεύτηκε'); close(true); }
+          else { const r = await mutate(() => DB.create('projects', body), 'Η ιδέα δημιουργήθηκε'); close(true); if (r && r.id) openDrawer(r.id); }
+        } catch { btn.disabled = false; }
+      };
+      $('[data-m="save"]', m).onclick = save;
+      f.onsubmit = (e) => { e.preventDefault(); save(); };
+      f.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) save(); });
+    },
+  });
+}
+
+function bugForm(b = null, projectId = null, presetTitle = '') {
+  const p = projOf(b ? b.project_id : projectId);
+  const v = b || { title: presetTitle, description: '', severity: 'medium', status: 'open', version_found: p?.version || '', fix_method: '', fix_patch: '', fixed_at: '' };
+  return modal({
+    title: b ? 'Επεξεργασία bug' : 'Νέο bug',
+    body: `<form class="form" id="bf" autocomplete="off">
+      <label class="field full"><span>Τίτλος *</span><input class="in" name="title" value="${esc(v.title)}" required maxlength="300" autofocus></label>
+      <label class="field full"><span>Περιγραφή / πώς αναπαράγεται</span><textarea class="in" name="description" rows="4">${esc(v.description)}</textarea></label>
+      <label class="field"><span>Σοβαρότητα</span><select class="in" name="severity">${opts(SEVERITIES, v.severity)}</select></label>
+      <label class="field"><span>Βρέθηκε στην έκδοση</span><input class="in" name="version_found" value="${esc(v.version_found)}" maxlength="40" style="font-family:var(--mono)"></label>
+      ${b ? `<label class="field"><span>Κατάσταση</span><select class="in" name="status">${opts([['open', 'Ανοιχτό'], ['fixed', 'Διορθώθηκε'], ['wontfix', 'Δεν θα διορθωθεί']], v.status)}</select></label>
+      <label class="field"><span>Patch / έκδοση διόρθωσης</span><input class="in" name="fix_patch" value="${esc(v.fix_patch)}" maxlength="120" style="font-family:var(--mono)"></label>
+      <label class="field full"><span>Μέθοδος διόρθωσης</span><textarea class="in" name="fix_method" rows="3">${esc(v.fix_method)}</textarea></label>` : ''}
+    </form>`,
+    foot: `${b ? `<button class="btn danger left" data-m="del">${ic('trash')}Διαγραφή</button>` : ''}<button class="btn" data-m="cancel">Άκυρο</button><button class="btn primary" data-m="save">${ic('check')}Αποθήκευση</button>`,
+    onMount: (m, close) => {
+      const f = $('#bf', m);
+      const save = async () => {
+        if (!f.reportValidity()) return;
+        const body = Object.fromEntries([...new FormData(f)].map(([k, x]) => [k, String(x).trim()]));
+        try {
+          if (b) await mutate(() => DB.update('bugs', b.id, body, b.updated_at), 'Αποθηκεύτηκε');
+          else { await mutate(() => DB.create('bugs', { ...body, project_id: projectId }), 'Το bug καταγράφηκε'); const i = $('#addBug input'); if (i) i.value = ''; }
+          close(true);
+        } catch {}
+      };
+      $('[data-m="save"]', m).onclick = save;
+      f.onsubmit = (e) => { e.preventDefault(); save(); };
+      const del = $('[data-m="del"]', m);
+      if (del) del.onclick = async () => {
+        if (await confirmBox('Οριστική διαγραφή bug;', 'Συνήθως δεν χρειάζεται: ένα διορθωμένο bug μένει διαγραμμένο με γραμμή για ιστορικό. Διάγραψέ το μόνο αν καταχωρήθηκε κατά λάθος.', 'Διαγραφή', true)) {
+          await mutate(() => DB.remove('bugs', b.id), 'Το bug διαγράφηκε'); close(true);
+        }
+      };
+    },
+  });
+}
+
+function fixForm(id) {
+  const b = S.data.bugs.find((x) => x.id === id); const p = projOf(b.project_id);
+  return modal({
+    title: 'Σήμανση ως διορθωμένο', narrow: true,
+    body: `<div class="bug open" style="margin-bottom:16px"><div class="bug-main"><div class="bug-title">${esc(b.title)}</div><div class="bug-meta"><span class="sev" style="--c:${pColor(b.severity)}">${SV[b.severity]}</span>${esc(p?.title || '')}</div></div></div>
+      <form class="form" id="ff" autocomplete="off">
+        <label class="field full"><span>Με ποια μέθοδο διορθώθηκε;</span><textarea class="in" name="fix_method" rows="4" autofocus placeholder="π.χ. Προστέθηκε debounce 50 ms στο PIR και watchdog στον Pico">${esc(b.fix_method)}</textarea></label>
+        <label class="field"><span>Patch / έκδοση / commit</span><input class="in" name="fix_patch" value="${esc(b.fix_patch || p?.version || '')}" maxlength="120" placeholder="v1.2.1 ή a1b2c3d" style="font-family:var(--mono)"></label>
+        <label class="field"><span>Ημερομηνία</span><input class="in" type="date" name="date" value="${dateInput()}"></label>
+        <label class="toggle field full" style="flex-direction:row;font-weight:500;color:var(--muted)"><input type="checkbox" name="wontfix"> Δεν θα διορθωθεί (κλείνει χωρίς διόρθωση)</label>
+      </form>`,
+    foot: `<button class="btn" data-m="cancel">Άκυρο</button><button class="btn primary" data-m="save">${ic('check')}Διορθώθηκε</button>`,
+    onMount: (m, close) => {
+      const f = $('#ff', m);
+      const wf = $('[name=wontfix]', m);
+      wf.onchange = () => { $('[data-m="save"]', m).innerHTML = wf.checked ? ic('x') + 'Κλείσιμο' : ic('check') + 'Διορθώθηκε'; };
+      const save = async () => {
+        if (!f.reportValidity()) return;
+        const fd = new FormData(f);
+        const d = fd.get('date');
+        const today = dateInput();
+        const fixed_at = d && d !== today ? new Date(d + 'T12:00:00').toISOString() : nowIso();
+        try {
+          await mutate(() => DB.update('bugs', b.id, { status: fd.get('wontfix') ? 'wontfix' : 'fixed', fix_method: String(fd.get('fix_method')).trim(), fix_patch: String(fd.get('fix_patch')).trim(), fixed_at }, b.updated_at), fd.get('wontfix') ? 'Το bug έκλεισε' : 'Μπράβο, διορθώθηκε');
+          close(true);
+        } catch {}
+      };
+      $('[data-m="save"]', m).onclick = save;
+      f.onsubmit = (e) => { e.preventDefault(); save(); };
+      f.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) save(); });
+    },
+  });
+}
+
+// ---------- ρυθμίσεις ----------
+function settingsForm() {
+  const c = cfg;
+  const remembered = !!VP_LS.getItem(CFG_KEY);
+  return modal({
+    title: 'Ρυθμίσεις',
+    body: `
+      <h4 class="section-t">Σύνδεση με Cloudflare</h4>
+      <form class="form" id="sf" autocomplete="off" style="margin-bottom:20px">
+        <label class="field full"><span>Διεύθυνση Worker</span><input class="in" name="apiUrl" value="${esc(c.apiUrl || '')}" placeholder="https://voidproject-api.xxx.workers.dev" style="font-family:var(--mono)"></label>
+        <label class="field full"><span>Κλειδί πρόσβασης</span><div class="pw"><input class="in" type="password" name="apiKey" value="${esc(c.apiKey || '')}" placeholder="Το κλειδί από το API_KEY.txt" autocomplete="off"><button type="button" class="icon-btn sm" data-pw title="Εμφάνιση">${ic('eye')}</button></div></label>
+        <label class="toggle field full" style="flex-direction:row"><input type="checkbox" name="remember" ${remembered || !c.apiKey ? 'checked' : ''}> Να το θυμάται αυτή η συσκευή</label>
+      </form>
+      <div class="hint" style="margin-bottom:22px">${ic('key')} Το κλειδί αποθηκεύεται σε αυτόν τον browser όταν επιλέγεις «Να το θυμάται». Χρησιμοποίησέ το σε προσωπική συσκευή. Στέλνεται με HTTPS στη διεύθυνση Worker που ορίζεις. Σε νέο υπολογιστή το ξαναγράφεις μία φορά. ${isDemo() ? '<br><b>Τώρα είσαι σε δοκιμαστική λειτουργία</b>: τα δεδομένα μένουν μόνο σε αυτόν τον browser.' : ''}</div>
+      <h4 class="section-t">Αντίγραφα ασφαλείας</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px">
+        <button class="btn" data-s="export">${ic('download')}Εξαγωγή JSON</button>
+        <button class="btn" data-s="import">${ic('upload')}Εισαγωγή JSON</button>
+        <input type="file" accept="application/json,.json" id="impFile" hidden>
+      </div>
+      <h4 class="section-t">Συντομεύσεις</h4>
+      <div class="hint"><kbd>N</kbd> νέα ιδέα &nbsp; <kbd>/</kbd> αναζήτηση &nbsp; <kbd>Esc</kbd> κλείσιμο &nbsp; <kbd>Ctrl</kbd>+<kbd>Enter</kbd> αποθήκευση φόρμας &nbsp; <kbd>R</kbd> ανανέωση</div>`,
+    foot: `<button class="btn danger left" data-s="logout">${ic('logout')}${isDemo() ? 'Έξοδος από δοκιμή' : 'Αποσύνδεση'}</button><button class="btn" data-s="test">${ic('cloud')}Δοκιμή</button><button class="btn primary" data-s="save">${ic('check')}Αποθήκευση</button>`,
+    onMount: (m, close) => {
+      const f = $('#sf', m);
+      $('[data-pw]', m).onclick = () => { const i = $('[name=apiKey]', m); i.type = i.type === 'password' ? 'text' : 'password'; $('[data-pw]', m).innerHTML = ic(i.type === 'password' ? 'eye' : 'eyeoff'); };
+      const read = () => { const fd = new FormData(f); return { apiUrl: String(fd.get('apiUrl')).trim().replace(/\/+$/, ''), apiKey: String(fd.get('apiKey')).trim(), remember: !!fd.get('remember') }; };
+      $('[data-s="test"]', m).onclick = async () => {
+        const v = read();
+        try { await apiCall('GET', '/api/ping', null, v); toast('Η σύνδεση λειτουργεί ✓'); } catch (e) { toast(e.message, true); }
+      };
+      $('[data-s="save"]', m).onclick = async () => {
+        const v = read();
+        if (!v.apiUrl || !v.apiKey) return toast('Συμπλήρωσε διεύθυνση και κλειδί', true);
+        try { await apiCall('GET', '/api/ping', null, v); } catch (e) { return toast(e.message, true); }
+        cfg = { apiUrl: v.apiUrl, apiKey: v.apiKey, mode: 'cloud' }; saveCfg(cfg, v.remember);
+        close(true); S.loaded = false; await reload(true); toast('Συνδέθηκε με το Cloudflare');
+      };
+      $('[data-s="logout"]', m).onclick = async () => {
+        if (!(await confirmBox(isDemo() ? 'Έξοδος από τη δοκιμή;' : 'Αποσύνδεση;', isDemo() ? 'Τα δοκιμαστικά δεδομένα μένουν σε αυτόν τον browser.' : 'Θα σβηστεί το κλειδί από αυτόν τον browser. Τα δεδομένα στο Cloudflare δεν επηρεάζονται.', 'Συνέχεια'))) return;
+        cfg = { apiUrl: cfg.apiUrl }; try { VP_LS.removeItem(CFG_KEY); sessionStorage.removeItem(CFG_KEY); } catch {}
+        close(true); closeDrawer(); showWelcome();
+      };
+      $('[data-s="export"]', m).onclick = exportJSON;
+      const file = $('#impFile', m);
+      $('[data-s="import"]', m).onclick = () => file.click();
+      file.onchange = async () => {
+        const fl=file.files[0]; file.value=''; if (!fl) return;
+        let data;
+        try {
+          if (fl.size > VPContract.MAX_BODY_BYTES) throw new Error('Το αρχείο ξεπερνά τα 8 MB.');
+          data=VPContract.validateBackup(JSON.parse(await fl.text()));
+        } catch(e) { return toast(e.message || 'Μη έγκυρο JSON',true); }
+        const mode=await modal({title:'Εισαγωγή αντιγράφου',narrow:true,
+          body:`<p>${data.projects.length} ιδέες · ${data.bugs.length} bugs · ${data.tasks.length} εργασίες · ${data.logs.length} καταχωρήσεις ιστορικού</p><p class="muted">Η συγχώνευση ενημερώνει τα ίδια IDs και διατηρεί τις υπόλοιπες εγγραφές. Η αντικατάσταση αφαιρεί όλα τα υπάρχοντα δεδομένα.</p>`,
+          foot:'<button class="btn" data-m="cancel">Άκυρο</button><button class="btn" data-import="replace">Αντικατάσταση</button><button class="btn primary" data-import="merge">Συγχώνευση</button>',
+          onMount:(dialog,done) => $$('[data-import]',dialog).forEach(b => b.onclick=() => done(b.dataset.import))});
+        if (!mode) return;
+        if (mode === 'replace') {
+          const confirmed=await confirmBox('Αντικατάσταση όλων των δεδομένων;', 'Κράτησε πρώτα Εξαγωγή JSON. Θα διαγραφούν οι τρέχουσες ιδέες, bugs, εργασίες και ιστορικό.', 'Αντικατάσταση',true,'ΔΙΑΓΡΑΦΗ');
+          if (!confirmed) return;
+        }
+        try { await mutate(() => DB.importAll({...data,mode}), 'Η εισαγωγή ολοκληρώθηκε'); close(true); } catch {}
+      };
+    },
+  });
+}
+
+function exportJSON() {
+  const text = JSON.stringify({ app: 'voidproject', schema_version: 2, exported_at: nowIso(), ...S.data }, null, 2);
+  if (window.VP_APP) { AndroidBridge.saveFile(`voidproject-backup-${dateInput()}.json`, 'application/json', text); return; }
+  const blob = new Blob([text], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `voidproject-backup-${dateInput()}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  toast('Το αντίγραφο κατέβηκε');
+}
+
+// ---------- PDF ----------
+function exportPDF(projects, single = false) {
+  if (!projects.length) return toast('Δεν υπάρχουν ιδέες για εξαγωγή', true);
+  const P = projects;
+  const allBugs = P.flatMap((p) => bugsOf(p.id));
+  const openN = allBugs.filter((b) => b.status === 'open').length;
+  const today = new Date().toLocaleDateString('el-GR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const pb = (c, l) => `<span class="pb" style="--c:${c}">${l}</span>`;
+
+  const projSection = (p, i) => {
+    const bugs = sortBugs(bugsOf(p.id)); const tasks = tasksOf(p.id); const logs = logsOf(p.id), releases=releasesOf(p.id);
+    const m = (k, v) => `<div><dt>${k}</dt><dd>${v}</dd></div>`;
+    return `<section class="pr-proj ${i === 0 && single ? 'first' : ''}" style="--pc:${esc(p.color)}">
+      <div class="pr-ph"><h1>${esc(p.title)}</h1>${p.summary ? `<p>${esc(p.summary)}</p>` : ''}</div>
+      <dl class="pr-meta">
+        ${m('Κατάσταση', pb(sColor(p.status), ST[p.status]))}
+        ${m('Release', pb(rColor(p.release), RL[p.release]))}
+        ${m('Έκδοση', p.version ? esc(p.version) : '—')}
+        ${m('Προτεραιότητα', PR[p.priority])}
+        ${m('Πρόοδος', `${p.progress}%<div class="pr-prog"><i style="width:${p.progress}%"></i></div>`)}
+        ${m('Κατηγορία', esc(p.category) || '—')}
+        ${m('Δημιουργία', fmtDate(p.created_at))}
+        ${m('Τελευταία αλλαγή', fmtDate(p.updated_at))}
+      </dl>
+      ${tagsOf(p).length ? `<p class="muted" style="margin:0 0 6px;font-size:9pt">${tagsOf(p).map((t) => '#' + esc(t)).join(' &nbsp; ')}</p>` : ''}
+      ${safeUrl(p.repo_url) ? `<p style="margin:0 0 6px;font-size:9pt">${esc(p.repo_url)}</p>` : ''}
+      ${p.description ? `<h2 class="pr-h">Περιγραφή</h2><div class="prose">${md(p.description)}</div>` : ''}
+      ${bugs.length ? `<h2 class="pr-h">Bugs — ${bugs.filter((b) => b.status === 'open').length} ανοιχτά / ${bugs.length}</h2>
+        ${bugs.map((b) => `<div class="pr-bug ${b.status}">
+          <div class="l"><div class="t"><span class="sevp" style="--c:${pColor(b.severity)}">${SV[b.severity]}</span>${esc(b.title)}</div>
+            ${b.description ? `<div class="d">${esc(b.description)}</div>` : ''}
+            <div class="d" style="font-size:8pt">Εντοπίστηκε ${fmtDate(b.created_at)}${b.version_found ? ' · ' + esc(b.version_found) : ''}</div></div>
+          <div class="r">${b.status === 'open' ? '<span style="color:#d4243a;font-weight:700">Ανοιχτό</span>'
+            : `<b>${b.status === 'fixed' ? '✓ Διορθώθηκε' : 'Δεν θα διορθωθεί'}</b> ${fmtDate(b.fixed_at)}${b.fix_patch ? ' · ' + esc(b.fix_patch) : ''}${b.fix_method ? `<div style="color:#141824;white-space:pre-wrap">${esc(b.fix_method)}</div>` : ''}`}</div>
+        </div>`).join('')}` : ''}
+      ${tasks.length ? `<h2 class="pr-h">Εργασίες — ${tasks.filter((t) => t.done).length}/${tasks.length}</h2>
+        ${[...tasks].sort((a, b) => a.done - b.done).map((t) => `<div class="pr-task ${t.done ? 'done' : ''}">${t.done ? '☑' : '☐'} ${esc(t.text)}</div>`).join('')}` : ''}
+      ${releases.length ? `<h2 class="pr-h">Εκδόσεις</h2>${releases.map(r=>`<div class="pr-release"><b>${esc(r.version)} · ${RL[r.channel]}</b> <span class="muted">${fmtDate(r.released_at)}</span><div class="prose">${md(r.notes)}</div>${r.url?`<div>${esc(r.url)}</div>`:''}</div>`).join('')}`:''}
+      ${logs.length ? `<h2 class="pr-h">Ιστορικό</h2>${logs.map((l) => `<div class="pr-log"><span>${fmtDate(l.created_at, true)}</span><div>${esc(l.text)}</div></div>`).join('')}` : ''}
+    </section>`;
+  };
+
+  const cover = single
+    ? `<div class="pr-cover" style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg, ${esc(P[0].color)}, #0f172a)"><div class="k">voidproject · Αναφορά project</div><div class="meta-line" style="margin:0">${today}</div></div>`
+    : `<div class="pr-cover"><div class="k">voidproject</div><h1>Αναφορά ιδεών &amp; projects</h1><p>${P.length} ${P.length === 1 ? 'ιδέα' : 'ιδέες'}${S.f.status !== 'all' || S.f.release !== 'all' || S.f.q ? ' (με τα τρέχοντα φίλτρα)' : ''}</p><div class="meta-line">${today}</div></div>
+      <div class="pr-stats">
+        <div><b>${P.length}</b><span>Σύνολο ιδεών</span></div>
+        <div><b>${P.filter((p) => p.status === 'development').length}</b><span>Υπό ανάπτυξη</span></div>
+        <div><b>${P.filter((p) => p.status === 'ready').length}</b><span>Έτοιμα</span></div>
+        <div><b style="color:#d4243a">${openN}</b><span>Ανοιχτά bugs</span></div>
+        <div><b style="color:#0b9467">${allBugs.filter((b) => b.status === 'fixed').length}</b><span>Διορθωμένα bugs</span></div>
+      </div>
+      <h2 class="pr-h">Σύνοψη</h2>
+      <table><thead><tr><th>Ιδέα</th><th>Κατάσταση</th><th>Release</th><th>Έκδοση</th><th>Πρόοδος</th><th>Bugs</th></tr></thead><tbody>
+      ${P.map((p) => { const ob = openBugs(p.id).length; return `<tr><td><b>${esc(p.title)}</b>${p.category ? `<div class="muted" style="font-size:8.5pt">${esc(p.category)}</div>` : ''}</td><td>${pb(sColor(p.status), ST[p.status])}</td><td>${pb(rColor(p.release), RL[p.release])}</td><td>${esc(p.version) || '—'}</td><td>${p.progress}%</td><td>${ob ? `<b style="color:#d4243a">${ob} ανοιχτά</b>` : '<span class="muted">—</span>'}</td></tr>`; }).join('')}
+      </tbody></table>`;
+
+  const root = $('#print-root');
+  root.innerHTML = cover + P.map(projSection).join('') + `<div class="pr-foot">voidproject · ${today}</div>`;
+  const oldTitle = document.title;
+  const slug = single ? P[0].title.replace(/[\\/:*?"<>|]+/g, '').slice(0, 60) : 'Αναφορά ιδεών';
+  document.title = `${slug} — ${dateInput()}`;
+  const done = () => { document.title = oldTitle; root.innerHTML = ''; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  if (window.VP_APP) {
+    setTimeout(() => { AndroidBridge.printPage(document.title); setTimeout(() => { document.title = oldTitle; }, 3000); }, 120);
+    toast('Διάλεξε «Αποθήκευση ως PDF» και πάτα το κουμπί PDF');
+    return;
+  }
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => requestAnimationFrame(() => window.print()));
+  toast('Στο παράθυρο εκτύπωσης διάλεξε «Αποθήκευση ως PDF»');
+}
+
+// ---------- welcome / σύνδεση ----------
+function showWelcome(err = '') {
+  S.loaded = false;
+  $('#topbar').hidden = true;
+  $('#workspaceNav').hidden = true;
+  document.body.classList.remove('workspace-on');
+  const c = cfg;
+  $('#app').innerHTML = `<div class="welcome">
+    <div class="welcome-intro"><a class="nav-brand"><span class="logo">${ic('cube')}</span><b>void<span>project</span></b></a><div class="eyebrow">ΤΟ WORKSPACE ΤΩΝ ΙΔΕΩΝ ΣΟΥ</div><h1>Οι μεγάλες ιδέες<br>ξεκινούν από<br><em>μια μικρή σημείωση.</em></h1><p>Από την πρώτη σκέψη μέχρι το public release. Projects, εργασίες και διορθώσεις, με ολόκληρη την ιστορία τους.</p><div class="welcome-details"><span>✦ Ιδέες &amp; εξέλιξη</span><span>✓ Bugs &amp; διορθώσεις</span><span>↗ Εκδόσεις &amp; ιστορικό</span></div></div>
+    <div class="welcome-card"><h2>Καλώς ήρθες.</h2><p>Συνδέσου στο προσωπικό σου workspace.</p>
+    ${err ? `<div class="hint" style="border-color:color-mix(in srgb,var(--danger) 40%,transparent);color:var(--danger);margin-bottom:16px">${esc(err)}</div>` : ''}
+    <form class="form" id="wf" autocomplete="off" style="grid-template-columns:1fr">
+      <label class="field"><span>Διεύθυνση Worker</span><input class="in" name="apiUrl" value="${esc(c.apiUrl || '')}" placeholder="https://voidproject-api.xxx.workers.dev" style="font-family:var(--mono)" required></label>
+      <label class="field"><span>Κλειδί πρόσβασης</span><div class="pw"><input class="in" type="password" name="apiKey" placeholder="Από το αρχείο API_KEY.txt" required autocomplete="off"><button type="button" class="icon-btn sm" data-pw title="Εμφάνιση">${ic('eye')}</button></div></label>
+      <label class="toggle"><input type="checkbox" name="remember" checked> Να το θυμάται αυτή η συσκευή</label>
+      <button class="btn primary" type="submit" style="height:44px">${ic('key')}Σύνδεση</button>
+    </form>
+    <div style="display:flex;align-items:center;gap:12px;margin:20px 0 14px;color:var(--faint);font-size:12px"><div style="flex:1;height:1px;background:var(--border)"></div>ή<div style="flex:1;height:1px;background:var(--border)"></div></div>
+    <button class="btn" id="demoBtn" style="width:100%">${ic('flask')}Δοκιμή χωρίς Cloudflare</button>
+    <p style="text-align:center;font-size:12px;color:var(--faint);margin:8px 0 0">Η δοκιμή κρατά τα δεδομένα μόνο σε αυτή τη συσκευή.</p>
+    </div><div class="welcome-foot"><span>voidproject · Ο δικός σου χώρος για δημιουργία.</span><span>Η δική σου βάση. Οι δικές σου ιδέες.</span></div></div>`;
+  const f = $('#wf');
+  $('[data-pw]', f).onclick = () => { const i = $('[name=apiKey]', f); i.type = i.type === 'password' ? 'text' : 'password'; };
+  f.onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(f);
+    const v = { apiUrl: String(fd.get('apiUrl')).trim().replace(/\/+$/, ''), apiKey: String(fd.get('apiKey')).trim() };
+    const btn = $('button[type=submit]', f); btn.disabled = true; btn.innerHTML = 'Σύνδεση…';
+    try {
+      await apiCall('GET', '/api/ping', null, v);
+      cfg = { ...v, mode: 'cloud' }; saveCfg(cfg, !!fd.get('remember'));
+      $('#app').innerHTML = '<div class="loader"><div class="ring"></div>Φόρτωση…</div>';
+      await reload(true);
+    } catch (er) { toast(er.message, true); btn.disabled = false; btn.innerHTML = ic('key') + 'Σύνδεση'; }
+  };
+  $('#demoBtn').onclick = async () => {
+    if (!Local.db()) { const d = demoExtras(starterData()); Local.save(d); }
+    cfg = { ...cfg, mode: 'demo' }; saveCfg(cfg, true);
+    await reload(true);
+  };
+}
+
+// ---------- top bar & πλήκτρα ----------
+function setThemeIcon() {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  $('#btnTheme').innerHTML = ic(dark ? 'sun' : 'moon');
+  if (window.VP_APP) try { AndroidBridge.setDark(dark); } catch (e) {}
+}
+function initChrome() {
+  const navigate=view=>{closeDrawer();S.view=view;Object.assign(S.f,{q:'',status:'all',release:'all',priority:'all'});$('#q').value='';persistUI();render();};
+  $$('[data-nav]').forEach(b=>b.onclick=()=>navigate(b.dataset.nav));
+  $('#navBrand').onclick=e=>{e.preventDefault();navigate('grid');};
+  $('#navCreate').onclick=()=>projectForm();
+  $('#btnRefresh').innerHTML = ic('refresh');
+  $('#btnSettings').innerHTML = ic('gear');
+  $('#btnPdfAll').innerHTML = ic('pdf') + '<span class="lbl">PDF</span>';
+  $('#btnNew').innerHTML = ic('plus') + '<span class="lbl">Νέα ιδέα</span>';
+  setThemeIcon();
+  $('#btnTheme').onclick = () => {
+    const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = t; try { VP_LS.setItem('voidproject.theme', t); } catch {}
+    $('meta[name=theme-color]').content = t === 'dark' ? '#111114' : '#f7f7fa';
+    setThemeIcon();
+  };
+  $('meta[name=theme-color]').content = document.documentElement.dataset.theme === 'dark' ? '#111114' : '#f7f7fa';
+  $('#btnRefresh').onclick = () => { if (!S.busy) reload(); };
+  window.addEventListener('online',() => { if (S.loaded && !S.busy && !$('.modal')) reload(true); });
+  $('#btnSettings').onclick = settingsForm;
+  $('#btnNew').onclick = () => projectForm();
+  $('#btnPdfAll').onclick = () => exportPDF(S.view === 'bugs' ? S.data.projects.filter(p=>!p.archived) : filtered());
+  $('#brandLink').onclick = (e) => { e.preventDefault(); closeDrawer(); Object.assign(S.f, { q: '', status: 'all', release: 'all', priority: 'all' }); $('#q').value = ''; render(); };
+  let qt;
+  $('#q').oninput = (e) => { clearTimeout(qt); qt = setTimeout(() => { S.f.q = e.target.value; render(); }, 120); };
+  document.addEventListener('keydown', (e) => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
+    if (e.key === 'Escape') { if ($('.modal')) return; if (drawerEls) return closeDrawer(); if (document.activeElement === $('#q')) $('#q').blur(); }
+    if (typing || e.ctrlKey || e.metaKey || e.altKey || !S.loaded || $('.modal')) return;
+    if (e.key === '/') { e.preventDefault(); $('#q').focus(); $('#q').select(); }
+    else if (e.key === 'n' || e.key === 'N' || e.key === 'ν') { e.preventDefault(); projectForm(); }
+    else if (e.key === 'r' || e.key === 'R' || e.key === 'ρ') { e.preventDefault(); reload(); }
+  });
+  // φρέσκα δεδομένα όταν επιστρέφεις στην καρτέλα (π.χ. άλλαξες κάτι από το κινητό)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !S.busy && S.loaded && Date.now() - S.lastLoad > 20000 && !$('.modal')) reload(true);
+  });
+}
+
+// Κουμπί «πίσω» του Android: κλείνει πρώτα παράθυρα/καρτέλα. true = το χειρίστηκε η σελίδα.
+window.vpBack = function () {
+  const ms = $$('.modal');
+  if (ms.length) { const x = $('[data-m="x"]', ms[ms.length - 1]); if (x) x.click(); return true; }
+  if (drawerEls) { closeDrawer(); return true; }
+  if (S.loaded && (S.f.q || S.f.status !== 'all' || S.f.release !== 'all' || S.f.priority !== 'all' || S.view !== 'grid')) {
+    Object.assign(S.f, { q: '', status: 'all', release: 'all', priority: 'all' }); S.view = 'grid'; $('#q').value = ''; persistUI(); render(); return true;
+  }
+  return false;
+};
+window.vpResume = function () { if (!S.busy && S.loaded && Date.now() - S.lastLoad > 15000 && !$('.modal')) reload(true); };
+
+initChrome();
+if (isReady()) reload(true); else showWelcome();
+</script>
+</body>
+</html>
+
