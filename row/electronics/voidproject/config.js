@@ -1,0 +1,1 @@
+window.VOIDPROJECT_CONFIG = {"apiUrl":"https://voidproject-api.alexmagnkarachalios.workers.dev"};
